@@ -1,0 +1,9 @@
+get serverbinary file1
+put file1
+put clientbinary
+get clientbinary file
+put file
+rm file
+put file
+mv file1 file2
+put file1

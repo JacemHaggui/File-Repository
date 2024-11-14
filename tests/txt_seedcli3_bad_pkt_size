@@ -1,0 +1,3 @@
+======================================= seedcli3_bad_pkt_size
+TEST DESCRIPTION:
+Server receives a packet with a too big packet size. It should print some error message and exit/return.

@@ -1,0 +1,3 @@
+======================================= seedcli2_put_deltafilename_miss0
+TEST DESCRIPTION:
+Filename modified in second packet of a put (missing final '\0'). Server should It should print some error message exit/return.

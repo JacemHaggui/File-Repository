@@ -1,0 +1,37 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+get serversmall file1
+OK
+put file1
+OK
+mv file1 file2
+OK
+put file1
+OK
+mv file1 file3
+OK
+put file1
+OK
+mv file1 file4
+OK
+put file1
+OK
+mv file1 file5
+OK
+put file1
+OK
+rm file3
+OK
+rm file4
+OK
+mv file1 file3
+OK
+put file1
+OK
+mv file1 file4
+OK
+put file1
+OK
+mv file1 file6
+OK
+put file1
+KO -5

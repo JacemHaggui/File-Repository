@@ -1,0 +1,3 @@
+======================================= seedcli25_bad_command
+TEST DESCRIPTION:
+Server receives a command with unknown command code 50. It should print some error message and exit/return. Note that provided server continues.

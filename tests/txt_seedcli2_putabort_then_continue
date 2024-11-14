@@ -1,0 +1,4 @@
+======================================= seedcli2_putabort_then_continue
+TEST DESCRIPTION:
+After receiving an abort packet from client while executing a put, the server should potentially print some error message, and then must be able to continue, receiving an ls from the client.
+

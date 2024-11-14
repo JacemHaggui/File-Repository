@@ -1,0 +1,6 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+put clientbig
+====>  BUG: corrupt  parameter file_name: suppress '\0'
+====>  BUG: put, corrupt filesize
+ ! #ERR FORMAT: parameters in sent packet do not respect command format
+KO -1

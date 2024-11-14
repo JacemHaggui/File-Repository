@@ -1,0 +1,8 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+cat serversmall 1
+Line 1  -- of serversmall -- somme useless chars to fill the line
+OK
+cat serversmall 1
+====>  BUG: turn packet's command code to unknown command
+ ! #ERR CMD: bad command pkt
+KO -1

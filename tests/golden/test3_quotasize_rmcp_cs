@@ -1,0 +1,19 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+get serverbinary file1
+OK
+put file1
+OK
+put clientbinary
+OK
+get clientbinary file
+OK
+put file
+OK
+rm file
+OK
+put file
+OK
+mv file1 file2
+OK
+put file1
+KO -5

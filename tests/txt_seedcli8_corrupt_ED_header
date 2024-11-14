@@ -1,0 +1,3 @@
+======================================= seedcli8_corrupt_ED_header
+TEST DESCRIPTION:
+While waiting for command, server receives a packet without the expected ED header. It should print some error message and exit/return.

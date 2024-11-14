@@ -1,0 +1,10 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+put clientbig
+====>  BUG: corrupt packet size -> becomes too big
+====>  BUG: corrupt parameter filename: put unauthorized char
+====>  BUG: send ABORT to server
+ ! #ERR FAIL: own-side failure - potential details on stderr
+ls
+ ! connection is closed
+ ! #ERR CLOSED: connection closed by peer
+KO -8

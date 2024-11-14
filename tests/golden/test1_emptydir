@@ -1,0 +1,9 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+rm serversmall
+OK
+rm serverbig
+OK
+rm serverbinary
+OK
+ls
+OK

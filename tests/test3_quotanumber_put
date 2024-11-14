@@ -1,0 +1,12 @@
+get serversmall file1
+put file1
+get file1 file2
+put file2
+get file1 file3
+put file3
+get file1 file4
+put file4
+get file1 file5
+put file5
+get file1 file6
+put file6

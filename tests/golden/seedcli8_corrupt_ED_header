@@ -1,0 +1,6 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+put clientbig
+====>  BUG: corrupt  header's tag (first characters)
+ ! connection is closed
+ ! #ERR CLOSED: connection closed by peer
+KO -8

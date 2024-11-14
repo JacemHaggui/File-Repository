@@ -1,0 +1,12 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+put clientsmall
+OK
+put clientbig
+====>  BUG: send ABORT to server
+ ! #ERR FAIL: own-side failure - potential details on stderr
+ls
+clientsmall		1331
+serverbig		32892
+serverbinary		41152
+serversmall		1666
+OK

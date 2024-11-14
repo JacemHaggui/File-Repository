@@ -1,0 +1,5 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+get clientsmall file1
+KO -2
+mv serversmall file1
+OK

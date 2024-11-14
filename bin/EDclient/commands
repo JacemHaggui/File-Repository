@@ -1,0 +1,7 @@
+ls
+get serversmall truc
+put truc
+ls
+mv truc bidule
+ls
+rm bidule

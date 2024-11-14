@@ -1,0 +1,4 @@
+rm serversmall
+rm serverbig
+rm serverbinary
+ls

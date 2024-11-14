@@ -1,0 +1,7 @@
+# CLIENT CONNECTS to 127.0.0.1:49152 - connected
+KO -6
+cat serversmall 3
+Line 1  -- of serversmall -- somme useless chars to fill the line
+Line 2  -- of serversmall -- somme useless chars to fill the line
+Line 3  -- of serversmall -- somme useless chars to fill the line
+OK
