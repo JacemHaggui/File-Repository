@@ -65,7 +65,7 @@ const char * const client_help_options = "\
 // the client.
 
 /* Returns the number of lines in a string. */
-void line_count(char string[], int n){
+int line_count(char string[]){
     int leng = strlen(string);
     if (leng == 0){
         return 0;
@@ -78,6 +78,20 @@ void line_count(char string[], int n){
     }
     return c;
 }
+
+void print_lines(char string[], int n){
+    if (n > line_count(string)){
+        printf("Warning: arg %d exceeds numbers of line in file (%d).\n", n, line_count(string));
+    }
+    int l = 0;
+    for(int i = 0; i < strlen(string) && l < n; i++){
+        print(string[i]);
+        if(string[i] == '\n'){
+            l++;
+        }
+    }
+}
+
 
 int student_client(int channel, int argc, char *argv[]) {
     // Writing to a closed socket causes a SIGPIPE signal, which makes 
