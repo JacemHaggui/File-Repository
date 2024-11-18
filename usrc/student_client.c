@@ -64,6 +64,21 @@ const char * const client_help_options = "\
 // It returns 0 to exit or another value to restart 
 // the client.
 
+/* Returns the number of lines in a string. */
+void line_count(char string[], int n){
+    int leng = strlen(string);
+    if (leng == 0){
+        return 0;
+    }
+    int c = 1;
+    for (int i = 0; i < leng; i++){
+        if(string[i] == '\n'){
+            c++;
+        }
+    }
+    return c;
+}
+
 int student_client(int channel, int argc, char *argv[]) {
     // Writing to a closed socket causes a SIGPIPE signal, which makes 
     // the program exits. The following line inhibits this default behaviour.
