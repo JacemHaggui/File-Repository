@@ -3,7 +3,7 @@ This file provides a quick summary on how files are organized,
 and where are the various documents to be read to start on the project.
 
 The first document to read is here:
-https://perso.telecom-paristech.fr/apvrille/BasicOS/project.html
+https://perso.telecom-paristech.fr/pacalet/BasicOS/project.html
 If provides the main specification of the project.
 
 Additionally, this repository contains two documents you ought to read:
