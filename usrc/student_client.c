@@ -80,14 +80,14 @@ int line_count(char string[]){
 }
 
 void print_lines(char string[], int n){
-    if (n > line_count(string)){
-        printf("Warning: arg %d exceeds numbers of line in file (%d).\n", n, line_count(string));
-        // WE HAVE TO HANDLE THIS ERROR !
-    }
-    for(int i = 0; i < strlen(string); i++){
+    int l = 0;
+    for(int i = 0; i < strlen(string) && l < n; i++){
         printf("%c",string[i]);
+        if(string[i] == '\n'){
+            l++;
+        }
     }
-        printf("\n");
+        // printf("\n");
 }
 
 

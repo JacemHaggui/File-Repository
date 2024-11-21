@@ -54,6 +54,32 @@ const char * const server_help_options = "\
 \n\
 ";
 
+/* Returns the number of lines in a string. */
+int line_count(char string[]){
+    int leng = strlen(string);
+    if (leng == 0){
+        return 0;
+    }
+    int c = 1;
+    for (int i = 0; i < leng; i++){
+        if(string[i] == '\n'){
+            c++;
+        }
+    }
+    return c;
+}
+
+void print_lines(char string[], int n){
+    int l = 0;
+    for(int i = 0; i < strlen(string) && l < n; i++){
+        printf("%c",string[i]);
+        if(string[i] == '\n'){
+            l++;
+        }
+    }
+        // printf("\n");
+}
+
 // !! This is the function you must implement for your project.
 // Here we provide an implementation related to the example, not
 // to the project... return makes the server wait for next client.
