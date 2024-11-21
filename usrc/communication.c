@@ -52,8 +52,16 @@ int recv_pkt(char *pkt, int channel) {
         if (*pkt == 0) amount_to_receive = 16;
         else if (*pkt == 1) amount_to_receive = 48;
         else amount_to_receive = 80;
+        /*
+        •	Based on the value of the first byte (nb), calculate how much more data needs to be received:
+	    •	nb == 0: 16 bytes (command only).
+	    •	nb == 1: 48 bytes (command + parameter1).
+	    •	nb == 2: 80 bytes (command + parameter1 + parameter2).
+        */
     }
+    //Move the pointer buf to the next byte in the buffer, after the nb field.
     buf++; // set pkt to the beginning of the command string
+    
     // receive the remaining data, which may require several reads
     while(amount_to_receive > 0) { // data remains to send
         amount_received = read(channel, buf, amount_to_receive);
