@@ -28,6 +28,12 @@
  * We don't want thi :-).
  */
 #include <signal.h>
+#include <string.h>
+#include <../include/utilities.h>
+#include <sys/stat.h>   // stat
+#include <stdbool.h>    // bool type
+
+
 
 // FUNCTIONS
 // ...
@@ -69,6 +75,11 @@ int line_count(char string[]){
     return c;
 }
 
+bool file_exists (char *filename) { // Checks for file existence.
+  struct stat   buffer;   
+  return (stat (filename, &buffer) == 0);
+}
+
 void print_lines(char string[], int n){
     int l = 0;
     for(int i = 0; i < strlen(string) && l < n; i++){
@@ -78,6 +89,53 @@ void print_lines(char string[], int n){
         }
     }
         // printf("\n");
+}
+
+/* TO DO: THESE FUNCTIONS MUST FAIL IF THE FILE ALREADY EXISTS! NO OVERWRITING IS ALLOWED.*/
+void write_to_file(char filepath[], char data[], char destination[]){ // FILENAME IS NOT ENOUGH. FILEPATH MUST CONTAIN THE PATH TO THE FILE!
+    if(file_exists(filepath)){
+        printf("ERROR: File %s already exists on directory!\n", filepath);
+        printf("No modifications will be made.\n");
+        return;
+    }
+    
+    FILE* new;
+    new = fopen(filepath, "w");
+    fprintf(new, data);
+    fclose(new);
+}
+
+void rename_file(char newfile[], char oldfile[]){ // full paths need to be given in parameter.
+    FILE *oldf;
+
+    if(file_exists(newfile)){
+        printf("ERROR: File %s already exists on directory!\n", newfile);
+        printf("No modifications will be made.\n");
+        return;
+    }
+
+    oldf = fopen(oldfile, "r");
+    char * buffer = 0;
+    long length;
+
+    if (oldf){
+        fseek (oldf, 0, SEEK_END);
+        length = ftell (oldf);
+        fseek (oldf, 0, SEEK_SET);
+        buffer = malloc (length);
+        if (buffer){fread (buffer, 1, length, oldf);}
+        fclose (oldf);
+    }        
+
+    FILE *fptr;
+
+    fptr = fopen(newfile, "w");
+    fprintf(fptr, buffer);
+    fclose(fptr); 
+    // Now that we've added the context of the oldfile to the newfile, since we're renaming the file, we have to remove the old one.
+    // Note that we have to add the case in which renaming is not possible (e.g if the new filepath already exists.)
+
+    remove(oldfile);
 }
 
 // !! This is the function you must implement for your project.
