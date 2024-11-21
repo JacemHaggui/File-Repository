@@ -138,6 +138,15 @@ void rename_file(char newfile[], char oldfile[]){ // full paths need to be given
     remove(oldfile);
 }
 
+void remove_file(char filename[]){
+    remove(filename);
+}
+
+// Copy a remote file to the local filesystem (WIP)
+void fetch(char localfilename[], char remotefilename[]){
+    return;
+}
+
 // !! This is the function you must implement for your project.
 // Here we provide an implementation related to the example, not
 // to the project... return makes the server wait for next client.
