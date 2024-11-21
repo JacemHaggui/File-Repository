@@ -64,18 +64,6 @@ const char * const client_help_options = "\
 // It returns 0 to exit or another value to restart 
 // the client.
 
-void print_lines(char string[], int n){
-    int l = 0;
-    for(int i = 0; i < strlen(string) && l < n; i++){
-        printf("%c",string[i]);
-        if(string[i] == '\n'){
-            l++;
-        }
-    }
-        // printf("\n");
-}
-
-
 int student_client(int channel, int argc, char *argv[]) {
     // Writing to a closed socket causes a SIGPIPE signal, which makes 
     // the program exits. The following line inhibits this default behaviour.
