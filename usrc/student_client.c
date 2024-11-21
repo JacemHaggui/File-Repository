@@ -64,21 +64,6 @@ const char * const client_help_options = "\
 // It returns 0 to exit or another value to restart 
 // the client.
 
-/* Returns the number of lines in a string. */
-int line_count(char string[]){
-    int leng = strlen(string);
-    if (leng == 0){
-        return 0;
-    }
-    int c = 1;
-    for (int i = 0; i < leng; i++){
-        if(string[i] == '\n'){
-            c++;
-        }
-    }
-    return c;
-}
-
 void print_lines(char string[], int n){
     int l = 0;
     for(int i = 0; i < strlen(string) && l < n; i++){
