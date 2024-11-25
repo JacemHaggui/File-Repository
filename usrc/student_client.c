@@ -141,3 +141,82 @@ int student_client(int channel, int argc, char *argv[]) {
     //  END of EXAMPLE code to be replaced               |
     // --------------------------------------------------
 }
+
+
+
+// Printing n lines
+Packet * print_n_lines(char * filename, int n) {
+    Packet * p = empty_packet();
+    p->E = 'E';
+    p->D = 'D';
+    p->r = 'r';
+    p->code = 1;
+    p->option1 = filename;
+    p->option2 = atoi(n);
+    return p;
+}
+
+
+// Adding a remote file
+Packet * adding_remote_file(char * local_filename, int size_file) {
+    Packet * p = empty_packet();
+    p->E = 'E';
+    p->D = 'D';
+    p->r = 'r';
+    p->code = 2;
+    p->option1 = local_filename;
+    p->option2 = atoi(size_file);
+    return p;
+}
+
+
+// Renaming a remote file
+Packet * renaming_remote_file(char * original_name, char * new_name) {
+    Packet * p = empty_packet();
+    p->E = 'E';
+    p->D = 'D';
+    p->r = 'r';
+    p->code = 3;
+    p->option1 = original_name;
+    p->option2 = new_name;
+    return p;
+}
+
+
+// Removing a remote file
+Packet * removing_remote_file(char * filename, char * empty) {
+    Packet * p = empty_packet();
+    p->E = 'E';
+    p->D = 'D';
+    p->r = 'r';
+    p->code = 4;
+    p->option1 = filename;
+    p->option2 = empty;
+    return p;
+}
+
+
+// Getting a remote file
+Packet * getting_remote_file(char * filename, char * empty) {
+    Packet * p = empty_packet();
+    p->E = 'E';
+    p->D = 'D';
+    p->r = 'r';
+    p->code = 4;
+    p->option1 = filename;
+    p->option2 = empty;
+    return p;
+}
+
+
+// Listing remote files
+Packet * listing_remote_file(char * filename, char * empty) {
+    Packet * p = empty_packet();
+    p->E = 'E';
+    p->D = 'D';
+    p->r = 'r';
+    p->code = 5;
+    p->option1 = filename;
+    p->option2 = empty;
+    return p;
+}
