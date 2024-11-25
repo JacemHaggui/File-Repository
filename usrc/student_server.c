@@ -28,10 +28,13 @@
  * We don't want thi :-).
  */
 #include <../include/utilities.h>
+#include <../uinclude/client.h>
 #include <signal.h>
 #include <stdbool.h> // bool type
 #include <string.h>
 #include <sys/stat.h> // stat
+
+const int INT_MAX = 2048 - 70; 
 
 // FUNCTIONS
 // ...
@@ -78,42 +81,71 @@ bool file_exists(char *filename) { // Checks for file existence.
   return (stat(filename, &buffer) == 0);
 }
 
-void print_lines(char string[], int n) {
+int print_lines(char string[], int n, char outstring[]) { // returns number of packets needed to store.
   int l = 0;
-  for (int i = 0; i < strlen(string) && l < n; i++) {
+  int i = 0;
+  for (i = 0; i < strlen(string) && l < n; i++) {
     printf("%c", string[i]);
+    outstring[i] = string[i];
     if (string[i] == '\n') {
       l++;
     }
   }
-  // printf("\n");
+  if (i > INT_MAX){
+    return (i / INT_MAX) + 1;
+  }
+  return 1;
 }
+
+char *file_to_string(char filename[]){
+  char * buffer = 0;
+  long length;
+  FILE * f = fopen (filename, "rb");
+  if (f)
+  {
+    fseek (f, 0, SEEK_END);
+    length = ftell (f);
+    fseek (f, 0, SEEK_SET);
+    buffer = malloc (length);
+    if (buffer)
+    {
+      fread (buffer, 1, length, f);
+    }
+    fclose (f);
+    return 0;
+  }
+  else{
+    printf("Error: File '%s' does not exist.\n", filename);
+  }
+  return buffer;
+}
+
 
 /* TO DO: THESE FUNCTIONS MUST FAIL IF THE FILE ALREADY EXISTS! NO OVERWRITING
  * IS ALLOWED.*/
-void write_to_file(char filepath[], char data[],
+int write_to_file(char filepath[], char data[],
                    char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
                                          // MUST CONTAIN THE PATH TO THE FILE!
   if (file_exists(filepath)) {
     printf("ERROR: File %s already exists on directory!\n", filepath);
     printf("No modifications will be made.\n");
-    return;
+    return -1;
   }
 
   FILE *new;
   new = fopen(filepath, "w");
   fprintf(new, data);
   fclose(new);
+  return 0;
 }
 
-void rename_file(char newfile[],
-                 char oldfile[]) { // full paths need to be given in parameter.
+int rename_file(char newfile[], char oldfile[]) { // full paths need to be given in parameter.
   FILE *oldf;
 
   if (file_exists(newfile)) {
     printf("ERROR: File %s already exists on directory!\n", newfile);
     printf("No modifications will be made.\n");
-    return;
+    return -1;
   }
 
   oldf = fopen(oldfile, "r");
@@ -142,12 +174,59 @@ void rename_file(char newfile[],
   // exists.)
 
   remove(oldfile);
+  return 0;
 }
 
-void remove_file(char filename[]) { remove(filename); }
+int remove_file(char filename[]) {
+  return remove(filename);
+}
+
+void slice(const char* str, char* result, size_t start, size_t end) {
+    strncpy(result, str + start, end - start);
+}
+
+Packet *f_print_n_lines(Packet* in){
+  char *filename = in->option1;
+
+  char * string = file_to_string(filename);
+  char * datastring;
+
+  int packnum = print_lines(filename, atoi(in->option2), datastring);
+
+  Packet * out;
+
+  for(int i = 0; i < packnum; i++){
+    out = empty_packet();
+    char buffer[INT_MAX];
+    out->code = 1;
+    itoa(packnum, out->option1, 10);
+    out->E = 'E'; out->D = 'D'; out->r = 'r';
+    out-> data_size = strlen(datastring); 
+    slice(datastring, buffer, i*packnum, (i+1)*packnum);
+    out->data_ptr = buffer;
+    // Here, convert packet to string, and send.
+  }
+  return out;
+}
+
+Packet *add_remote_file(Packet* in){
+  char* directory = ""; // to change and add the directory parameter
+  int errcode = write_to_file(in->option1, in->data_ptr, directory);
+  Packet *out = empty_packet();
+  out->E = 'E'; out->D = 'D'; out->r = 'r';
+  out->code = 0;
+  out->data_size = 0;
+  return out;
+}
+
+Packet * renamefile(Packet* in){
+  int res = rename_file(in->option2, in->option1);
+  Packet *out = empty_packet();
+  out->code = res;
+  
+}
 
 // Copy a remote file to the local filesystem (WIP)
-void fetch(char localfilename[], char remotefilename[]) { return; }
 
 // !! This is the function you must implement for your project.
 // Here we provide an implementation related to the example, not
