@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <ctype.h>
 
 #include <stddef.h> // DEBUG ONLY
 
-typedef struct __attribute__((packed))  { // NO PADDING IN THIS CASE ONLY <!>
+typedef struct  {
 	char E; // 1 byte
 	char D; // 1 byte
 	char r; // 1 byte
@@ -39,10 +40,21 @@ void print_packet(Packet * packet) {
 	if (packet->data_ptr) printf("\t-Data Pointer provided ? : %d (1 <=> True)", *(packet->data_ptr) != '\0'  ); else printf("\t-No Data Pointer Provided");
 }
 
+void print_string(char * str, int n) {
+	for (int i = 0; i < n ; i ++) {
+		unsigned char c = (unsigned char) str[i];
+		if (c == '\0') printf("\\0");
+		else if (isprint(c)) printf("%c", c);
+		else printf("\\x%02X", c);
+	}
+	putchar('\n');
+}
 
 
-int string_to_packet (char * string, Packet * packet) { /* Convert a string argument 
-	to a packet struct given INPUT :
+
+int string_to_packet (char * string, Packet * packet) { 
+	/* Convert a string argument to a struct packet given 
+	INPUT :
 		string	: the string to convert
 		packet	: the pointer to a given packet which will be overwritted
 	OUTPUT :
@@ -99,6 +111,34 @@ int string_to_packet (char * string, Packet * packet) { /* Convert a string argu
 
 
 
+} 
+
+int packet_to_string(Packet * packet, char * string) {
+	*(string) 	= packet->E;
+	*(++string) 	= packet->D;
+	*(++string) 	= packet->r;
+	*(++string)	= ((packet->data_size & 0xF0) >> 8) ; // First get the 8 upper bit with the mask then shift right 8 times to remove the lower part
+	*(++string)	= (packet->data_size & 0x0F) ; // Then get the 8 lower bits with an another mask 
+	*(++string)	= packet->code;
+
+	int n_opt1 = strlen(packet->option1);
+	for (int i = 0; i < n_opt1 ; i ++ ) {
+		*(++string) = packet->option1[i];
+	}
+	*(++string)	= '\0'; // ADD NUL-TERMINATOR
+
+	int n_opt2 = strlen(packet->option2);
+	for (int i = 0; i < n_opt2 ; i ++) {
+		*(++string)	= packet->option2[i];
+	}
+	*(++string)	= '\0'; // ADD NUL-TERMINATOR
+	
+	char * ptr = packet->data_ptr;
+	for (int i = 0; i < packet->data_size; i ++) {
+		*(++string)	= *(ptr++);
+	}
+
+	return 0;
 }
 
 
@@ -120,13 +160,23 @@ void main() {
         	string5,
         	string6
 	};
-
+	/*
 	for (int i = 1; i < 7 ; i ++) { 
 		Packet * packet = empty_packet();
 		int code = string_to_packet(string_list[i-1], packet);
 		printf("--- STRING %d --- \n", i );
 		print_packet(packet);
 		printf("\nCode %d\n", code);
-	}
+	} 
+	*/
+	//Packet * packet = empty_packet();
+	int code = string_to_packet(string_list[0], packet);
+	print_packet(packet);
+	printf("\nCode %d\n", code);
+	int n = 6 + strlen(packet->option1) + 1 + strlen(packet->option2) + 1 + packet->data_size
+. ;
+	char * string_receiver = calloc(sizeof(packet) + packet->data_size , sizeof(string1));
+	packet_to_string(packet, string_receiver);
+	print_string(string_receiver, n);
 	free_packet(packet);
 }
