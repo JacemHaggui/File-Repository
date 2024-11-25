@@ -1,18 +1,24 @@
-// ----------------------------------------------------------
-//  EXAMPLE.  To be removed or replaced by your project code |
-// ----------------------------------------------------------
-
-/* implementation of communication.h, a library for sending 
- * and receiving packets. Packet format (different from project):
- *    ----------------------------------------
- *   | nb | command | parameter1 | parameter2 |
- *    ----------------------------------------
- * where 
- * - nb (1 byte) is 0, 1 or 2, the number of parameters,
- * - command (16 bytes) is a (null-terminated) string
- * - parameter1 (32 bytes) is a (null-terminated) string
- * - parameter2 (32 bytes) is a (null-terminated) string
- * irrelevant parameters (w.r.t. nb) are not sent
+/* This implementation respects the project-specific packet format.
+ * The client analyzes the command line arguments using the 
+ * parse_commandline() function. Then, it sends these arguments 
+ * to the server, which processes the command.
+ * 
+ * Packet Format (Header + Data) as defined for the project:
+ *    ---------------------------------------------------------------------
+ *   | 'E' | 'D' | 'r' | data size (2 bytes) | command/error (1 byte)     |
+ *   | option1 (32 bytes) | option2 (32 bytes) | data (0 to 1978 bytes)    |
+ *    ---------------------------------------------------------------------
+ * 
+ * Where:
+ * - The first three bytes are fixed: 'E', 'D', and 'r'.
+ * - Data size (2 bytes): Represents the size of the data field in the packet.
+ * - Command/Error (1 byte): Stores the command type or error code.
+ * - Option1 (32 bytes): Stores a string (e.g., filename or other metadata).
+ * - Option2 (32 bytes): Stores a second string (or additional metadata).
+ * - Data (0 to 1978 bytes): Contains raw data if the command requires it 
+ *   (e.g., file contents). This field is optional.
+ * 
+ * Total packet size must not exceed 2048 bytes, including the header.
  */
 
 /* to print messages associated to detected errors */
@@ -30,59 +36,45 @@
  * Returns 1 in case of success, 0 in case of failure
  */
 int recv_pkt(char *pkt, int channel) {
-    int amount_to_receive;
     int amount_received;
-    char *buf = pkt; // pointer to the place where received 
-                     // data will be put, begins at pkt
+    int total_size = 70; // First, we expect the 70-byte header
+    char *buf = pkt; // pointer to data buffer
 
-    // decides of the amount of data to be received by looking at the "nb" field.
-    // -> first reads this field
-    amount_received = read(channel, buf, 1);
-    if (amount_received == -1) { //error case
-        // print error-associated message on stderr cf errno.h
-        perror("cannot write"); 
+    // Read the header first
+    amount_received = read(channel, buf, total_size);
+    if (amount_received == -1) { // Error case
+        perror("Cannot read");
         return 0;
     }
-    if (amount_received == 0) { // connection closed
-        // print relevant error message on stderr
-        fprintf(stderr, "connection closed\n"); 
+    if (amount_received == 0) { // Connection closed
+        fprintf(stderr, "Connection closed\n");
         return 0;
     }
-    else { // set amount_to_receive
-        if (*pkt == 0) amount_to_receive = 16;
-        else if (*pkt == 1) amount_to_receive = 48;
-        else amount_to_receive = 80;
-        /*
-        •	Based on the value of the first byte (nb), calculate how much more data needs to be received:
-	    •	nb == 0: 16 bytes (command only).
-	    •	nb == 1: 48 bytes (command + parameter1).
-	    •	nb == 2: 80 bytes (command + parameter1 + parameter2).
-        */
-    }
-    //Move the pointer buf to the next byte in the buffer, after the nb field.
-    buf++; // set pkt to the beginning of the command string
-    
-    // receive the remaining data, which may require several reads
-    while(amount_to_receive > 0) { // data remains to send
-        amount_received = read(channel, buf, amount_to_receive);
-        if (amount_received == -1) { //error case
-            // print error-associated message on stderr. cf errno.h
-            perror("cannot write"); 
-            return 0;
-        }
-        if (amount_received == 0) { // connection closed
-            // print relevant error message on stderr
-            fprintf(stderr, "connection closed\n"); 
-            return 0;
-        }
-        else { // amount_received data has been read
-            // update amount of data to receive
-            amount_to_receive = amount_to_receive - amount_received;
-            // points to relevant data location
-            buf = buf + amount_received;
+
+    // After the header, read the actual data (based on data_size field)
+    unsigned short data_size = *((unsigned short*)(pkt + 3)); // Get data size from the packet
+    if (data_size > 0) {
+        total_size = data_size; // Set total size to read the actual data
+        buf += 70; // Move the buffer pointer past the header
+
+        // Read the data field
+        while (total_size > 0) {
+            amount_received = read(channel, buf, total_size);
+            if (amount_received == -1) { // Error case
+                perror("Cannot read");
+                return 0;
+            }
+            if (amount_received == 0) { // Connection closed
+                fprintf(stderr, "Connection closed\n");
+                return 0;
+            }
+
+            total_size -= amount_received; // Update the remaining data size to read
+            buf += amount_received; // Move the buffer pointer forward
         }
     }
-    return 1; // if this line is reached, no error occurred.
+
+    return 1; // Success
 }
 
 
@@ -92,40 +84,29 @@ int recv_pkt(char *pkt, int channel) {
  * Returns 1 for success and 0 for failure
  */
 int send_pkt(char *pkt, int channel) {
-    int amount_to_send = 17; // value when the field nb contains 0, 
+    // Header is 70 bytes: 3 for 'E', 'D', 'r' + 2 for data_size + 1 for command/error
+    // + 32 for option1 + 32 for option2 = 70.
+    int total_size = 70 + *((unsigned short*)(pkt + 3)); // 70 bytes header + data_size
     int amount_sent;
-    char *buf = pkt; // pointer to the data to send, begins at pkt
+    char *buf = pkt; // pointer to data to send
 
-    // compute the amount of data to be sent by looking at the nb field
-    if(*pkt == 1) amount_to_send = 49; // nb contains 1
-    else if (*pkt == 2) amount_to_send = 81; // nb contains 2
-
-    // send the packet which may require several writes
-    while(amount_to_send > 0) { // data remains to send
-        amount_sent = write(channel, buf, amount_to_send);
-        if (amount_sent == -1) { //error case
-            // print error message for closed connection (cf errno.h)
-            if(errno == EPIPE)
-                fprintf(stderr, "connection closed\n"); 
+    // Send the entire packet, including the header and data
+    while (total_size > 0) {
+        amount_sent = write(channel, buf, total_size);
+        if (amount_sent == -1) { // Error case
+            if (errno == EPIPE)
+                fprintf(stderr, "Connection closed\n");
             else
-            // print error-associated message to stderr cf (errno.h)
-                perror("cannot write"); 
+                perror("Cannot write");
             return 0;
         }
-        if (amount_sent == 0) { // problem: loop risk
-            // print relevant error message on stderr
-            fprintf(stderr, "write problem\n"); 
+        if (amount_sent == 0) { // Connection issue
+            fprintf(stderr, "Write problem\n");
             return 0;
         }
-        else { // amount_sent data has been sent
-            // update amount of data to be sent
-            amount_to_send = amount_to_send - amount_sent;
-            // points to remaining data
-            buf = buf + amount_sent;
-        }
+
+        total_size -= amount_sent; // Update remaining size to send
+        buf += amount_sent; // Move buffer pointer forward
     }
-    return 1; // if this line is reached, no error occurred.
+    return 1; // Success
 }
-// --------------------------------------------------
-//  END of EXAMPLE code to be removed or replaced    |
-// --------------------------------------------------
