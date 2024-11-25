@@ -30,6 +30,8 @@
 /* for memcpy,...*/
 #include <string.h>
 
+#include <inttypes.h>
+
 /* a function to receive a packet (in pkt) on a socket channel 
  * it assumes that the received packet respects the format.
  * (in a real program, this should be checked... )
@@ -52,7 +54,7 @@ int recv_pkt(char *pkt, int channel) {
     }
 
     // After the header, read the actual data (based on data_size field)
-    unsigned short data_size = *((unsigned short*)(pkt + 3)); // Get data size from the packet
+    uint16_t data_size = *(uint16_t*)(pkt + 3); // Get data size from the packet
     if (data_size > 0) {
         total_size = data_size; // Set total size to read the actual data
         buf += 70; // Move the buffer pointer past the header
@@ -86,7 +88,8 @@ int recv_pkt(char *pkt, int channel) {
 int send_pkt(char *pkt, int channel) {
     // Header is 70 bytes: 3 for 'E', 'D', 'r' + 2 for data_size + 1 for command/error
     // + 32 for option1 + 32 for option2 = 70.
-    int total_size = 70 + *((unsigned short*)(pkt + 3)); // 70 bytes header + data_size
+    uint16_t data_size = *(uint16_t*)(pkt + 3);
+    int total_size = 70 + data_size; // 70 bytes header + data_size
     int amount_sent;
     char *buf = pkt; // pointer to data to send
 
