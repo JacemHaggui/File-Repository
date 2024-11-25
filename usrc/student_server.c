@@ -123,19 +123,20 @@ char *file_to_string(char filename[]){
 
 /* TO DO: THESE FUNCTIONS MUST FAIL IF THE FILE ALREADY EXISTS! NO OVERWRITING
  * IS ALLOWED.*/
-void write_to_file(char filepath[], char data[],
+int write_to_file(char filepath[], char data[],
                    char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
                                          // MUST CONTAIN THE PATH TO THE FILE!
   if (file_exists(filepath)) {
     printf("ERROR: File %s already exists on directory!\n", filepath);
     printf("No modifications will be made.\n");
-    return;
+    return -1;
   }
 
   FILE *new;
   new = fopen(filepath, "w");
   fprintf(new, data);
   fclose(new);
+  return 0;
 }
 
 int rename_file(char newfile[], char oldfile[]) { // full paths need to be given in parameter.
@@ -203,9 +204,27 @@ Packet *f_print_n_lines(Packet* in){
     out-> data_size = strlen(datastring); 
     slice(datastring, buffer, i*packnum, (i+1)*packnum);
     out->data_ptr = buffer;
+    // Here, convert packet to string, and send.
   }
+  return out;
 }
 
+Packet *add_remote_file(Packet* in){
+  char* directory = ""; // to change and add the directory parameter
+  int errcode = write_to_file(in->option1, in->data_ptr, directory);
+  Packet *out = empty_packet();
+  out->E = 'E'; out->D = 'D'; out->r = 'r';
+  out->code = 0;
+  out->data_size = 0;
+  return out;
+}
+
+Packet * renamefile(Packet* in){
+  int res = rename_file(in->option2, in->option1);
+  Packet *out = empty_packet();
+  out->code = res;
+  
+}
 
 // Copy a remote file to the local filesystem (WIP)
 
