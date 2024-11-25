@@ -1,20 +1,27 @@
 // ------------------------------------------------------
-//  EXAMPLE.  to be replaced by your project code        |
+//  PROJECT IMPLEMENTATION: Client Packet Format         |
 // ------------------------------------------------------
-/* In this example, the client analyzes the command line arguments
- * uses the parse_commandline() function. Then it sends 
- * these arguments o the server which prints them in its terminal.
- * In this example, the packet format is different from the one of the project:
- *    ----------------------------------------
- *   | nb | command | parameter1 | parameter2 |
- *    ----------------------------------------
- * where 
- * - nb (1 byte) is 0, 1 or 2, the number of parameters,
- * - command (16 bytes) is a (null-terminated) string
- * - parameter1 (32 bytes) is a (null-terminated) string
- * - parameter2 (32 bytes) is a (null-terminated) string
- * irrelevant parameters are not sent
- * (w.r.t nb, depending of the command )
+/* This implementation respects the project-specific packet format.
+ * The client analyzes the command line arguments using the 
+ * parse_commandline() function. Then, it sends these arguments 
+ * to the server, which processes the command.
+ * 
+ * Packet Format (Header + Data) as defined for the project:
+ *    ---------------------------------------------------------------------
+ *   | 'E' | 'D' | 'r' | data size (2 bytes) | command/error (1 byte)     |
+ *   | option1 (32 bytes) | option2 (32 bytes) | data (0 to 1978 bytes)    |
+ *    ---------------------------------------------------------------------
+ * 
+ * Where:
+ * - The first three bytes are fixed: 'E', 'D', and 'r'.
+ * - Data size (2 bytes): Represents the size of the data field in the packet.
+ * - Command/Error (1 byte): Stores the command type or error code.
+ * - Option1 (32 bytes): Stores a string (e.g., filename or other metadata).
+ * - Option2 (32 bytes): Stores a second string (or additional metadata).
+ * - Data (0 to 1978 bytes): Contains raw data if the command requires it 
+ *   (e.g., file contents). This field is optional.
+ * 
+ * Total packet size must not exceed 2048 bytes, including the header.
  */
 
 // INCLUDES
