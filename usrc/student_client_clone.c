@@ -42,80 +42,17 @@ const char * const client_help_options = "\
 
 int CmdlinetoPacket(const char *input, Packet *pkt);
 void print_packet(Packet * packet);
+int student_client(int channel, int argc, char *argv[]);
 
-int student_client(int channel, int argc, char *argv[]) {
-    // Ignore SIGPIPE signals
-    signal(SIGPIPE, SIG_IGN);
-
-    // Variables for command-line options
-    int analyze_flag = 0;
-    int interactive_flag = 0;
-    char analyze_file[256] = {0};
-    char directory[256] = {0};
-
-    // Step 1: Parse command-line arguments, figuring out which mode to activate
-    for (int i = 1; i < argc; i++) {
-
-        if (strcmp(argv[i], "-analyze") == 0) {
-            if (analyze_flag || i + 1 >= argc) {
-                //If the program encounters -analyze, it expects a value (commands.txt) immediately after it.
-                //If i + 1 >= argc,there are no more arguments after argv[i]
-                fprintf(stderr, "Error: Invalid or duplicate -analyze option\n");//In case the user is messing with us
-                return -1;
-            }
-            analyze_flag = 1;
-            strncpy(analyze_file, argv[++i], sizeof(analyze_file) - 1);
-        }
-        else if (strcmp(argv[i], "-interactive") == 0) {
-            if (interactive_flag || i + 1 >= argc) {
-                fprintf(stderr, "Error: Duplicate -interactive option\n");
-                return -1;
-            }
-            interactive_flag = 1;
-        }
-        else if (strcmp(argv[i], "-directory") == 0) {
-            if (directory[0] || i + 1 >= argc) {
-                fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
-                return -1;
-            }
-            strncpy(directory, argv[++i], sizeof(directory) - 1);
-        }
-        else {
-            fprintf(stderr, "Error: Unknown option %s\n", argv[i]);//User isn't making any sense
-            return -1;
-        }
-    }
-
-    // Step 2: Handle -analyze option
-    if (analyze_flag) {
-        printf("Executing commands from file: %s\n", analyze_file);
-        // TODO: Open the file, read commands, and send packets to the server
-    }
-
-    // Step 3: Handle -interactive option
-    if (interactive_flag) {
-        printf("Entering interactive mode...\n");
-        // TODO: Accept keyboard commands, construct packets, and send them
-    }
-
-    // Step 4: Handle -directory option
-    if (directory[0]) {
-        printf("Using directory: %s\n", directory);
-        // TODO: Check existing files and process as needed
-    }
-
-    // Placeholder for communication logic
-    Packet pkt = { 'E', 'D', 'r', 0, 0, "", "", "" };
-    // TODO: Populate the packet structure based on user commands or file input
-    // TODO: Send the packet using send_pkt()
-    return 0; // Success
-}
-
-int main(){
+int main(int argc, char *argv[]){
+    student_client(111, argc, argv);
+    /*
     Packet* test_packet = malloc(sizeof(Packet));
     const char* test_command = "mv titi.txt toto.txt";
     int res = CmdlinetoPacket(test_command, test_packet);
     print_packet(test_packet);
+    */
+    return 1;
 }
 
 int CmdlinetoPacket(const char *input, Packet *pkt) {
@@ -189,9 +126,7 @@ int CmdlinetoPacket(const char *input, Packet *pkt) {
     else if (strcmp(command, "restart") == 0) {
         pkt->code = 8;  // Command byte for "restart"
     }
-    else if (strcmp(command, "help") == 0) {
-        pkt->code = 9;  // Command byte for "help"
-    } 
+
     else {
         fprintf(stderr, "Error: Unknown command '%s'\n", command);
         return -1;
@@ -212,4 +147,78 @@ void print_packet(Packet * packet) {
 	if ( packet->option1) printf("\t-Option 1 : %s\n", packet->option1); else printf("\t-No Option 1\n");
 	if ( packet->option2) printf("\t-Option 2 : %s\n", packet->option2); else printf("\t-No Option 2\n");
 	if (packet->data_ptr) printf("\t-Data Pointer provided ? : %d (1 <=> True)", *(packet->data_ptr) != '\0'  ); else printf("\t-No Data Pointer Provided");
+}
+
+
+int student_client(int channel, int argc, char *argv[]) {
+    // Ignore SIGPIPE signals
+    signal(SIGPIPE, SIG_IGN);
+
+    // Variables for command-line options
+    int analyze_flag = 0;
+    int interactive_flag = 0;
+    char analyze_file[256] = {0};
+    char directory[256] = {0};
+
+    //check if the user is asking for help
+    if(argc == 2 && strcmp(argv[1], "help") == 0 ){
+        printf("\n%s", client_help_options);
+    };
+
+    // Step 1: Parse command-line arguments, figuring out which mode to activate
+    for (int i = 1; i < argc; i++) {
+
+        if (strcmp(argv[i], "-analyze") == 0) {
+            if (analyze_flag || i + 1 >= argc) {
+                //If the program encounters -analyze, it expects a value (commands.txt) immediately after it.
+                //If i + 1 >= argc,there are no more arguments after argv[i]
+                fprintf(stderr, "Error: Invalid or duplicate -analyze option\n");//In case the user is messing with us
+                return -1;
+            }
+            analyze_flag = 1;
+            strncpy(analyze_file, argv[++i], sizeof(analyze_file) - 1);
+        }
+        else if (strcmp(argv[i], "-interactive") == 0) {
+            if (interactive_flag || i + 1 >= argc) {
+                fprintf(stderr, "Error: Duplicate -interactive option\n");
+                return -1;
+            }
+            interactive_flag = 1;
+        }
+        else if (strcmp(argv[i], "-directory") == 0) {
+            if (directory[0] || i + 1 >= argc) {
+                fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
+                return -1;
+            }
+            strncpy(directory, argv[++i], sizeof(directory) - 1);
+        }
+        else {
+            fprintf(stderr, "Error: Unknown option %s\n", argv[i]);//User isn't making any sense
+            return -1;
+        }
+    }
+
+    // Step 2: Handle -analyze option
+    if (analyze_flag) {
+        printf("Executing commands from file: %s\n", analyze_file);
+        // TODO: Open the file, read commands, and send packets to the server
+    }
+
+    // Step 3: Handle -interactive option
+    if (interactive_flag) {
+        printf("Entering interactive mode...\n");
+        // TODO: Accept keyboard commands, construct packets, and send them
+    }
+
+    // Step 4: Handle -directory option
+    if (directory[0]) {
+        printf("Using directory: %s\n", directory);
+        // TODO: Check existing files and process as needed
+    }
+
+    // Placeholder for communication logic
+    Packet pkt = { 'E', 'D', 'r', 0, 0, "", "", "" };
+    // TODO: Populate the packet structure based on user commands or file input
+    // TODO: Send the packet using send_pkt()
+    return 0; // Success
 }
