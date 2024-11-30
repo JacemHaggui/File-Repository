@@ -173,8 +173,7 @@ void main() {
 	int code = string_to_packet(string_list[0], packet);
 	print_packet(packet);
 	printf("\nCode %d\n", code);
-	int n = 6 + strlen(packet->option1) + 1 + strlen(packet->option2) + 1 + packet->data_size
-. ;
+	int n = 6 + strlen(packet->option1) + 1 + strlen(packet->option2) + 1 + packet->data_size;
 	char * string_receiver = calloc(sizeof(packet) + packet->data_size , sizeof(string1));
 	packet_to_string(packet, string_receiver);
 	print_string(string_receiver, n);
