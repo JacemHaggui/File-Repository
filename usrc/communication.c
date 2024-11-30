@@ -54,13 +54,13 @@ int recv_pkt(char *pkt, int channel) {
     }
 
     // After the header, read the actual data (based on data_size field)
-    uint16_t data_size = *(uint16_t*)(pkt + 3); // Get data size from the packet
-    if (data_size > 0) {
+    uint16_t data_size = *(uint16_t*)(pkt + 3); // Get data size(2 bytes) from the packet
+    if (data_size > 0) { //If we actually have data (duuuuh)
         total_size = data_size; // Set total size to read the actual data
         buf += 70; // Move the buffer pointer past the header
 
         // Read the data field
-        while (total_size > 0) {
+        while (total_size > 0) {//While there is stuff to read keep reading
             amount_received = read(channel, buf, total_size);
             if (amount_received == -1) { // Error case
                 perror("Cannot read");
@@ -94,7 +94,7 @@ int send_pkt(char *pkt, int channel) {
     char *buf = pkt; // pointer to data to send
 
     // Send the entire packet, including the header and data
-    while (total_size > 0) {
+    while (total_size > 0) {//while there is stuff to send, keep sending
         amount_sent = write(channel, buf, total_size);
         if (amount_sent == -1) { // Error case
             if (errno == EPIPE)
