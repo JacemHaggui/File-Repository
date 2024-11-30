@@ -1,52 +1,27 @@
-// ------------------------------------------------------
-//  PROJECT IMPLEMENTATION: Client Packet Format         |
-// ------------------------------------------------------
-/* This implementation respects the project-specific packet format.
- * The client analyzes the command line arguments using the 
- * parse_commandline() function. Then, it sends these arguments 
- * to the server, which processes the command.
- * 
- * Packet Format (Header + Data) as defined for the project:
- *    ---------------------------------------------------------------------
- *   | 'E' | 'D' | 'r' | data size (2 bytes) | command/error (1 byte)     |
- *   | option1 (32 bytes) | option2 (32 bytes) | data (0 to 1978 bytes)    |
- *    ---------------------------------------------------------------------
- * 
- * Where:
- * - The first three bytes are fixed: 'E', 'D', and 'r'.
- * - Data size (2 bytes): Represents the size of the data field in the packet.
- * - Command/Error (1 byte): Stores the command type or error code.
- * - Option1 (32 bytes): Stores a string (e.g., filename or other metadata).
- * - Option2 (32 bytes): Stores a second string (or additional metadata).
- * - Data (0 to 1978 bytes): Contains raw data if the command requires it 
- *   (e.g., file contents). This field is optional.
- * 
- * Total packet size must not exceed 2048 bytes, including the header.
- */
-
-// INCLUDES
-/* to use the provided parse_commandline function. */
 #include "../include/utilities.h"
-/* user defined library for sending and receiving packets */
 #include "../uinclude/communication.h"
-/* for stdin,...*/
 #include <stdio.h>
-/* for memcpy,...*/
 #include <string.h>
-/* to modify SIGPIPE signal handling, as default behaviour makes
- * the program exits when trying to write to a closed socket. 
- * We don't want this.
- */
 #include <signal.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-// FUNCTIONS
-// ...
-// empty because all used functions in this example are provided by
-// "provided", "communication" and system provided libraries.
-// -----------------------------------------------------
-//  END of EXAMPLE code to be replace                   |
-// -----------------------------------------------------
+// Define constants for packet
+#define HEADER_SIZE 70
+#define MAX_PACKET_SIZE 2048
+#define MAX_DATA_SIZE (MAX_PACKET_SIZE - HEADER_SIZE)
 
+// Packet structure
+typedef struct  {
+	char E; // 1 byte
+	char D; // 1 byte
+	char r; // 1 byte
+	uint16_t data_size; // 2 byte  <!> little-endian MODE ! (So we have to swap from little-endian to big-endian order)
+	int8_t code; // 1 byte
+	char option1[32]; //32 bytes
+	char option2[32]; //32 bytes
+	char * data_ptr;
+} Packet ;
 
 /**  help message for commandline options */
 const char * const client_help_options = "\
@@ -65,158 +40,185 @@ const char * const client_help_options = "\
 \n\
 ";
 
-// The following function is the one you must implement for your project.
-// Here, we provide an implementation related to the example given above, which is
-// not the exactly the project you have to implement
-// It returns 0 to exit or another value to restart 
-// the client.
+int CmdlinetoPacket(const char *input, Packet *pkt);
+void print_packet(Packet * packet);
+int student_client(int channel, int argc, char *argv[]);
+
+int main(int argc, char *argv[]){
+    student_client(111, argc, argv);
+    /*
+    Packet* test_packet = malloc(sizeof(Packet));
+    const char* test_command = "mv titi.txt toto.txt";
+    int res = CmdlinetoPacket(test_command, test_packet);
+    print_packet(test_packet);
+    */
+    return 1;
+}
+
+int CmdlinetoPacket(const char *input, Packet *pkt) {
+    // Initialize the packet with fixed values
+    pkt->E = 'E';
+    pkt->D = 'D';
+    pkt->r = 'r';
+    
+    // Initializing data_size and the option1 and option2 arrays to zero.
+    // We use memset here to efficiently set all 32 bytes of each array to 0.
+    // This ensures that the options are empty before we populate them with actual data.
+    memset(pkt->option1, 0, sizeof(pkt->option1));
+    memset(pkt->option2, 0, sizeof(pkt->option2));
+    pkt->data_size = 0;
+
+    // Split input into command and arguments
+    // Buffers to store command and arguments
+    char command[64];  // Size 64 for most commands
+    char option1[256]; // Size 256 for first argument (e.g., filename)
+    char option2[256]; // Size 256 for second argument (if needed)
+
+    // Parse the input into command and options
+    int args = sscanf(input, "%s %s %s", command, option1, option2); 
+    /* sscanf Explanation
+    * The sscanf function is used to read formatted input from the string `input`.
+    * 
+    * - "%s %s %s" is the format string that tells sscanf to:
+    *   - Read a string (word) up to the first space and store it in `command`
+    *   - Read the next string up to the next space and store it in `option1`
+    *   - Read the next string up to the next space and store it in `option2`
+    * 
+    * In the case of an input like "put myfile.txt /path/to/destination":
+    * - `command` will store "put"
+    * - `option1` will store "myfile.txt"
+    * - `option2` will store "/path/to/destination"
+    * 
+    * `args` will store the number of successful assignments, which is 3 in this case 
+    * because three strings were successfully extracted from the `input`.
+    */
+
+    strncpy(pkt->option1, option1, sizeof(pkt->option1) - 1);  // Copy the first option (e.g., filename)
+    strncpy(pkt->option2, option2, sizeof(pkt->option2) - 1);  // Copy the second option (if available)
+
+    // Determine which command was entered
+    if (strcmp(command, "put") == 0) {
+        pkt->code = 1;  // Command code for "put" (not permanent)
+        //TODO: Put the entire file contents in data
+        //Seems weird since the packet only takes a pointer to data ?
+        //Reminder: Discuss with the group 
+    } 
+    else if (strcmp(command, "rm") == 0) {
+        pkt->code = 2;  // Command code for "rm"
+    } 
+    else if (strcmp(command, "get") == 0) {
+        pkt->code = 3;  // Command code for "get"
+        // pkt->option1 and pkt->option2 have already been set earlier
+    } 
+    else if (strcmp(command, "ls") == 0) {
+        pkt->code = 4;  // Command code for "ls"
+    } 
+    else if (strcmp(command, "cat") == 0) {
+        pkt->code = 5;  // Command code for "cat"
+    } 
+    else if (strcmp(command, "mv") == 0) {
+        pkt->code = 6;  // Command code for "mv"
+        // pkt->option1 and pkt->option2 have already been set earlier
+    } 
+    else if (strcmp(command, "quit") == 0 || strcmp(command, "exit") == 0) {
+        pkt->code = 7;  // Command byte for "quit" or "exit"
+    } 
+    else if (strcmp(command, "restart") == 0) {
+        pkt->code = 8;  // Command byte for "restart"
+    }
+
+    else {
+        fprintf(stderr, "Error: Unknown command '%s'\n", command);
+        return -1;
+    }
+
+    return 1;  // Indicate success
+}
+
+
+void print_packet(Packet * packet) {
+	printf("Print Packet :\n");
+	if (! packet) 	{printf("\t-Empty Packet\n");  return ;} 
+	if ( packet->E) printf("\t-Const E : %c\n", packet->E); else printf("\t-No Const E\n");
+	if ( packet->D) printf("\t-Const D : %c\n", packet->D); else printf("\t-No Const D\n");
+	if ( packet->r) printf("\t-Const r : %c\n", packet->r); else printf("\t-No Const r\n");
+	if ( packet->data_size) printf("\t-Data Size : %d bytes\n", packet->data_size); else printf("\t-No Data Size\n");
+	if ( packet->code) printf("\t-Code : %d\n", packet->code); else printf("\t-No Code\n");
+	if ( packet->option1) printf("\t-Option 1 : %s\n", packet->option1); else printf("\t-No Option 1\n");
+	if ( packet->option2) printf("\t-Option 2 : %s\n", packet->option2); else printf("\t-No Option 2\n");
+	if (packet->data_ptr) printf("\t-Data Pointer provided ? : %d (1 <=> True)", *(packet->data_ptr) != '\0'  ); else printf("\t-No Data Pointer Provided");
+}
+
 
 int student_client(int channel, int argc, char *argv[]) {
-    // Writing to a closed socket causes a SIGPIPE signal, which makes 
-    // the program exits. The following line inhibits this default behaviour.
-    // Thus, writing to a cloned socket will simply return -1 with the EPIPE
-    // error in errno and will therefore not cause an exit. 
-    // (see the line with "EPIPE" in send_pkt in usrc/communication.c).
+    // Ignore SIGPIPE signals
     signal(SIGPIPE, SIG_IGN);
 
-    // --------------------------------------------------
-    //  EXAMPLE. To be replaced by your project code     |
-    // --------------------------------------------------
+    // Variables for command-line options
+    int analyze_flag = 0;
+    int interactive_flag = 0;
+    char analyze_file[256] = {0};
+    char directory[256] = {0};
 
-    // illustrate sort_dir
-    char arr[] = "fileC,100,fileA,50,fileB,75";
-    printf("\nIllustrating function sort_dir\n string before: %s\n",arr);
-    if(!sort_dir(arr))
-        fprintf(stderr," Error while sorting\n\n");
-    else
-        printf(" string after: %s\n\n", arr);
+    //check if the user is asking for help
+    if(argc == 2 && strcmp(argv[1], "help") == 0 ){
+        printf("\n%s", client_help_options);
+    };
 
-    // Example of a client...
-    printf("Example of a client\nS");
-    // Buffer to receive the command line
-    char cmdline[128];
-    // Buffer to build the packet to send (max size: 81)
-    char sendbuf[81];
-    // Structure to be filled by parse_commandline
-    usercommand parsed_cmd;
-    // print info to terminal
-    printf("(^C to exit)\n\n");
-    // infinite loop -> use ^C to exit the program 
-    while (1) {
-        // get the command from user, exit if it fails
-        printf("Enter a command > ");
-        if(! fgets(cmdline, 128, stdin)){
-            printf("Cannot read command line\n");
-            // return 0 to exit
-            return 0;
+    // Step 1: Parse command-line arguments, figuring out which mode to activate
+    for (int i = 1; i < argc; i++) {
+
+        if (strcmp(argv[i], "-analyze") == 0) {
+            if (analyze_flag || i + 1 >= argc) {
+                //If the program encounters -analyze, it expects a value (commands.txt) immediately after it.
+                //If i + 1 >= argc,there are no more arguments after argv[i]
+                fprintf(stderr, "Error: Invalid or duplicate -analyze option\n");//In case the user is messing with us
+                return -1;
+            }
+            analyze_flag = 1;
+            strncpy(analyze_file, argv[++i], sizeof(analyze_file) - 1);
         }
-        // parse it
-        int test = parse_commandline(&parsed_cmd, cmdline);
-        if (test) { // parsing was successful
-            // prepare packet to be sent
-            // 1. fill all fields except the number of parameters. 
-            //    To simplify the example, unused parameters are 
-            //    also copied, but they won't be sent
-            memcpy(sendbuf+1, parsed_cmd.cmd, 16); // copy command
-            memcpy(sendbuf+17, parsed_cmd.param1, 32); // 1st parameter
-            memcpy(sendbuf+49, parsed_cmd.param2, 32); // snd parameter
-            // 2. set the number or parameter (command dependent)
-            if (   strcmp(parsed_cmd.cmd,"help") == 0
-                || strcmp(parsed_cmd.cmd,"quit") == 0
-                || strcmp(parsed_cmd.cmd,"restart") == 0
-                || strcmp(parsed_cmd.cmd,"ls") == 0 )
-                *sendbuf = 0; //command without parameter
-            else if ( strcmp(parsed_cmd.cmd,"put") == 0
-                || strcmp(parsed_cmd.cmd,"rm") == 0 )
-                *sendbuf = 1; //command with 1 parameter
-            else 
-                *sendbuf = 2; //command with 1 parameter
-            // 3. attempt to send the packet
-            int res = send_pkt(sendbuf, channel);
-            // returns 1 to restart if somme communication error occured
-            if (!res) return 1; 
+        else if (strcmp(argv[i], "-interactive") == 0) {
+            if (interactive_flag || i + 1 >= argc) {
+                fprintf(stderr, "Error: Duplicate -interactive option\n");
+                return -1;
+            }
+            interactive_flag = 1;
+        }
+        else if (strcmp(argv[i], "-directory") == 0) {
+            if (directory[0] || i + 1 >= argc) {
+                fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
+                return -1;
+            }
+            strncpy(directory, argv[++i], sizeof(directory) - 1);
+        }
+        else {
+            fprintf(stderr, "Error: Unknown option %s\n", argv[i]);//User isn't making any sense
+            return -1;
         }
     }
-    // --------------------------------------------------
-    //  END of EXAMPLE code to be replaced               |
-    // --------------------------------------------------
-}
 
+    // Step 2: Handle -analyze option
+    if (analyze_flag) {
+        printf("Executing commands from file: %s\n", analyze_file);
+        // TODO: Open the file, read commands, and send packets to the server
+    }
 
+    // Step 3: Handle -interactive option
+    if (interactive_flag) {
+        printf("Entering interactive mode...\n");
+        // TODO: Accept keyboard commands, construct packets, and send them
+    }
 
-// Printing n lines
-Packet * print_n_lines(char * filename, int n) {
-    Packet * p = empty_packet();
-    p->E = 'E';
-    p->D = 'D';
-    p->r = 'r';
-    p->code = 1;
-    p->option1 = filename;
-    p->option2 = atoi(n);
-    return p;
-}
+    // Step 4: Handle -directory option
+    if (directory[0]) {
+        printf("Using directory: %s\n", directory);
+        // TODO: Check existing files and process as needed
+    }
 
-
-// Adding a remote file
-Packet * adding_remote_file(char * local_filename, int size_file) {
-    Packet * p = empty_packet();
-    p->E = 'E';
-    p->D = 'D';
-    p->r = 'r';
-    p->code = 2;
-    p->option1 = local_filename;
-    p->option2 = atoi(size_file);
-    return p;
-}
-
-
-// Renaming a remote file
-Packet * renaming_remote_file(char * original_name, char * new_name) {
-    Packet * p = empty_packet();
-    p->E = 'E';
-    p->D = 'D';
-    p->r = 'r';
-    p->code = 3;
-    p->option1 = original_name;
-    p->option2 = new_name;
-    return p;
-}
-
-
-// Removing a remote file
-Packet * removing_remote_file(char * filename, char * empty) {
-    Packet * p = empty_packet();
-    p->E = 'E';
-    p->D = 'D';
-    p->r = 'r';
-    p->code = 4;
-    p->option1 = filename;
-    p->option2 = empty;
-    return p;
-}
-
-
-// Getting a remote file
-Packet * getting_remote_file(char * filename, char * empty) {
-    Packet * p = empty_packet();
-    p->E = 'E';
-    p->D = 'D';
-    p->r = 'r';
-    p->code = 4;
-    p->option1 = filename;
-    p->option2 = empty;
-    return p;
-}
-
-
-// Listing remote files
-Packet * listing_remote_file(char * filename, char * empty) {
-    Packet * p = empty_packet();
-    p->E = 'E';
-    p->D = 'D';
-    p->r = 'r';
-    p->code = 5;
-    p->option1 = filename;
-    p->option2 = empty;
-    return p;
+    // Placeholder for communication logic
+    Packet pkt = { 'E', 'D', 'r', 0, 0, "", "", "" };
+    // TODO: Populate the packet structure based on user commands or file input
+    // TODO: Send the packet using send_pkt()
+    return 0; // Success
 }
