@@ -18,16 +18,21 @@ typedef struct  {
 } Packet ;
 
 Packet * empty_packet() {
-	//Packet * packet = calloc(1, sizeof(*packet));
-	Packet * packet = (Packet *)malloc(sizeof(Packet));
+	Packet * packet = calloc(1, sizeof(*packet));
+	//Packet * packet = (Packet *)malloc(sizeof(Packet));
 	return packet;
 }
 
 void free_packet(Packet * packet) {
+	/* Free Packet if exist */
 	if (packet) free(packet);
 }
 
 void print_packet(Packet * packet) {
+	/* 
+		ONLY FOR DEBUGGING : 
+		Print the Packet in a decent format
+	*/
 	printf("Print Packet :\n");
 	if (! packet) 	{printf("\t-Empty Packet\n");  return ;} 
 	if ( packet->E) printf("\t-Const E : %c\n", packet->E); else printf("\t-No Const E\n");
@@ -41,6 +46,11 @@ void print_packet(Packet * packet) {
 }
 
 void print_string(char * str, int n) {
+	/* 
+		ONLY FOR DEBUGGING :
+		Print the first n characters in the string.
+		<!> 0x0000 and '\0' are the same character in C. They will be showed as '\0' .
+	*/
 	for (int i = 0; i < n ; i ++) {
 		unsigned char c = (unsigned char) str[i];
 		if (c == '\0') printf("\\0");
@@ -114,6 +124,14 @@ int string_to_packet (char * string, Packet * packet) {
 } 
 
 int packet_to_string(Packet * packet, char * string) {
+	/*
+	Convert a packet given in a string format.
+	INPUT :
+		packet : The packet to transform in a string
+		string : The string which will be filled in place
+	OUTPUT :
+		0 : R.A.S (All goooooood)
+	*/
 	*(string) 	= packet->E;
 	*(++string) 	= packet->D;
 	*(++string) 	= packet->r;
