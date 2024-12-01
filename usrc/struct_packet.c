@@ -49,7 +49,7 @@ void print_string(char * str, int n) {
 	/* 
 		ONLY FOR DEBUGGING :
 		Print the first n characters in the string.
-		<!> 0x0000 and '\0' are the same character in C. They will be showed as '\0' .
+		<!> 0x0000 and '\0' are the same character in C. They will be shown as '\0' .
 	*/
 	for (int i = 0; i < n ; i ++) {
 		unsigned char c = (unsigned char) str[i];
