@@ -243,7 +243,12 @@ Packet * renamefile(Packet* in, char directory[]){
 }
 
 int remove_file(char filename[]) {
-  return remove(filename);
+  if(!remove(filename)){
+    return -2;
+  }
+  else{
+    return 0;
+  }
 }
 
 Packet * removefile(Packet* in, char directory[]){
@@ -256,8 +261,13 @@ Packet * removefile(Packet* in, char directory[]){
 Packet **fetch(Packet* in, char directory[]){
   char *filename = strcat(directory, in->option1);
 
-  char * buffer;
-  char * string = file_to_string(filename, buffer);
+  char * string;
+  int errcode = file_to_string(filename, string);
+
+  if(errcode != 0){
+    return error_packet(errcode);
+  }
+
   char * datastring;
 
   int packnum = print_lines(filename, line_count(string), datastring, 0);
@@ -270,7 +280,6 @@ Packet **fetch(Packet* in, char directory[]){
     char buffer[INT_MAX];
     out->code = 5;
     itoa(packnum, out->option1, 10);
-    out->E = 'E'; out->D = 'D'; out->r = 'r'; 
     slice(string, buffer, i*packnum, (i+1)*packnum);
     out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
@@ -291,7 +300,7 @@ Packet **list_files(Packet* in, char destination[]){
       printf("Could not open current directory"); 
       Packet ** list = malloc(sizeof(Packet));
       Packet * out = empty_packet();
-      out->code = -1;
+      out->code = -9; // DIRECTORY NOT FOUND
       out->E = 'E'; out->D = 'D'; out->r = 'r'; 
       out-> data_size = 0;
       list[0] = out;
