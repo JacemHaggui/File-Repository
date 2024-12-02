@@ -278,11 +278,11 @@ Packet **fetch(Packet* in, char directory[]){
   return list;
 }
 
-Packet **list_files(Packet* in){
+Packet **list_files(Packet* in, char destination[]){
   struct dirent *de;  // Pointer for directory entry 
 
   // opendir() returns a pointer of DIR type.  
-  DIR *dr = opendir("."); 
+  DIR *dr = opendir(destination); 
 
   if (dr == NULL)  // opendir returns NULL if couldn't open directory 
   { 
