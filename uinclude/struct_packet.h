@@ -30,3 +30,9 @@ void print_string(char * str, int n);
 int string_to_packet (char * string, Packet * packet);
 
 int packet_to_string(Packet * packet, char * string);
+
+int CmdlinetoPacket(const char *input, Packet *pkt);
+
+void print_packet(Packet * packet);
+
+int student_client(int channel, int argc, char *argv[]);
