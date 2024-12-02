@@ -33,6 +33,8 @@
 #include <stdbool.h> // bool type
 #include <string.h>
 #include <sys/stat.h> // stat
+#include <dirent.h> // For directory handling.
+
 
 const int INT_MAX = 2048 - 70; 
 
@@ -81,11 +83,11 @@ bool file_exists(char *filename) { // Checks for file existence.
   return (stat(filename, &buffer) == 0);
 }
 
-int print_lines(char string[], int n, char outstring[]) { // returns number of packets needed to store.
+int print_lines(char string[], int n, char outstring[], bool print_state) { // returns number of packets needed to store.
   int l = 0;
   int i = 0;
   for (i = 0; i < strlen(string) && l < n; i++) {
-    printf("%c", string[i]);
+    if(print_state){ printf("%c", string[i]); }
     outstring[i] = string[i];
     if (string[i] == '\n') {
       l++;
@@ -133,14 +135,21 @@ int write_to_file(char filepath[], char data[],
   }
 
   FILE *new;
-  new = fopen(filepath, "w");
+  new = fopen(strcat(destination,filepath), "w");
   fprintf(new, data);
   fclose(new);
   return 0;
 }
 
+/* Returns -1 if trying to rename to existing file, returns -2 if trying to rename a non-existing file. Returns 0 if done correctly.*/
 int rename_file(char newfile[], char oldfile[]) { // full paths need to be given in parameter.
   FILE *oldf;
+
+  if(!file_exist(oldfile)){
+    print("ERROR: File %s does not exist on directory!\n", oldfile);
+    print("No modifications will be made.\n");
+    return -2;
+  }
 
   if (file_exists(newfile)) {
     printf("ERROR: File %s already exists on directory!\n", newfile);
@@ -177,22 +186,23 @@ int rename_file(char newfile[], char oldfile[]) { // full paths need to be given
   return 0;
 }
 
-int remove_file(char filename[]) {
-  return remove(filename);
-}
 
 void slice(const char* str, char* result, size_t start, size_t end) {
     strncpy(result, str + start, end - start);
 }
 
-Packet *f_print_n_lines(Packet* in){
-  char *filename = in->option1;
+/*Returns multiple packets.*/
+Packet **f_print_n_lines(Packet* in, char directory[]){
+  
+  
+  char *filename = strcat(directory, in->option1);
 
   char * string = file_to_string(filename);
   char * datastring;
 
-  int packnum = print_lines(filename, atoi(in->option2), datastring);
+  int packnum = print_lines(filename, atoi(in->option2), datastring, 1);
 
+  Packet ** list = calloc(packnum, sizeof(Packet));
   Packet * out;
 
   for(int i = 0; i < packnum; i++){
@@ -200,32 +210,125 @@ Packet *f_print_n_lines(Packet* in){
     char buffer[INT_MAX];
     out->code = 1;
     itoa(packnum, out->option1, 10);
-    out->E = 'E'; out->D = 'D'; out->r = 'r';
-    out-> data_size = strlen(datastring); 
+    out->E = 'E'; out->D = 'D'; out->r = 'r'; 
     slice(datastring, buffer, i*packnum, (i+1)*packnum);
+    out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
-    // Here, convert packet to string, and send.
+    list[i] = out;
   }
-  return out;
+  return list;
 }
 
-Packet *add_remote_file(Packet* in){
-  char* directory = ""; // to change and add the directory parameter
-  int errcode = write_to_file(in->option1, in->data_ptr, directory);
+Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the operation. Packet.code = 0 if correctly done, -1 otherwise (file named filename already exists)
+  int errcode = write_to_file(strcat(directory, in->option1), in->data_ptr, directory);
+  
   Packet *out = empty_packet();
   out->E = 'E'; out->D = 'D'; out->r = 'r';
-  out->code = 0;
+  out->code = errcode;
   out->data_size = 0;
   return out;
 }
 
-Packet * renamefile(Packet* in){
-  int res = rename_file(in->option2, in->option1);
+Packet * renamefile(Packet* in, char directory[]){
+  int res = rename_file(strcat(directory, in->option2), strcat(directory, in->option1));
+  
   Packet *out = empty_packet();
   out->code = res;
-  
+  return out;
 }
 
+int remove_file(char filename[]) {
+  return remove(filename);
+}
+
+Packet * removefile(Packet* in, char directory[]){
+  int errcode = remove_file(strcat(directory, in->option1));
+  
+  Packet *out = empty_packet();
+  out->E = 'E'; out->D = 'D'; out->r = 'r';
+  out->code = errcode;
+  out->data_size = 0;
+  return out;
+}
+
+/*Very similar to print_n_lines */
+Packet **fetch(Packet* in, char directory[]){
+  char *filename = strcat(directory, in->option1);
+
+  char * string = file_to_string(filename);
+  char * datastring;
+
+  int packnum = print_lines(filename, line_count(string), datastring, 0);
+
+  Packet ** list = calloc(packnum, sizeof(Packet));
+  Packet * out;
+
+  for(int i = 0; i < packnum; i++){
+    out = empty_packet();
+    char buffer[INT_MAX];
+    out->code = 5;
+    itoa(packnum, out->option1, 10);
+    out->E = 'E'; out->D = 'D'; out->r = 'r'; 
+    slice(string, buffer, i*packnum, (i+1)*packnum);
+    out-> data_size = strlen(buffer);
+    out->data_ptr = buffer;
+    list[i] = out;
+  }
+
+  return list;
+}
+
+Packet **list_files(Packet* in){
+  struct dirent *de;  // Pointer for directory entry 
+
+  // opendir() returns a pointer of DIR type.  
+  DIR *dr = opendir("."); 
+
+  if (dr == NULL)  // opendir returns NULL if couldn't open directory 
+  { 
+      printf("Could not open current directory"); 
+      Packet ** list = malloc(sizeof(Packet));
+      Packet * out = empty_packet();
+      out->code = -1;
+      out->E = 'E'; out->D = 'D'; out->r = 'r'; 
+      out-> data_size = 0;
+      list[0] = out;
+      return list; 
+  } 
+  else{
+    char* string;
+    while (de = readdir(dr) != NULL) {
+      // printf("%s\n", de->d_name); 
+      strcat(string, de->d_name);
+      strcat(string, ",");
+      
+      struct stat* restrict buf;
+      stat(de->d_name, buf);
+
+      strcat(string, ",");
+      strcat(string, buf->st_size);
+    }
+    closedir(dr);
+    string[strlen(string) - 1] = '\0'; // o remove the last comma and add a null terminator at the end.
+    char* trash;
+    int packnum = print_lines(string, 1, trash,0);
+
+    Packet *out;
+    Packet **list;
+
+    for(int i = 0; i < packnum; i++){
+      out = empty_packet();
+      char buffer[INT_MAX];
+      out->code = 6;
+      itoa(packnum, out->option1, 10);
+      out->E = 'E'; out->D = 'D'; out->r = 'r'; 
+      slice(string, buffer, i*packnum, (i+1)*packnum);
+      out-> data_size = strlen(buffer);
+      out->data_ptr = buffer;
+      list[i] = out;
+      } return list; 
+  }
+}
 // Copy a remote file to the local filesystem (WIP)
 
 // !! This is the function you must implement for your project.
