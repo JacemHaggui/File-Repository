@@ -99,8 +99,7 @@ int print_lines(char string[], int n, char outstring[], bool print_state) { // r
   return 1;
 }
 
-char *file_to_string(char filename[]){
-  char * buffer = 0;
+int file_to_string(char filename[], char* buffer){
   long length;
   FILE * f = fopen (filename, "rb");
   if (f)
@@ -118,8 +117,8 @@ char *file_to_string(char filename[]){
   }
   else{
     printf("Error: File '%s' does not exist.\n", filename);
+    return -2; // FILE NOT FOUND
   }
-  return buffer;
 }
 
 
@@ -131,7 +130,7 @@ int write_to_file(char filepath[], char data[],
   if (file_exists(filepath)) {
     printf("ERROR: File %s already exists on directory!\n", filepath);
     printf("No modifications will be made.\n");
-    return -1;
+    return -3; // FILE ALREADY EXISTS.
   }
 
   FILE *new;
@@ -154,7 +153,7 @@ int rename_file(char newfile[], char oldfile[]) { // full paths need to be given
   if (file_exists(newfile)) {
     printf("ERROR: File %s already exists on directory!\n", newfile);
     printf("No modifications will be made.\n");
-    return -1;
+    return -3;
   }
 
   oldf = fopen(oldfile, "r");
@@ -193,11 +192,15 @@ void slice(const char* str, char* result, size_t start, size_t end) {
 
 /*Returns multiple packets.*/
 Packet **f_print_n_lines(Packet* in, char directory[]){
-  
-  
   char *filename = strcat(directory, in->option1);
 
-  char * string = file_to_string(filename);
+  char * string; 
+  int errcode = file_to_string(filename, string);
+  
+  if(errcode != 0){
+    return error_packet(errcode);
+  }
+
   char * datastring;
 
   int packnum = print_lines(filename, atoi(in->option2), datastring, 1);
@@ -222,6 +225,10 @@ Packet **f_print_n_lines(Packet* in, char directory[]){
 Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the operation. Packet.code = 0 if correctly done, -1 otherwise (file named filename already exists)
   int errcode = write_to_file(strcat(directory, in->option1), in->data_ptr, directory);
   
+  if(errcode != 0){
+    return error_packet(errcode);
+  }
+
   Packet *out = empty_packet();
   out->E = 'E'; out->D = 'D'; out->r = 'r';
   out->code = errcode;
@@ -230,11 +237,9 @@ Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the
 }
 
 Packet * renamefile(Packet* in, char directory[]){
-  int res = rename_file(strcat(directory, in->option2), strcat(directory, in->option1));
-  
-  Packet *out = empty_packet();
-  out->code = res;
-  return out;
+  int errcode = rename_file(strcat(directory, in->option2), strcat(directory, in->option1));
+
+  return error_packet(errcode);
 }
 
 int remove_file(char filename[]) {
@@ -244,18 +249,15 @@ int remove_file(char filename[]) {
 Packet * removefile(Packet* in, char directory[]){
   int errcode = remove_file(strcat(directory, in->option1));
   
-  Packet *out = empty_packet();
-  out->E = 'E'; out->D = 'D'; out->r = 'r';
-  out->code = errcode;
-  out->data_size = 0;
-  return out;
+  return error_packet(errcode);
 }
 
 /*Very similar to print_n_lines */
 Packet **fetch(Packet* in, char directory[]){
   char *filename = strcat(directory, in->option1);
 
-  char * string = file_to_string(filename);
+  char * buffer;
+  char * string = file_to_string(filename, buffer);
   char * datastring;
 
   int packnum = print_lines(filename, line_count(string), datastring, 0);
