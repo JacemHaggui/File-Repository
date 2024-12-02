@@ -201,7 +201,26 @@ int student_client(int channel, int argc, char *argv[]) {
     // Step 2: Handle -analyze option
     if (analyze_flag) {
         printf("Executing commands from file: %s\n", analyze_file);
-        // TODO: Open the file, read commands, and send packets to the server
+
+        // Open the file
+        FILE *file = fopen(argv[1], "r");
+        
+        char line[256];  // maximum length of the line
+        char *packet = NULL;
+
+        // Take each line of the file
+        while (fgets(line, sizeof(line), file)) {
+            // Allocate memory for the packet (based on line length)
+            packet = (char *)malloc(strlen(line) + 1); // +1 for the null terminator
+            // Convert the line to a packet
+            string_to_packet(line, packet);
+            // Send packet to the server
+            send_packet(packet);
+            // Free the allocated memory after use
+            free(packet);
+        }
+        // Close the file
+        fclose(file);
     }
 
     // Step 3: Handle -interactive option
