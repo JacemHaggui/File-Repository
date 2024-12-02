@@ -299,11 +299,7 @@ Packet **list_files(Packet* in, char destination[]){
   { 
       printf("Could not open current directory"); 
       Packet ** list = malloc(sizeof(Packet));
-      Packet * out = empty_packet();
-      out->code = -9; // DIRECTORY NOT FOUND
-      out->E = 'E'; out->D = 'D'; out->r = 'r'; 
-      out-> data_size = 0;
-      list[0] = out;
+      list[0] = error_packet(-9); // Directory not found.
       return list; 
   } 
   else{
