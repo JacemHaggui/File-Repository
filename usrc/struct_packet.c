@@ -19,8 +19,15 @@ typedef struct  {
 
 Packet * empty_packet() {
 	Packet * packet = calloc(1, sizeof(*packet));
+	packet->E = 'E'; packet->D = 'D'; packet->r = 'r';
 	//Packet * packet = (Packet *)malloc(sizeof(Packet));
 	return packet;
+}
+
+Packet * error_packet(int errcode){
+	Packet * out = empty_packet();
+	out->data_size = 0; out->code = errcode;
+	return out;
 }
 
 void free_packet(Packet * packet) {
