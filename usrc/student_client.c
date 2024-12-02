@@ -179,7 +179,7 @@ int student_client(int channel, int argc, char *argv[]) {
             strncpy(analyze_file, argv[++i], sizeof(analyze_file) - 1);
         }
         else if (strcmp(argv[i], "-interactive") == 0) {
-            if (interactive_flag || i + 1 >= argc) {
+            if (interactive_flag) {
                 fprintf(stderr, "Error: Duplicate -interactive option\n");
                 return -1;
             }
@@ -216,8 +216,6 @@ int student_client(int channel, int argc, char *argv[]) {
         // TODO: Check existing files and process as needed
     }
 
-    // Placeholder for communication logic
-    Packet pkt = { 'E', 'D', 'r', 0, 0, "", "", "" };
     // TODO: Populate the packet structure based on user commands or file input
     // TODO: Send the packet using send_pkt()
     return 0; // Success
