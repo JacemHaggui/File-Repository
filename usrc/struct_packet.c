@@ -23,6 +23,13 @@ Packet * empty_packet() {
 	return packet;
 }
 
+Packet * error_packet(int errcode){
+	Packet * out = empty_packet();
+	out->E = 'E'; out->D = 'D'; out->r = 'r';
+	out->data_size = 0; out->code = errcode;
+	return out;
+}
+
 void free_packet(Packet * packet) {
 	/* Free Packet if exist */
 	if (packet) free(packet);
