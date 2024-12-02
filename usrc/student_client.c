@@ -1,5 +1,6 @@
 #include "../include/utilities.h"
 #include "../uinclude/communication.h"
+//#include "../uinclude/struct_packet.h"
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
@@ -10,6 +11,7 @@
 #define HEADER_SIZE 70
 #define MAX_PACKET_SIZE 2048
 #define MAX_DATA_SIZE (MAX_PACKET_SIZE - HEADER_SIZE)
+
 
 // Packet structure
 typedef struct  {
@@ -43,9 +45,12 @@ const char * const client_help_options = "\
 int CmdlinetoPacket(const char *input, Packet *pkt);
 void print_packet(Packet * packet);
 int student_client(int channel, int argc, char *argv[]);
+int packet_to_string(Packet * packet, char * string);
 
 int main(int argc, char *argv[]){
     student_client(111, argc, argv);
+
+    return 0;
     /*
     Packet* test_packet = malloc(sizeof(Packet));
     const char* test_command = "mv titi.txt toto.txt";
@@ -226,7 +231,58 @@ int student_client(int channel, int argc, char *argv[]) {
     // Step 3: Handle -interactive option
     if (interactive_flag) {
         printf("Entering interactive mode...\n");
-        // TODO: Accept keyboard commands, construct packets, and send them
+        
+    // Continuous loop for interactive mode
+    while (1) {
+        char command[256];
+        printf("> "); // Command prompt simulator XD
+
+        // Read a command from the command line
+        if (fgets(command, sizeof(command), stdin) == NULL) {
+            printf("Error reading input. Exiting interactive mode.\n");
+            continue;
+        }
+        command[strcspn(command, "\n")] = 0;  // Remove the newline character
+
+        // Check for an exit command
+        if (strcmp(command, "exit") == 0) {
+            printf("Exiting interactive mode.\n");
+            break;
+        }
+
+        // Process the command
+        printf("Processing command: %s\n", command);
+
+        // Convert the command into a packet
+        Packet* package = malloc(sizeof(Packet)); // Allocate memory for the packet
+        if (package == NULL) {
+            printf("Memory allocation failed. Exiting.\n");
+            continue; // Exit if memory allocation fails
+        }
+
+        // Check if the command can be converted to a packet
+        if (CmdlinetoPacket(command, package) == -1) {
+            printf("Error: Command not recognized. Please try again.\n");
+            free(package); // Free the memory to avoid memory leak
+            continue; // Skip to the next loop iteration
+        }
+
+        // Print the packet for debugging (optional)
+        print_packet(package);
+
+
+        //Converting the packet to a string
+        char package_string[2048];//maximum number of bytes is 2048
+        packet_to_string(package, package_string);
+        // Print the string we will send for debugging (optional)
+        printf("%s", package_string);
+
+        //Sending the packet
+        //send_pkt(package_string, 863548516);
+
+        // Free the allocated memory after processing the command
+        free(package);
+        }
     }
 
     // Step 4: Handle -directory option
@@ -238,4 +294,43 @@ int student_client(int channel, int argc, char *argv[]) {
     // TODO: Populate the packet structure based on user commands or file input
     // TODO: Send the packet using send_pkt()
     return 0; // Success
+}
+
+
+
+
+int packet_to_string(Packet * packet, char * string) {
+	/*
+	Convert a packet given in a string format.
+	INPUT :
+		packet : The packet to transform in a string
+		string : The string which will be filled in place
+	OUTPUT :
+		0 : R.A.S (All goooooood)
+	*/
+	*(string) 	= packet->E;
+	*(++string) 	= packet->D;
+	*(++string) 	= packet->r;
+	*(++string)	= ((packet->data_size & 0xF0) >> 8) ; // First get the 8 upper bit with the mask then shift right 8 times to remove the lower part
+	*(++string)	= (packet->data_size & 0x0F) ; // Then get the 8 lower bits with an another mask 
+	*(++string)	= packet->code;
+
+	int n_opt1 = strlen(packet->option1);
+	for (int i = 0; i < n_opt1 ; i ++ ) {
+		*(++string) = packet->option1[i];
+	}
+	*(++string)	= '\0'; // ADD NUL-TERMINATOR
+
+	int n_opt2 = strlen(packet->option2);
+	for (int i = 0; i < n_opt2 ; i ++) {
+		*(++string)	= packet->option2[i];
+	}
+	*(++string)	= '\0'; // ADD NUL-TERMINATOR
+	
+	char * ptr = packet->data_ptr;
+	for (int i = 0; i < packet->data_size; i ++) {
+		*(++string)	= *(ptr++);
+	}
+
+	return 0;
 }
