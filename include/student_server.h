@@ -1,6 +1,7 @@
 #ifndef STUDENT_SERVER_H
 #define STUDENT_SERVER_H
-#include "../usrc/struct_packet.c"
+
+#include "../uinclude/struct_packet.h"
 
 extern const char * const server_help_options;
 

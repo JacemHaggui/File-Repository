@@ -27,14 +27,14 @@
  * the program exits when trying to write to a closed socket.
  * We don't want thi :-).
  */
-#include <../include/utilities.h>
-#include <../uinclude/client.h>
+#include "../include/utilities.h"
+#include "../uinclude/client.h"
 #include <signal.h>
 #include <stdbool.h> // bool type
 #include <string.h>
 #include <sys/stat.h> // stat
 #include <dirent.h> // For directory handling.
-
+#include <stdlib.h>
 
 const int INT_MAX = 2048 - 70; 
 
@@ -144,7 +144,7 @@ int write_to_file(char filepath[], char data[],
 int rename_file(char newfile[], char oldfile[]) { // full paths need to be given in parameter.
   FILE *oldf;
 
-  if(!file_exist(oldfile)){
+  if(!file_exists(oldfile)){
     print("ERROR: File %s does not exist on directory!\n", oldfile);
     print("No modifications will be made.\n");
     return -2;

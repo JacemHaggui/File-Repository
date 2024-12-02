@@ -1,3 +1,6 @@
+#ifndef STRUCT_PACKET_H
+#define STRUCT_PACKET_H
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -36,3 +39,5 @@ int CmdlinetoPacket(const char *input, Packet *pkt);
 void print_packet(Packet * packet);
 
 int student_client(int channel, int argc, char *argv[]);
+
+#endif // STRUCT_PACKET_H
