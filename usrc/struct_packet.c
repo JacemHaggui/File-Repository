@@ -38,7 +38,7 @@ void print_packet(Packet * packet) {
 	if ( packet->code) printf("\t-Code : %d\n", packet->code); else printf("\t-No Code\n");
 	if ( packet->option1) printf("\t-Option 1 : %s\n", packet->option1); else printf("\t-No Option 1\n");
 	if ( packet->option2) printf("\t-Option 2 : %s\n", packet->option2); else printf("\t-No Option 2\n");
-	if (packet->data_ptr) printf("\t-Data Pointer provided ? : %d (1 <=> True)", *(packet->data_ptr) != '\0'  ); else printf("\t-No Data Pointer Provided");
+	if (packet->data_ptr) printf("\t-Data Pointer provided ? : %d (1 <=> True)\n", *(packet->data_ptr) != '\0'  ); else printf("\t-No Data Pointer Provided\n");
 }
 
 void print_string(char * str, int n) {
@@ -118,6 +118,7 @@ int string_to_packet (char * string, Packet * packet) {
 
 
 } 
+ 
 
 int packet_to_string(Packet * packet, char * string) {
 	/*
@@ -154,6 +155,7 @@ int packet_to_string(Packet * packet, char * string) {
 
 	return 0;
 }
+
 
 /*
 void main() {
@@ -195,6 +197,8 @@ void main() {
 }
 
 */
+
+
 
 int CmdlinetoPacket(const char *input, Packet *pkt) {
     // Initialize the packet with fixed values

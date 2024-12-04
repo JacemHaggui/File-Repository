@@ -1,3 +1,4 @@
+//--------------------------------------------------------------------------------
 #include "../include/utilities.h"
 #include "../uinclude/communication.h"
 #include "../uinclude/struct_packet.h"
@@ -30,19 +31,21 @@ const char * const client_help_options = "\
 \n\
 ";
 
+//------------------------------------------------------------------------------
+
 int student_client(int channel, int argc, char *argv[]);
 
 int main(int argc, char *argv[]){
     student_client(111, argc, argv);
 
-    return 0;
+    
     /*
     Packet* test_packet = malloc(sizeof(Packet));
     const char* test_command = "mv titi.txt toto.txt";
     int res = CmdlinetoPacket(test_command, test_packet);
     print_packet(test_packet);
     */
-    return 1;
+   return 0;
 }
 
 
