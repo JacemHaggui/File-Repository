@@ -18,18 +18,24 @@ dirs:
 ulib/communication.o: uinclude/communication.h usrc/communication.c
 	$(CC) -c -o $@ usrc/communication.c
 
+ulib/struct_packet.o: uinclude/struct_packet.h usrc/struct_packet.c
+	$(CC) -c -o $@ usrc/struct_packet.c
+
 ulib/student_client.o: include/student_client.h usrc/student_client.c
 	$(CC) -c -o $@ usrc/student_client.c
 
 ulib/student_server.o: include/student_server.h usrc/student_server.c
 	$(CC) -c -o $@ usrc/student_server.c
 
+ulib/testing.o: usrc/testing.c
+	$(CC) -c $@ usrc/testing.c
+
 bin/EDclient/client: lib/nettools.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o
-	$(CC) -o $@ lib/nettools.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o
+	$(CC) -o $@ lib/nettools.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o ulib/struct_packet.o
 	ln -f $@ bin/
 
 bin/EDserver/server: lib/nettools.o ulib/student_server.o ulib/communication.o lib/server.o
-	$(CC) -o $@ lib/nettools.o ulib/student_server.o ulib/communication.o lib/server.o
+	$(CC) -o $@ lib/nettools.o ulib/student_server.o ulib/struct_packet.o ulib/communication.o lib/server.o
 	ln -f $@ bin/
 
 clean:

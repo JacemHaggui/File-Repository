@@ -35,18 +35,19 @@ const char * const client_help_options = "\
 
 int student_client(int channel, int argc, char *argv[]);
 
-int main(int argc, char *argv[]){
+/* int main(int argc, char *argv[]){
     student_client(111, argc, argv);
 
     
-    /*
+    
     Packet* test_packet = malloc(sizeof(Packet));
     const char* test_command = "mv titi.txt toto.txt";
     int res = CmdlinetoPacket(test_command, test_packet);
     print_packet(test_packet);
-    */
+    
    return 0;
-}
+} 
+*/
 
 
 int student_client(int channel, int argc, char *argv[]) {
@@ -113,7 +114,7 @@ int student_client(int channel, int argc, char *argv[]) {
             // Allocate memory for the packet (based on line length)
             Packet * packet = empty_packet();
             // Convert the line to a packet
-            error_code = string_to_packet(line, packet);
+            int error_code = string_to_packet(line, packet);
 
 	    // PROCESS ERROR CODE
 
