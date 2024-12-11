@@ -63,6 +63,21 @@ const char *const server_help_options = "\
 \n\
 ";
 
+// Converts an int to string
+char* itoa(int val, int base){
+	
+	static char buf[32] = {0};
+	
+	int i = 30;
+	
+	for(; val && i ; --i, val /= base)
+	
+		buf[i] = "0123456789abcdef"[val % base];
+	
+	return &buf[i+1];
+	
+}
+
 /* Returns the number of lines in a string. */
 int line_count(char string[]) {
   int leng = strlen(string);
@@ -212,7 +227,7 @@ Packet **f_print_n_lines(Packet* in, char directory[]){
     out = empty_packet();
     char buffer[INT_MAX];
     out->code = 1;
-    itoa(packnum, out->option1, 10);
+    out->option1 = itoa(packnum, 10);
     out->E = 'E'; out->D = 'D'; out->r = 'r'; 
     slice(datastring, buffer, i*packnum, (i+1)*packnum);
     out-> data_size = strlen(buffer);
