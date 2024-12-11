@@ -4,7 +4,7 @@ export
 
 .PHONY: clean test reset
 
-all: dirs bin/EDclient/client bin/EDserver/server
+all: dirs bin/EDclient/client bin/EDserver/server bin/usrc/testing
 
 dirs: 
 	mkdir -p bin
@@ -27,9 +27,6 @@ ulib/student_client.o: include/student_client.h usrc/student_client.c
 ulib/student_server.o: include/student_server.h usrc/student_server.c
 	$(CC) -c -o $@ usrc/student_server.c
 
-ulib/testing.o: usrc/testing.c
-	$(CC) -c $@ usrc/testing.c
-
 bin/EDclient/client: lib/nettools.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o
 	$(CC) -o $@ lib/nettools.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o ulib/struct_packet.o
 	ln -f $@ bin/
@@ -38,13 +35,21 @@ bin/EDserver/server: lib/nettools.o ulib/student_server.o ulib/communication.o l
 	$(CC) -o $@ lib/nettools.o ulib/student_server.o ulib/struct_packet.o ulib/communication.o lib/server.o
 	ln -f $@ bin/
 
+ulib/testing.o: usrc/testing.c
+	$(CC) -c -o $@ usrc/testing.c
+
+bin/usrc/testing: ulib/testing.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
+	$(CC) -o $@ ulib/testing.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
+	mkdir -p usrc
+	ln -f $@ usrc/
+
 clean:
 	if [ -d ./tests ]; then \
 		$(MAKE) clean -C tests/ ; \
 	fi
 	rm -f bin/EDserver/server bin/EDclient/client ulib/*.o bin/server bin/client
 
-reset:
+reset: 
 	if [ -f ./bin/EDserver/server ]; then \
 		cp bin/EDserver/server reset/EDserver/server; \
 	fi
