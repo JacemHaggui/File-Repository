@@ -57,11 +57,7 @@ int student_client(int channel, int argc, char *argv[]) {
     int analyze_flag = 0;
     int interactive_flag = 0;
     char analyze_file[256] = {0};
-    char directory[256] = {0};
-
-    // Directory by default is './' AND MUST ENDS WITH '/' 
-    directory[0] = '.';
-    directory[1] = '/';
+    char directory[256] = {0}; // Directory MUST ENDS WITH '/' 
 
     //check if the user is asking for help
     if(argc == 2 && strcmp(argv[1], "help") == 0 ){
@@ -90,7 +86,7 @@ int student_client(int channel, int argc, char *argv[]) {
         }
         else if (strcmp(argv[i], "-directory") == 0) {
 		// DIRECTORY STRING MUST END WITH '/'
-            if (directory[2] || i + 1 >= argc) { // BY DEFAULT directory is './'
+            if (directory[0] || i + 1 >= argc) { // BY DEFAULT directory is './'
                 fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
                 return -1;
             }
@@ -107,7 +103,7 @@ int student_client(int channel, int argc, char *argv[]) {
         printf("Executing commands from file: %s\n", analyze_file);
 
         // Open the file
-        FILE *file = fopen(strcat(directory, analyze_file), "r"); // DIRECTORY ENDS WITH '/'
+        FILE *file = fopen(analyze_file, "r"); 
 
         char line[256];  // maximum length of the line
         //char *packet = NULL;   <-- USELESS NOW
@@ -118,8 +114,15 @@ int student_client(int channel, int argc, char *argv[]) {
             Packet * packet = empty_packet();
             // Convert the line to a packet
             error_code = string_to_packet(line, packet);
-            // Send packet to the server
-            send_packet(packet);
+
+	    // PROCESS ERROR CODE
+
+	    // Send packet to the server
+            //send_packet(packet);
+
+	    // DEBUG : 
+	    print_packet(packet);
+
             // Free the allocated memory after use
             free(packet);
         }
