@@ -160,8 +160,8 @@ int rename_file(char newfile[], char oldfile[]) { // full paths need to be given
   FILE *oldf;
 
   if(!file_exists(oldfile)){
-    print("ERROR: File %s does not exist on directory!\n", oldfile);
-    print("No modifications will be made.\n");
+    printf("ERROR: File %s does not exist on directory!\n", oldfile);
+    printf("No modifications will be made.\n");
     return -2;
   }
 
@@ -227,7 +227,7 @@ Packet **f_print_n_lines(Packet* in, char directory[]){
     out = empty_packet();
     char buffer[INT_MAX];
     out->code = 1;
-    out->option1 = itoa(packnum, 10);
+    strcpy(out->option1, itoa(packnum,10));
     out->E = 'E'; out->D = 'D'; out->r = 'r'; 
     slice(datastring, buffer, i*packnum, (i+1)*packnum);
     out-> data_size = strlen(buffer);
@@ -294,7 +294,7 @@ Packet **fetch(Packet* in, char directory[]){
     out = empty_packet();
     char buffer[INT_MAX];
     out->code = 5;
-    itoa(packnum, out->option1, 10);
+    strcpy(out->option1, itoa(packnum, 10));
     slice(string, buffer, i*packnum, (i+1)*packnum);
     out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
@@ -342,7 +342,7 @@ Packet **list_files(Packet* in, char destination[]){
       out = empty_packet();
       char buffer[INT_MAX];
       out->code = 6;
-      itoa(packnum, out->option1, 10);
+      strcpy(out->option1, itoa(packnum, 10));
       out->E = 'E'; out->D = 'D'; out->r = 'r'; 
       slice(string, buffer, i*packnum, (i+1)*packnum);
       out-> data_size = strlen(buffer);
