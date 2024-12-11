@@ -35,15 +35,9 @@ const char * const client_help_options = "\
 
 int student_client(int channel, int argc, char *argv[]);
 
-/* int main(int argc, char *argv[]){
+/*
+int main(int argc, char *argv[]){
     student_client(111, argc, argv);
-
-    
-    
-    Packet* test_packet = malloc(sizeof(Packet));
-    const char* test_command = "mv titi.txt toto.txt";
-    int res = CmdlinetoPacket(test_command, test_packet);
-    print_packet(test_packet);
     
    return 0;
 } 
@@ -111,21 +105,32 @@ int student_client(int channel, int argc, char *argv[]) {
 
         // Take each line of the file
         while (fgets(line, sizeof(line), file)) {
-            // Allocate memory for the packet (based on line length)
-            Packet * packet = empty_packet();
-            // Convert the line to a packet
-            int error_code = string_to_packet(line, packet);
+	        // Process the command
+            printf("Processing command: %s\n", line);
 
-	    // PROCESS ERROR CODE
+            // Convert the command into a packet
+            Packet* package = malloc(sizeof(Packet)); // Allocate memory for the packet
 
-	    // Send packet to the server
-            //send_packet(packet);
+            if (package == NULL) {
+                printf("Memory allocation failed. Exiting.\n");
+                continue; // Exit if memory allocation fails
+            }
 
-	    // DEBUG : 
-	    print_packet(packet);
+            // Check if the command can be converted to a packet
+            if (CmdlinetoPacket(line, package) == -1) {
+                printf("Error: Command not recognized. Please try again.\n");
+                free(package); // Free the memory to avoid memory leak
+                continue; // Skip to the next loop iteration
+            }
 
-            // Free the allocated memory after use
-            free(packet);
+            // Print the packet for debugging (optional)
+            print_packet(package);
+
+            // Sending the packet to the server
+            // Send_pkt(package_string, 863548516);
+    
+            // Free the allocated memory after processing the command
+            free(package);
         }
         // Close the file
         fclose(file);
@@ -149,7 +154,7 @@ int student_client(int channel, int argc, char *argv[]) {
         command[strcspn(command, "\n")] = 0;  // Remove the newline character
 
         // Check for an exit command
-        if (strcmp(command, "exit") == 0) {
+        if (strcmp(command, "exit") == 0 || strcmp(command, "quit") == 0) {
             printf("Exiting interactive mode.\n");
             break;// Ahah! Break not continue (yes, i made the mistake)
         }
@@ -179,7 +184,7 @@ int student_client(int channel, int argc, char *argv[]) {
         char package_string[2048];//maximum number of bytes is 2048
         packet_to_string(package, package_string);
         // Print the string we will send for debugging (optional)
-        printf("%s\n", package_string);
+        print_string(package_string, 70);
 
         //Sending the packet
         //send_pkt(package_string, 863548516);
