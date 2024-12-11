@@ -59,6 +59,10 @@ int student_client(int channel, int argc, char *argv[]) {
     char analyze_file[256] = {0};
     char directory[256] = {0};
 
+    // Directory by default is './' AND MUST ENDS WITH '/' 
+    directory[0] = '.';
+    directory[1] = '/';
+
     //check if the user is asking for help
     if(argc == 2 && strcmp(argv[1], "help") == 0 ){
         printf("\n%s", client_help_options);
@@ -85,7 +89,8 @@ int student_client(int channel, int argc, char *argv[]) {
             interactive_flag = 1;
         }
         else if (strcmp(argv[i], "-directory") == 0) {
-            if (directory[0] || i + 1 >= argc) {
+		// DIRECTORY STRING MUST END WITH '/'
+            if (directory[2] || i + 1 >= argc) { // BY DEFAULT directory is './'
                 fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
                 return -1;
             }
@@ -98,22 +103,21 @@ int student_client(int channel, int argc, char *argv[]) {
     }
 
     // Step 2: Handle -analyze option
-    /*
     if (analyze_flag) {
         printf("Executing commands from file: %s\n", analyze_file);
 
         // Open the file
-        FILE *file = fopen(argv[1], "r");
-        
+        FILE *file = fopen(strcat(directory, analyze_file), "r"); // DIRECTORY ENDS WITH '/'
+
         char line[256];  // maximum length of the line
-        char *packet = NULL;
+        //char *packet = NULL;   <-- USELESS NOW
 
         // Take each line of the file
         while (fgets(line, sizeof(line), file)) {
             // Allocate memory for the packet (based on line length)
-            packet = (char *)malloc(strlen(line) + 1); // +1 for the null terminator
+            Packet * packet = empty_packet();
             // Convert the line to a packet
-            string_to_packet(line, packet);
+            error_code = string_to_packet(line, packet);
             // Send packet to the server
             send_packet(packet);
             // Free the allocated memory after use
@@ -122,7 +126,7 @@ int student_client(int channel, int argc, char *argv[]) {
         // Close the file
         fclose(file);
     }
-    */
+
 
     // Step 3: Handle -interactive option
     if (interactive_flag) {
