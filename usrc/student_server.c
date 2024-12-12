@@ -166,7 +166,7 @@ int write_to_file(char filepath[], char data[],
 
   FILE *new;
   new = fopen(filepath, "w");
-  fprintf(new, data);
+  fputs(data, new);
   fclose(new);
   return 0;
 }
@@ -205,7 +205,7 @@ int rename_file(char newfile[], char oldfile[]) { // full paths need to be given
   FILE *fptr;
 
   fptr = fopen(newfile, "w");
-  fprintf(fptr, buffer);
+  fputs(buffer, fptr);
   fclose(fptr);
   // Now that we've added the context of the oldfile to the newfile, since we're
   // renaming the file, we have to remove the old one. Note that we have to add
@@ -230,7 +230,9 @@ Packet **f_print_n_lines(Packet* input, char *directory){
   int errcode = file_to_string(filename, stringf);
 
   if(errcode != 0){
-    return error_packet(errcode);
+    Packet ** single_slot = calloc(1, sizeof(Packet));
+    single_slot[0] = error_packet(errcode);
+    return single_slot;
   }
 
   char * datastring = malloc(sizeof(char) * strlen(datastring));
@@ -320,17 +322,22 @@ Packet **list_files(Packet* in, char destination[]){
       return list; 
   } 
   else{
-    char* string;
-    while (de = readdir(dr) != NULL) {
+    char * string;
+    while ((de = readdir(dr)) != NULL) {
       // printf("%s\n", de->d_name); 
-      strcat(string, de->d_name);
-      strcat(string, ",");
+      
+      string = cats(string, de->d_name);
+      string = cats(string, ",");
+      //strcat(string, de->d_name);
+      //strcat(string, ",");
       
       struct stat* restrict buf;
       stat(de->d_name, buf);
-
-      strcat(string, ",");
-      strcat(string, buf->st_size);
+	
+      string = cats(string, ",");
+      string = cats(string, itoa(buf->st_size, 10));
+      //strcat(string, ",");
+      //strcat(string, buf->st_size);
     }
     closedir(dr);
     string[strlen(string) - 1] = '\0'; // o remove the last comma and add a null terminator at the end.
