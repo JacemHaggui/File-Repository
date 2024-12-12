@@ -7,7 +7,9 @@
 #include <stddef.h>  // DEBUG ONLY
 
 Packet * empty_packet() {
-	/* Create an empty Packet. Each packet begins with E, D and r.
+	/* 
+		Create an empty Packet. 
+		Each packet begins with E, D and r.
 	INPUT :
 	OUTPUT :
 		packet : Empty Packet
