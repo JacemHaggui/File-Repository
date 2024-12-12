@@ -267,9 +267,9 @@ int CmdlinetoPacket(const char *input, Packet *pkt) {
 
     else {
         fprintf(stderr, "Error: Unknown command '%s'\n", command);
-        return -1;
+        return -6;
     }
 
-    return 1;  // Indicate success
+    return 0;  // Indicate success
 }
 
