@@ -34,6 +34,13 @@ const char * const client_help_options = "\
 //------------------------------------------------------------------------------
 
 int student_client(int channel, int argc, char *argv[]) {  // We don't use channel for now
+    /* 0
+        INPUT :
+            0
+        OUTPUT :
+            0
+    */
+
     // Ignore SIGPIPE signals
     signal(SIGPIPE, SIG_IGN);
 
