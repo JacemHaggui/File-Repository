@@ -29,12 +29,12 @@ int main(int argc, char *argv[]) {
 
   Packet* out2 = add_remote_file(pac2, "./");
 
-  printf("\n == == \n");
+  printf("\n == PACKET 1 == \n");
   print_packet(out2);
 
   // TESTING: What if we try to do it a second time?
 
-  printf("\n == == \n");
+  printf("\n == PACKET 2 == \n");
 
   out2 = add_remote_file(pac2, "./");
 
@@ -46,6 +46,20 @@ int main(int argc, char *argv[]) {
   strcpy(pac3->option2, "newerfile.txt");
 
   Packet *out3 = renamefile(pac3, "./");
+
+  printf("\n == PACKET 3 == \n");
+  print_packet(out3);
+
+  // TESTING: finally, we remove "newerfile.txt".
+
+  Packet *pac4 = empty_packet();
+
+  strcpy(pac4->option1, "newerfile.txt");
+
+  Packet *out4 = removefile(pac4, "./");
+
+  printf("\n == PACKET 4 == \n");
+  print_packet(out4);
 
   return 0;
 }
