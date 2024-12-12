@@ -7,6 +7,8 @@ extern const char * const server_help_options;
 
 void student_server(int channel, int argc, char *argv[]);
 
+char* itoa(int value, int base);
+
 Packet **f_print_n_lines(Packet* in, char directory[]);
 
 Packet *add_remote_file(Packet* in, char directory[]);

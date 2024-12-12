@@ -156,8 +156,9 @@ int write_to_file(char filepath[], char data[],
     return -3; // FILE ALREADY EXISTS.
   }
 
+
   FILE *new;
-  new = fopen(strcat(destination,filepath), "w");
+  new = fopen(filepath, "w");
   fprintf(new, data);
   fclose(new);
   return 0;
@@ -218,7 +219,6 @@ Packet **f_print_n_lines(Packet* input, char *directory){
 
   char *filename = malloc(sizeof(char)* (strlen(directory) + strlen(input->option1)));
   strcpy(filename, directory);
-
   strcat(filename, input->option1);
 
   char * stringf = malloc(sizeof(char) * 1000); // Bad allocation!
@@ -250,8 +250,15 @@ Packet **f_print_n_lines(Packet* input, char *directory){
 }
 
 Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the operation. Packet.code = 0 if correctly done, -1 otherwise (file named filename already exists)
-  int errcode = write_to_file(strcat(directory, in->option1), in->data_ptr, directory);
+  char *filename = malloc(sizeof(char)* (strlen(directory) + strlen(in->option1)));
+  strcpy(filename, directory);
+
+  strcat(filename, in->option1);
+
   
+  int errcode = write_to_file(filename, in->data_ptr, directory);
+
+
   if(errcode != 0){
     return error_packet(errcode);
   }
@@ -264,6 +271,10 @@ Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the
 }
 
 Packet * renamefile(Packet* in, char directory[]){
+  char *filename = malloc(sizeof(char)* (strlen(directory) + strlen(input->option1)));
+  strcpy(filename, directory);
+
+
   int errcode = rename_file(strcat(directory, in->option2), strcat(directory, in->option1));
 
   return error_packet(errcode);
