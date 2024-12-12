@@ -6,6 +6,7 @@
 #include "../uinclude/struct_packet.h"
 #include <stddef.h>  // DEBUG ONLY
 
+
 Packet * empty_packet() {
 	/* 
 		Create an empty Packet. 
@@ -20,8 +21,10 @@ Packet * empty_packet() {
 	return packet;
 }
 
+
 Packet * error_packet(int errcode){
-	/* Create a Packet containing an error code.
+	/* 
+		Create a Packet containing an error code.
 	INPUT :
 		errcode : Error code
 	OUTPUT :
@@ -32,8 +35,10 @@ Packet * error_packet(int errcode){
 	return out;
 }
 
+
 void free_packet(Packet * packet) {
-	/* Free Packet if exist 
+	/* 
+		Free Packet if exist 
 	INPUT :
 		packet : The pointer to a given packet which will be overwritted
 	OUTPUT :
@@ -41,8 +46,10 @@ void free_packet(Packet * packet) {
 	if (packet) free(packet);
 }
 
+
 void print_packet(Packet * packet) {
-	/* ONLY FOR DEBUGGING : Print the Packet in a decent format
+	/* 
+		ONLY FOR DEBUGGING : Print the Packet in a decent format
 	INPUT :
 		packet : The pointer to a given packet which will be overwritted
 	OUTPUT :
@@ -59,8 +66,10 @@ void print_packet(Packet * packet) {
 	if (packet->data_ptr) printf("\t-Data Pointer provided ? : %d (1 <=> True)\n", *(packet->data_ptr) != '\0'  ); else printf("\t-No Data Pointer Provided\n");
 }
 
+
 void print_string(char * str, int n) {
-	/* ONLY FOR DEBUGGING : Print the first n characters in the string.
+	/* 
+		ONLY FOR DEBUGGING : Print the first n characters in the string.
 	<!> 0x0000 and '\0' are the same character in C. They will be shown as '\0' 
 	INPUT :
 		str : The string to print
@@ -77,9 +86,9 @@ void print_string(char * str, int n) {
 }
 
 
-
 int string_to_packet (char * string, Packet * packet) { 
-	/* Convert a string argument to a struct packet given 
+	/* 
+		Convert a string argument to a struct packet given 
 	INPUT :
 		string : The string to convert
 		packet : The pointer to a given packet which will be overwritted
@@ -136,7 +145,8 @@ int string_to_packet (char * string, Packet * packet) {
  
 
 int packet_to_string(Packet * packet, char * string) {
-	/* Convert a packet given in a string format.
+	/* 
+		Convert a packet given in a string format.
 	INPUT :
 		packet : The packet to transform in a string
 		string : The string which will be filled in place
@@ -171,49 +181,9 @@ int packet_to_string(Packet * packet, char * string) {
 }
 
 
-/*
-void main() {
-
-
-	Packet * packet = empty_packet();
-	char * string1 = "EDr\x00\x0A\x02OptionA\0Another option\0Hello\0XXX";
-	char * string2 = "EDr\x00\x0A\x02Opt1\0Opt2\0";
-	char * string3 = "EDr\x01\xF4\x05ThisIsOption1WithFullLength1234\0ThisIsOption2WithFullLength6543\0";
-	char * string4 = "EDr\x00\x14\x03\0\0";
-	char * string5 = "EDr\x00\x10\x04OptPartiallyFilled\0";
-	char * string6 = "EDr\x00\x64\x07OptionEndingHere123\0AnotherOptionBoundary123\0data \0";
-	char *string_list[] = {
-        	string1,
-        	string2,
-        	string3,
-        	string4,
-        	string5,
-        	string6
-	};
-	
-	for (int i = 1; i < 7 ; i ++) { 
-		Packet * packet = empty_packet();
-		int code = string_to_packet(string_list[i-1], packet);
-		printf("--- STRING %d --- \n", i );
-		print_packet(packet);
-		printf("\nCode %d\n", code);
-	} 
-	
-	//Packet * packet = empty_packet();
-	int code = string_to_packet(string_list[0], packet);
-	print_packet(packet);
-	printf("\nCode %d\n", code);
-	int n = 6 + strlen(packet->option1) + 1 + strlen(packet->option2) + 1 + packet->data_size;
-	char * string_receiver = calloc(sizeof(packet) + packet->data_size , sizeof(string1));
-	packet_to_string(packet, string_receiver);
-	print_string(string_receiver, n);
-	free_packet(packet);
-}
-
-*/
-
 int CmdlinetoPacket(const char *input, Packet *pkt) {
-	/* Convert a string given in a packet format.
+	/* 
+		Convert a string given in a packet format.
 	INPUT :
 		input : The string to transform in a packet
 		pkt : The packet which will be filled in place
@@ -302,3 +272,44 @@ int CmdlinetoPacket(const char *input, Packet *pkt) {
     return 0;  // Success
 }
 
+
+/*
+void main() {
+
+
+	Packet * packet = empty_packet();
+	char * string1 = "EDr\x00\x0A\x02OptionA\0Another option\0Hello\0XXX";
+	char * string2 = "EDr\x00\x0A\x02Opt1\0Opt2\0";
+	char * string3 = "EDr\x01\xF4\x05ThisIsOption1WithFullLength1234\0ThisIsOption2WithFullLength6543\0";
+	char * string4 = "EDr\x00\x14\x03\0\0";
+	char * string5 = "EDr\x00\x10\x04OptPartiallyFilled\0";
+	char * string6 = "EDr\x00\x64\x07OptionEndingHere123\0AnotherOptionBoundary123\0data \0";
+	char *string_list[] = {
+        	string1,
+        	string2,
+        	string3,
+        	string4,
+        	string5,
+        	string6
+	};
+	
+	for (int i = 1; i < 7 ; i ++) { 
+		Packet * packet = empty_packet();
+		int code = string_to_packet(string_list[i-1], packet);
+		printf("--- STRING %d --- \n", i );
+		print_packet(packet);
+		printf("\nCode %d\n", code);
+	} 
+	
+	//Packet * packet = empty_packet();
+	int code = string_to_packet(string_list[0], packet);
+	print_packet(packet);
+	printf("\nCode %d\n", code);
+	int n = 6 + strlen(packet->option1) + 1 + strlen(packet->option2) + 1 + packet->data_size;
+	char * string_receiver = calloc(sizeof(packet) + packet->data_size , sizeof(string1));
+	packet_to_string(packet, string_receiver);
+	print_string(string_receiver, n);
+	free_packet(packet);
+}
+
+*/
