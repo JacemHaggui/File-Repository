@@ -248,7 +248,7 @@ Packet **f_print_n_lines(Packet* input, char *directory){
     out->code = 1;
     strcpy(out->option1, itoa(packnum,10));
     out->E = 'E'; out->D = 'D'; out->r = 'r'; 
-    slice(datastring, buffer, i*packnum, (i+1)*packnum);
+    slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
     list[i] = out;
@@ -318,7 +318,7 @@ Packet **fetch(Packet* in, char directory[]){
     out->code = 5;
     strcpy(out->option1, itoa(packnum,10));
     out->E = 'E'; out->D = 'D'; out->r = 'r'; 
-    slice(datastring, buffer, i*packnum, (i+1)*packnum);
+    slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
     list[i] = out;
