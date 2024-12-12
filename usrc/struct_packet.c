@@ -65,19 +65,17 @@ int string_to_packet (char * string, Packet * packet) {
 		packet	: the pointer to a given packet which will be overwritted
 	OUTPUT :
 		0	: Conversion is complete
-		-1 	: Error Code - Empty String
-		-2	: Error Code - Constant Value (E,D,r) not here
-		-3	: Error Code - Option 1 is too long
-		-4	: Error Code - Option 2 is too long
+		-1 	: Error Code - bad packet format
+		-5	: Error Code - quota exceeded
 	*/
 		if ( ! *string) { return -1 ; }  // String is Empty
 
 	char * ptr = string ; // ptr is pointing to the first element in string
 
 	// CONSTANTS PART
-	if (*ptr) 	packet->E = *ptr;  	else return -2 ;
-	if (*(++ptr))	packet->D = *(ptr);	else return -2 ;
-	if (*(++ptr))	packet->r = *(ptr);	else return -2 ;
+	if (*ptr) 	packet->E = *ptr;  	else return -1 ;  // Constant Value E not here
+	if (*(++ptr))	packet->D = *(ptr);	else return -1 ;  // Constant Value D not here
+	if (*(++ptr))	packet->r = *(ptr);	else return -1 ;  // Constant Value r not here
 
 	// DATA SIZE PART
 	uint16_t data_size = (uint16_t)(  (unsigned char)(  (unsigned char)(*(++ptr)) ) | (unsigned char)(  (unsigned char)( *(++ptr) ) << 8 ) );
@@ -92,7 +90,7 @@ int string_to_packet (char * string, Packet * packet) {
 	int i = 0;
 	++ptr; // Skip the code final character
 	while(*(ptr) != '\0') {
-		if (i > 31) return -3;
+		if (i > 31) return -5;  // Option 1 is too long
 		packet->option1[i] = *ptr;
 		i ++;
 		++ptr;
@@ -102,7 +100,7 @@ int string_to_packet (char * string, Packet * packet) {
 	int j = 0;
 	++ptr; // Skip the option1 last character : '\0'
 	while(*(ptr) != '\0' ) {
-		if (j > 31) return -4 ;
+		if (j > 31) return -5 ;  // Option 2 is too long
 		packet->option2[j] = *ptr;
 		j ++;
 		++ptr;
