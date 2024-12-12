@@ -40,8 +40,6 @@ void print_packet(Packet * packet);
 
 int student_client(int channel, int argc, char *argv[]);
 
-char *retoption1(Packet *pkt);
-
 int CmdlinetoPacket(const char *input, Packet *pkt);
 
 #endif // STRUCT_PACKET_H
