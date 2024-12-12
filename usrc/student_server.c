@@ -296,36 +296,14 @@ Packet * removefile(Packet* in, char directory[]){
   return error_packet(errcode);
 }
 
-/*Very similar to print_n_lines */
+/* UNFINISHED! */
 Packet **fetch(Packet* in, char directory[]){
-  char *filename = strcat(directory, in->option1);
+  Packet *new = empty_packet();
 
-  char * string;
-  int errcode = file_to_string(filename, string);
-
-  if(errcode != 0){
-    return error_packet(errcode);
-  }
-
-  char * datastring;
-
-  int packnum = print_lines(filename, line_count(string), datastring, 0);
-
-  Packet ** list = calloc(packnum, sizeof(Packet));
-  Packet * out;
-
-  for(int i = 0; i < packnum; i++){
-    out = empty_packet();
-    char buffer[INT_MAX];
-    out->code = 5;
-    strcpy(out->option1, itoa(packnum, 10));
-    slice(string, buffer, i*packnum, (i+1)*packnum);
-    out-> data_size = strlen(buffer);
-    out->data_ptr = buffer; // There's an issue here, I think.
-    list[i] = out;
-  }
-
-  return list;
+  strcpy(new->option1, in->option1);
+  strcpy(new->option2, in->option2);
+  
+  return ;
 }
 
 Packet **list_files(Packet* in, char destination[]){
