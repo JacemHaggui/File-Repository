@@ -299,13 +299,31 @@ Packet * removefile(Packet* in, char directory[]){
 }
 
 /* UNFINISHED! */
+/* Essentially does the same as */
 Packet **fetch(Packet* in, char directory[]){
-  Packet *new = empty_packet();
-
-  strcpy(new->option1, in->option1);
-  strcpy(new->option2, in->option2);
+  char *contents = malloc(sizeof(char) * 2056);
   
-  return ;
+  file_to_string(cats(directory, in->option1), contents);
+
+  char * datastring = malloc(sizeof(char) * strlen(contents));
+
+  int packnum = print_lines(contents, line_count(contents), datastring, 0);
+
+  Packet ** list = calloc(packnum, sizeof(Packet));
+  Packet * out;
+
+  for(int i = 0; i < packnum; i++){
+    out = empty_packet();
+    char buffer[INT_MAX];
+    out->code = 5;
+    strcpy(out->option1, itoa(packnum,10));
+    out->E = 'E'; out->D = 'D'; out->r = 'r'; 
+    slice(datastring, buffer, i*packnum, (i+1)*packnum);
+    out-> data_size = strlen(buffer);
+    out->data_ptr = buffer;
+    list[i] = out;
+  }
+  return list;
 }
 
 Packet **list_files(Packet* in, char destination[]){
