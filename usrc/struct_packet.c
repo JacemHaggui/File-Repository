@@ -198,8 +198,6 @@ void main() {
 
 */
 
-
-
 int CmdlinetoPacket(const char *input, Packet *pkt) {
     // Initialize the packet with fixed values
     pkt->E = 'E';

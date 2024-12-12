@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
   Packet* pac1 = empty_packet();
 
-  strcpy(pac1->option1, "hello.txt");
+  strcpy(pac1->option1, "testext.txt");
 
   strcpy(pac1->option2, "3");
 
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 
   printf("\n == == \n");
 
-  print_packet(out[0]);
+  print_packet(*out);
 
   return 0;
 }

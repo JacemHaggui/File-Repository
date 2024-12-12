@@ -29,6 +29,7 @@
  */
 #include "../include/utilities.h"
 #include "../uinclude/client.h"
+#include "../uinclude/struct_packet.h"
 #include <signal.h>
 #include <stdbool.h> // bool type
 #include <string.h>
@@ -114,31 +115,38 @@ int print_lines(char string[], int n, char outstring[], bool print_state) { // r
   return 1;
 }
 
-int file_to_string(char filename[], char* buffer){
-  long length;
-  FILE * f = fopen (filename, "rb");
-  if (f)
-  {
-    fseek (f, 0, SEEK_END);
-    length = ftell (f);
-    fseek (f, 0, SEEK_SET);
-    buffer = malloc (length);
-    if (buffer)
-    {
-      fread (buffer, 1, length, f);
-    }
-    fclose (f);
-    return 0;
-  }
-  else{
+int file_to_string(char *filename, char *text)
+{ 
+  char c;
+  int cpt = 0;
+
+  if(!file_exists(filename)){
     printf("Error: File '%s' does not exist.\n", filename);
-    return -2; // FILE NOT FOUND
+    return -2;
+    }
+
+  /*Counts size file.*/
+  FILE *f = fopen(filename, "r");
+
+  while (fscanf(f, "%c", &c) != EOF)
+  {
+    cpt = cpt + 1;
   }
+  fclose(f);
+  /* Stocks file content into a string*/
+  text[cpt] = '\0';
+  f = fopen(filename, "r");
+  cpt = 0;
+
+  while (fscanf(f, "%c", &c) != EOF)
+  {
+    text[cpt] = c;
+    cpt = cpt + 1;
+  }
+  return 0;
 }
 
 
-/* TO DO: THESE FUNCTIONS MUST FAIL IF THE FILE ALREADY EXISTS! NO OVERWRITING
- * IS ALLOWED.*/
 int write_to_file(char filepath[], char data[],
                    char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
                                          // MUST CONTAIN THE PATH TO THE FILE!
@@ -206,19 +214,23 @@ void slice(const char* str, char* result, size_t start, size_t end) {
 }
 
 /*Returns multiple packets.*/
-Packet **f_print_n_lines(Packet* in, char directory[]){
-  char *filename = strcat(directory, in->option1);
+Packet **f_print_n_lines(Packet* input, char *directory){
 
-  char * string; 
-  int errcode = file_to_string(filename, string);
-  
+  char *filename = malloc(sizeof(char)* (strlen(directory) + strlen(input->option1)));
+  strcpy(filename, directory);
+
+  strcat(filename, input->option1);
+
+  char * stringf = malloc(sizeof(char) * 1000); // Bad allocation!
+  int errcode = file_to_string(filename, stringf);
+
   if(errcode != 0){
     return error_packet(errcode);
   }
 
-  char * datastring;
+  char * datastring = malloc(sizeof(char) * strlen(datastring));
 
-  int packnum = print_lines(filename, atoi(in->option2), datastring, 1);
+  int packnum = print_lines(stringf, atoi(input->option2), datastring, 1);
 
   Packet ** list = calloc(packnum, sizeof(Packet));
   Packet * out;
@@ -297,7 +309,7 @@ Packet **fetch(Packet* in, char directory[]){
     strcpy(out->option1, itoa(packnum, 10));
     slice(string, buffer, i*packnum, (i+1)*packnum);
     out-> data_size = strlen(buffer);
-    out->data_ptr = buffer;
+    out->data_ptr = buffer; // There's an issue here, I think.
     list[i] = out;
   }
 
@@ -340,7 +352,7 @@ Packet **list_files(Packet* in, char destination[]){
 
     for(int i = 0; i < packnum; i++){
       out = empty_packet();
-      char buffer[INT_MAX];
+      char *buffer = malloc(INT_MAX * sizeof(char));
       out->code = 6;
       strcpy(out->option1, itoa(packnum, 10));
       out->E = 'E'; out->D = 'D'; out->r = 'r'; 
