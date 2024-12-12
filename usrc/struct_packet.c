@@ -4,9 +4,14 @@
 #include <inttypes.h>
 #include <ctype.h>
 #include "../uinclude/struct_packet.h"
-#include <stddef.h> // DEBUG ONLY
+#include <stddef.h>  // DEBUG ONLY
 
 Packet * empty_packet() {
+	/* Create an empty Packet. Each packet begins with E, D and r.
+	INPUT :
+	OUTPUT :
+		packet : Empty Packet
+	*/
 	Packet * packet = calloc(1, sizeof(*packet));
 	packet->E = 'E'; packet->D = 'D'; packet->r = 'r';
 	//Packet * packet = (Packet *)malloc(sizeof(Packet));
@@ -14,20 +19,31 @@ Packet * empty_packet() {
 }
 
 Packet * error_packet(int errcode){
+	/* Create a Packet containing an error code.
+	INPUT :
+		errcode : Error code
+	OUTPUT :
+		out : Packet with error code
+	*/
 	Packet * out = empty_packet();
 	out->data_size = 0; out->code = errcode;
 	return out;
 }
 
 void free_packet(Packet * packet) {
-	/* Free Packet if exist */
+	/* Free Packet if exist 
+	INPUT :
+		packet : The pointer to a given packet which will be overwritted
+	OUTPUT :
+	*/
 	if (packet) free(packet);
 }
 
 void print_packet(Packet * packet) {
-	/* 
-		ONLY FOR DEBUGGING : 
-		Print the Packet in a decent format
+	/* ONLY FOR DEBUGGING : Print the Packet in a decent format
+	INPUT :
+		packet : The pointer to a given packet which will be overwritted
+	OUTPUT :
 	*/
 	printf("Print Packet :\n");
 	if (! packet) 	{printf("\t-Empty Packet\n");  return ;} 
@@ -42,10 +58,12 @@ void print_packet(Packet * packet) {
 }
 
 void print_string(char * str, int n) {
-	/* 
-		ONLY FOR DEBUGGING :
-		Print the first n characters in the string.
-		<!> 0x0000 and '\0' are the same character in C. They will be shown as '\0' .
+	/* ONLY FOR DEBUGGING : Print the first n characters in the string.
+	<!> 0x0000 and '\0' are the same character in C. They will be shown as '\0' 
+	INPUT :
+		str : The string to print
+		n : Number of lines we want to print
+	OUTPUT :
 	*/
 	for (int i = 0; i < n ; i ++) {
 		unsigned char c = (unsigned char) str[i];
@@ -61,12 +79,12 @@ void print_string(char * str, int n) {
 int string_to_packet (char * string, Packet * packet) { 
 	/* Convert a string argument to a struct packet given 
 	INPUT :
-		string	: the string to convert
-		packet	: the pointer to a given packet which will be overwritted
+		string : The string to convert
+		packet : The pointer to a given packet which will be overwritted
 	OUTPUT :
-		0	: Conversion is complete
-		-1 	: Error Code - bad packet format
-		-5	: Error Code - quota exceeded
+		0 : Success - Conversion is complete
+		-1 : Error Code - Bad packet format
+		-5 : Error Code - Quota exceeded
 	*/
 		if ( ! *string) { return -1 ; }  // String is Empty
 
@@ -116,13 +134,12 @@ int string_to_packet (char * string, Packet * packet) {
  
 
 int packet_to_string(Packet * packet, char * string) {
-	/*
-	Convert a packet given in a string format.
+	/* Convert a packet given in a string format.
 	INPUT :
 		packet : The packet to transform in a string
 		string : The string which will be filled in place
 	OUTPUT :
-		0 : R.A.S (All goooooood)
+		0 : Success
 	*/
 	*(string) 	= packet->E;
 	*(++string) 	= packet->D;
@@ -194,6 +211,15 @@ void main() {
 */
 
 int CmdlinetoPacket(const char *input, Packet *pkt) {
+	/* Convert a string given in a packet format.
+	INPUT :
+		input : The string to transform in a packet
+		pkt : The packet which will be filled in place
+	OUTPUT :
+		0 : Success
+		-6 : Syntax error in command line
+	*/
+
     // Initialize the packet with fixed values
     pkt->E = 'E';
     pkt->D = 'D';
@@ -271,6 +297,6 @@ int CmdlinetoPacket(const char *input, Packet *pkt) {
         return -6;
     }
 
-    return 0;  // Indicate success
+    return 0;  // Success
 }
 
