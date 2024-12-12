@@ -36,8 +36,8 @@ void print_packet(Packet * packet) {
 	if ( packet->r) printf("\t-Const r : %c\n", packet->r); else printf("\t-No Const r\n");
 	if ( packet->data_size) printf("\t-Data Size : %d bytes\n", packet->data_size); else printf("\t-No Data Size\n");
 	if ( packet->code) printf("\t-Code : %d\n", packet->code); else printf("\t-No Code\n");
-	if ( packet->option1) printf("\t-Option 1 : %s\n", packet->option1); else printf("\t-No Option 1\n");
-	if ( packet->option2) printf("\t-Option 2 : %s\n", packet->option2); else printf("\t-No Option 2\n");
+	if ( strlen( packet->option1 ) > 0) printf("\t-Option 1 : %s\n", packet->option1); else printf("\t-No Option 1\n");
+	if ( strlen( packet->option2 ) > 0) printf("\t-Option 2 : %s\n", packet->option2); else printf("\t-No Option 2\n");
 	if (packet->data_ptr) printf("\t-Data Pointer provided ? : %d (1 <=> True)\n", *(packet->data_ptr) != '\0'  ); else printf("\t-No Data Pointer Provided\n");
 }
 
@@ -230,6 +230,10 @@ int CmdlinetoPacket(const char *input, Packet *pkt) {
     * `args` will store the number of successful assignments, which is 3 in this case 
     * because three strings were successfully extracted from the `input`.
     */
+    
+    if (args < 3) {
+		printf("CmdLineToPacket : args < 3 and args = %d \n", args);
+    }
 
     strncpy(pkt->option1, option1, sizeof(pkt->option1) - 1);  // Copy the first option (e.g., filename)
     strncpy(pkt->option2, option2, sizeof(pkt->option2) - 1);  // Copy the second option (if available)
