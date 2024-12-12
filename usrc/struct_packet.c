@@ -240,32 +240,29 @@ int CmdlinetoPacket(const char *input, Packet *pkt) {
     strncpy(pkt->option2, option2, sizeof(pkt->option2) - 1);  // Copy the second option (if available)
 
     // Determine which command was entered
-    if (strcmp(command, "put") == 0) {
-        pkt->code = 1;  // Command code for "put" (not permanent)
-        //TODO: Put the entire file contents in data
-        //Seems weird since the packet only takes a pointer to data ?
-        //Reminder: Discuss with the group 
-    } 
+	if (strcmp(command, "cat") == 0) {
+        pkt->code = 1;  // Command code for "cat"
+    }
+    else if (strcmp(command, "put") == 0) {
+        pkt->code = 2;  // Command code for "put" (not permanent)
+    }
+	else if (strcmp(command, "mv") == 0) {
+        pkt->code = 3;  // Command code for "mv"
+        // pkt->option1 and pkt->option2 have already been set earlier
+    }
     else if (strcmp(command, "rm") == 0) {
-        pkt->code = 2;  // Command code for "rm"
-    } 
+        pkt->code = 4;  // Command code for "rm"
+    }
     else if (strcmp(command, "get") == 0) {
-        pkt->code = 3;  // Command code for "get"
+        pkt->code = 5;  // Command code for "get"
         // pkt->option1 and pkt->option2 have already been set earlier
-    } 
+    }
     else if (strcmp(command, "ls") == 0) {
-        pkt->code = 4;  // Command code for "ls"
-    } 
-    else if (strcmp(command, "cat") == 0) {
-        pkt->code = 5;  // Command code for "cat"
-    } 
-    else if (strcmp(command, "mv") == 0) {
-        pkt->code = 6;  // Command code for "mv"
-        // pkt->option1 and pkt->option2 have already been set earlier
-    } 
+        pkt->code = 6;  // Command code for "ls"
+    }
     else if (strcmp(command, "quit") == 0 || strcmp(command, "exit") == 0) {
         pkt->code = 7;  // Command byte for "quit" or "exit"
-    } 
+    }
     else if (strcmp(command, "restart") == 0) {
         pkt->code = 8;  // Command byte for "restart"
     }
