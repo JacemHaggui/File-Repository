@@ -112,9 +112,6 @@ int string_to_packet (char * string, Packet * packet) {
 
 	return 0;
 
-
-
-
 } 
  
 

@@ -79,6 +79,13 @@ char* itoa(int val, int base){
 	
 }
 
+char* cats(char* dest, char* source){
+  char* both = malloc(sizeof(char) * (strlen(source) + strlen(dest)));
+  strcpy(both, dest);
+  strcat(both, source);
+  return both;
+}
+
 /* Returns the number of lines in a string. */
 int line_count(char string[]) {
   int leng = strlen(string);
@@ -216,10 +223,8 @@ void slice(const char* str, char* result, size_t start, size_t end) {
 
 /*Returns multiple packets.*/
 Packet **f_print_n_lines(Packet* input, char *directory){
-
-  char *filename = malloc(sizeof(char)* (strlen(directory) + strlen(input->option1)));
-  strcpy(filename, directory);
-  strcat(filename, input->option1);
+  
+ char * filename = cats(directory, input->option1);
 
   char * stringf = malloc(sizeof(char) * 1000); // Bad allocation!
   int errcode = file_to_string(filename, stringf);
@@ -250,11 +255,8 @@ Packet **f_print_n_lines(Packet* input, char *directory){
 }
 
 Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the operation. Packet.code = 0 if correctly done, -1 otherwise (file named filename already exists)
-  char *filename = malloc(sizeof(char)* (strlen(directory) + strlen(in->option1)));
-  strcpy(filename, directory);
-
-  strcat(filename, in->option1);
-
+  
+  char * filename = cats(directory, in->option1);
   
   int errcode = write_to_file(filename, in->data_ptr, directory);
 
@@ -271,11 +273,10 @@ Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the
 }
 
 Packet * renamefile(Packet* in, char directory[]){
-  char *filename = malloc(sizeof(char)* (strlen(directory) + strlen(input->option1)));
-  strcpy(filename, directory);
+  char * oldfilename = cats(directory, in->option1);
+  char * newfilename = cats(directory, in->option2);
 
-
-  int errcode = rename_file(strcat(directory, in->option2), strcat(directory, in->option1));
+  int errcode = rename_file(newfilename, oldfilename);
 
   return error_packet(errcode);
 }
@@ -290,7 +291,7 @@ int remove_file(char filename[]) {
 }
 
 Packet * removefile(Packet* in, char directory[]){
-  int errcode = remove_file(strcat(directory, in->option1));
+  int errcode = remove_file(cats(directory, in->option1));
   
   return error_packet(errcode);
 }
