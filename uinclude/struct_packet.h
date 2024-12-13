@@ -54,7 +54,7 @@ int CmdlinetoPacket(const char *input, Packet *pkt);
 
 void print_packet(Packet * packet);
 
-int student_client(int argc, char *argv[]);//int student_client(int channel, int argc, char *argv[])
+//int student_client(int argc, char *argv[]);//int student_client(int channel, int argc, char *argv[])
 
 int CmdlinetoPacket(const char *input, Packet *pkt);
 

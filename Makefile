@@ -40,19 +40,19 @@ bin/EDclient/client: lib/nettools.o ulib/functions.o lib/utilities.o ulib/studen
 	$(CC) -o $@ lib/nettools.o ulib/functions.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o ulib/struct_packet.o
 	ln -f $@ bin/
 
-bin/EDserver/server: lib/nettools.o ulib/functions.o ulib/student_server.o ulib/communication.o lib/server.o
+bin/EDserver/server: lib/nettools.o ulib/functions.o  lib/utilities.o ulib/student_server.o ulib/communication.o lib/server.o
 	@echo "Compiling $@"
-	$(CC) -o $@ lib/nettools.o ulib/functions.o ulib/student_server.o ulib/struct_packet.o ulib/communication.o lib/server.o
+	$(CC) -o $@ lib/nettools.o ulib/functions.o  lib/utilities.o ulib/student_server.o ulib/struct_packet.o ulib/communication.o lib/server.o
 	ln -f $@ bin/
 
 ulib/testing.o: usrc/testing.c
 	@echo "Compiling $@"
 	$(CC) -c -o $@ usrc/testing.c
 
-bin/usrc/testing: ulib/testing.o ulib/functions.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
+bin/usrc/testing: ulib/testing.o  lib/utilities.o ulib/functions.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
 	@echo "Compiling $@"
 	mkdir -p bin/usrc
-	$(CC) -o $@ ulib/testing.o ulib/functions.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
+	$(CC) -o $@ ulib/testing.o  lib/utilities.o ulib/functions.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
 	ln -f $@ usrc/
 
 clean:

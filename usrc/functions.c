@@ -6,6 +6,8 @@
 #include <stdbool.h> // bool type
 #include <sys/stat.h> // stat
 #include <dirent.h> // For directory handling.
+#include "../uinclude/struct_packet.h"
+#include "../include/utilities.h"
 
 char *  cats(char* dest, char* source){
   char* both = malloc(sizeof(char) * (strlen(source) + strlen(dest)));
@@ -132,4 +134,69 @@ void force_client_directory_format(){
 } 
 
 
+int convert_cmd_string_to_packet_string(char * cmd, char * string) {
+  /*
+    We're going to use the Packet Structure to pass from string (cmd line) -> Struct Packet -> string packet format
+  */
+  Packet * packet = empty_packet();
+
+  usercommand parsed_cmd;
+  int test = parse_commandline(&parsed_cmd, cmd);
+  if (test) { // parsing was successful
+      /*
+       parsed_cmd :
+          cmd : 16
+          param1 : 32
+          param2 : 32
+      */
+    if (strcmp(parsed_cmd.cmd,"put") == 0) {
+      
+      packet->code = CMD_ADD;
+      memcpy(packet->option1, parsed_cmd.param1, 32);
+      //packet->option1 = parsed_cmd.param1;
+      // WHERE ARE THE DATA TO TRANSMIT ? In my cucu ?
+    }
+    else if (strcmp(parsed_cmd.cmd,"rm") == 0) {
+      packet->code = CMD_REMOVE;
+      memcpy(packet->option1, parsed_cmd.param1, 32);
+    }
+    else if (strcmp(parsed_cmd.cmd,"get") == 0) {
+      packet->code = CMD_GET;
+      memcpy(packet->option1, parsed_cmd.param1, 32);
+      memcpy(packet->option2, parsed_cmd.param2, 32);
+    }
+    else if (strcmp(parsed_cmd.cmd,"ls") == 0) {
+      packet->code = CMD_LIST;
+    }
+    else if (strcmp(parsed_cmd.cmd,"cat") == 0) {
+      packet->code = CMD_PRINT;
+      memcpy(packet->option1, parsed_cmd.param1, 32);
+      memcpy(packet->option2, parsed_cmd.param2, 32);
+    }
+    else if (strcmp(parsed_cmd.cmd,"mv") == 0) {
+      packet->code = CMD_RENAME;
+      memcpy(packet->option1, parsed_cmd.param1, 32);
+      memcpy(packet->option2, parsed_cmd.param2, 32);
+    }
+    else if (strcmp(parsed_cmd.cmd,"quit") == 0 || strcmp(parsed_cmd.cmd,"exit") == 0) {
+      packet->code = CMD_QUIT;
+    }
+    else if (strcmp(parsed_cmd.cmd,"restart") == 0 ) {
+      packet->code = CMD_RESTART;
+    }
+    else if (strcmp(parsed_cmd.cmd,"help") == 0) {
+      // DO HELP CMD
+    }
+
+    print_packet(packet);
+
+    int error_code = packet_to_string(packet, string);
+
+    return error_code;
+
+  }
+
+  return 0; // A CHANGER
+
+}
 

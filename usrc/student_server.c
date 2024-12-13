@@ -209,7 +209,7 @@ Packet **f_print_n_lines(Packet* input, char *directory){
     char buffer[INT_MAX];
     out->code = 1;
     strcpy(out->option1, itoa(packnum,10));
-    out->E = 'E'; out->D = 'D'; out->r = 'r'; 
+    out->E = 'E'; out->D = 'D'; out->r = 'r';
     slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
@@ -360,9 +360,10 @@ void student_server(int channel, int argc, char *argv[]) {
 
   set_server_directory("./"); // DIRECTORY DEFAULT SERVER IS "./"
   printf("DIRECTORY : %s\n", SERVER_DIRECTORY);
+  force_server_directory_format();
 
   // buffer to receive packets (max size: 81)
-  char recvbuf[81];
+  char recvbuf[2048];
   // infinite loop -> use ^C to exit the program
   while (1) {
     // get the command from user, exit if it fails
@@ -371,6 +372,7 @@ void student_server(int channel, int argc, char *argv[]) {
     int res = recv_pkt(recvbuf, channel);
     if (!res)
       return; // return if communication error occured
+    printf("RECU\n");
     // prints the command, relying on the number of parameters
     if (*recvbuf == 0)
       printf("     command: %s\n", recvbuf + 1);

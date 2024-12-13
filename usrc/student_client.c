@@ -45,7 +45,7 @@ const char * const client_help_options = "\
 //------------------------------------------------------------------------------
 //int student_client(int channel, int argc, char *argv[])
 
-int student_client(int argc, char *argv[]) { 
+int student_client_old(int argc, char *argv[]) { 
     /* 0
         INPUT :
             0
@@ -333,4 +333,53 @@ int student_client(int argc, char *argv[]) {
     // TODO: Populate the packet structure based on file input
     // TODO: Send the packet using send_pkt()
     return 0; // Success
+}
+
+
+
+int student_client(int channel, int argc, char *argv[]) {
+    // CHANGE BY ROMAIN WAIT !!
+
+
+    // Writing to a closed socket causes a SIGPIPE signal, which makes 
+    // the program exits. The following line inhibits this default behaviour.
+    // Thus, writing to a cloned socket will simply return -1 with the EPIPE
+    // error in errno and will therefore not cause an exit. 
+    // (see the line with "EPIPE" in send_pkt in usrc/communication.c).
+    signal(SIGPIPE, SIG_IGN);
+
+    // Buffer to receive the command line
+    char cmdline[128];
+    // Buffer to build the packet to send (max size: 81)
+    char sendbuf[2048];
+
+    // print info to terminal
+    printf("(^C to exit)\n\n");
+    // infinite loop -> use ^C to exit the program 
+    while (1) {
+        // get the command from user, exit if it fails
+        printf("Enter a command > ");
+        if(! fgets(cmdline, 128, stdin)){
+            printf("Cannot read command line\n");
+            // return 0 to exit
+            return 0;
+        }
+
+        printf("PRINT CLIENT COMMAND :\n\t");
+        print_string(cmdline, strlen(cmdline) - 1);
+
+        char cmd_to_packet_string[2048];
+        int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string);
+
+        printf("\nString Send :\n\t");
+        print_string(cmd_to_packet_string, 70); // HEADER ONLY
+
+        // attempt to send the packet
+        int res = send_pkt(cmd_to_packet_string, channel);
+        printf("RES : %d\n", res);
+        //returns 1 to restart if somme communication error occured
+        //if (!res) return 1;
+        
+    }
+
 }

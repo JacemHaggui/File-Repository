@@ -167,11 +167,21 @@ int packet_to_string(Packet * packet, char * string) {
 	}
 	*(++string)	= '\0'; // ADD NUL-TERMINATOR
 
+	// fill option1 with void :
+	for (int i = 0; i < 32 - (n_opt1 + 1)  ; i ++ ) {
+		*(++string) = '.';
+	}
+
 	int n_opt2 = strlen(packet->option2);
 	for (int i = 0; i < n_opt2 ; i ++) {
 		*(++string)	= packet->option2[i];
 	}
 	*(++string)	= '\0'; // ADD NUL-TERMINATOR
+
+	// fill option2 with void :
+	for (int i = 0; i < 32 - (n_opt2 + 1)  ; i ++ ) {
+		*(++string) = '.';
+	}
 	
 	char * ptr = packet->data_ptr;
 	for (int i = 0; i < packet->data_size; i ++) {
