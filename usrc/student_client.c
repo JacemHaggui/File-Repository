@@ -12,6 +12,16 @@
 #define HEADER_SIZE 70
 #define MAX_PACKET_SIZE 2048
 #define MAX_DATA_SIZE (MAX_PACKET_SIZE - HEADER_SIZE)
+// Defining error codes
+#define BAD_PACKET_FORMAT    -1
+#define FILE_NOT_FOUND       -2
+#define FILE_ALREADY_EXISTS  -3
+#define COMMAND_FAILS        -4
+#define QUOTA_EXCEEDED       -5
+#define SYNTAX_ERROR         -6
+#define BAD_SERVER_RESPONSE  -7
+#define CONNECTION_CLOSED    -8
+#define SUCCESS              0
 
 
 /**  help message for commandline options */
@@ -120,10 +130,10 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
             }
 
             // Print the packet for debugging (optional)
-            print_packet(package);
+            //print_packet(package);
 
             // Sending the packet to the server
-            // Send_pkt(package_string, channel code);
+            Send_pkt(package, 00000); //using 00000 as a channel code
 
             // Receiving the response from the server
             Packet* answer = malloc(sizeof(Packet)); // Allocate memory for the packet response
@@ -131,39 +141,37 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
             int response_code = recv_pkt(answer, 00000);// Using 00000 as channel code
 
             switch (response_code) {
-                case -1:
+                case BAD_PACKET_FORMAT:
                     printf("\nBad packet format\n");
                     break;
-                case -2:
+                case FILE_NOT_FOUND:
                     printf("\nFile not found\n");
                     break;
-                case -3:
+                case FILE_ALREADY_EXISTS:
                     printf("\nFile already exists\n");
                     break;
-                case -4:
+                case COMMAND_FAILS:
                     printf("\nCommand fails (for other server-side failures)\n");
                     break;
-                case -5:
+                case QUOTA_EXCEEDED:
                     printf("\nQuota exceeded\n");
                     break;
-                case -6:
+                case SYNTAX_ERROR:
                     printf("\nSyntax error in command line\n");
                     break;
-                case -7:
-                    printf("\nBad response form server\n");
+                case BAD_SERVER_RESPONSE:
+                    printf("\nBad response from server\n");
                     break;
-                case -8:
+                case CONNECTION_CLOSED:
                     printf("\nConnection closed\n");
                     break;
-                case 0:
-                    printf("\nSuccesfully received the server's response\n");
+                case SUCCESS:
+                    printf("\nSuccessfully received the server's response\n");
                     break;
                 default:
-                    print("\nUNKNOWN ERROR\n");
-                }
+                    printf("\nUNKNOWN ERROR\n");
+            }
     
-
-
             // Free the allocated memory after processing the command
             free(package);
             free(answer);
@@ -231,36 +239,36 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
         int response_code = recv_pkt(answer, 00000); // Using 00000 as channel code
 
         switch (response_code) {
-            case -1:
+            case BAD_PACKET_FORMAT:
                 printf("\nBad packet format\n");
                 break;
-            case -2:
+            case FILE_NOT_FOUND:
                 printf("\nFile not found\n");
                 break;
-            case -3:
+            case FILE_ALREADY_EXISTS:
                 printf("\nFile already exists\n");
                 break;
-            case -4:
+            case COMMAND_FAILS:
                 printf("\nCommand fails (for other server-side failures)\n");
                 break;
-            case -5:
+            case QUOTA_EXCEEDED:
                 printf("\nQuota exceeded\n");
                 break;
-            case -6:
+            case SYNTAX_ERROR:
                 printf("\nSyntax error in command line\n");
                 break;
-            case -7:
-                printf("\nBad response form server\n");
+            case BAD_SERVER_RESPONSE:
+                printf("\nBad response from server\n");
                 break;
-            case -8:
+            case CONNECTION_CLOSED:
                 printf("\nConnection closed\n");
                 break;
-            case 0:
-                printf("\nSuccesfully received the server's response\n");
+            case SUCCESS:
+                printf("\nSuccessfully received the server's response\n");
                 break;
             default:
-                print("\nUNKNOWN ERROR\n");
-            }
+                printf("\nUNKNOWN ERROR\n");
+        }
 
         // Free the allocated memory after processing the command
         free(package);
