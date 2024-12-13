@@ -9,6 +9,18 @@
 
 #include <stddef.h> // DEBUG ONLY
 
+// ORIGIN GROUP: Command Codes for GROUP
+#define CMD_RESTART   8   // Restart command
+#define CMD_QUIT      7   // Quit or exit command
+
+// ORIGIN PROF: Command Codes for PROF
+#define CMD_LIST      6   // List remote files
+#define CMD_GET       5   // Get a remote file
+#define CMD_REMOVE    4   // Remove a remote file
+#define CMD_RENAME    3   // Rename a remote file
+#define CMD_ADD       2   // Add a remote file
+#define CMD_PRINT     1   // Print n lines of a file
+
 typedef struct  {
 	char E; // 1 byte
 	char D; // 1 byte

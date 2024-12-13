@@ -76,7 +76,7 @@ int recv_pkt(char *pkt, int channel) {
         }
     }
 
-    return 1; // Success
+    return 0; // Success
 }
 
 

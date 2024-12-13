@@ -273,6 +273,66 @@ int CmdlinetoPacket(const char *input, Packet *pkt) {
 }
 
 
+// Utility function to swap byte order (little-endian to big-endian)
+// 2 byte  <!> little-endian MODE ! (So we have to swap from little-endian to big-endian order)
+uint16_t swap_endian_16(uint16_t value) {
+    return (value >> 8) | (value << 8);
+}
+
+// Function to print response details based on the packet
+void print_response(const Packet *packet) {
+    if (!packet) {
+        printf("Error: Null packet received.\n");
+        return;
+    }
+
+    // Swap `data_size` from little-endian to big-endian
+    uint16_t data_size_be = swap_endian_16(packet->data_size);
+
+    // Decode the command based on the `code` field
+    printf("Response Details:\n");
+    //printf("Header: %c%c%c\n", packet->E, packet->D, packet->r);
+    //printf("Data Size: %u bytes\n", data_size_be);
+
+    switch (packet->code) {
+        case CMD_LIST:
+            printf("Listing remote files\n");
+            break;
+        case CMD_GET:
+            printf("Getting a remote file\n");
+            printf("File Name: %s\n", packet->option1);
+            break;
+        case CMD_REMOVE:
+            printf("Removing a remote file\n");
+            printf("File Name: %s\n", packet->option1);
+            break;
+        case CMD_RENAME:
+            printf("Renaming a remote file\n");
+            printf("Old Name: %s, New Name: %s\n", packet->option1, packet->option2);
+            break;
+        case CMD_ADD:
+            printf("Adding a remote file\n");
+            printf("File Name: %s\n", packet->option1);
+            break;
+        case CMD_PRINT:
+            printf("Printing n lines of file\n");
+            printf("File Name: %s\n", packet->option1);
+            break;
+        default:
+            printf("Unknown command (Code: %d)\n", packet->code);
+            break;
+    }
+
+    // Handle additional data if `data_ptr` is not NULL
+    if (packet->data_ptr && data_size_be > 0) {
+        printf("Additional Data:\n%.*s\n", data_size_be, packet->data_ptr);
+    } else {
+        printf("No additional data.\n");
+    }
+}
+
+
+
 /*
 void main() {
 
