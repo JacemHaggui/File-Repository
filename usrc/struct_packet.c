@@ -73,7 +73,7 @@ void print_string(char * str, int n) {
 	<!> 0x0000 and '\0' are the same character in C. They will be shown as '\0' 
 	INPUT :
 		str : The string to print
-		n : Number of lines we want to print
+		n : Number of caracters we want to print
 	OUTPUT :
 	*/
 	for (int i = 0; i < n ; i ++) {
@@ -291,9 +291,6 @@ void print_response(const Packet *packet) {
 
     // Decode the command based on the `code` field
     printf("Response Details:\n");
-    //printf("Header: %c%c%c\n", packet->E, packet->D, packet->r);
-    //printf("Data Size: %u bytes\n", data_size_be);
-
     switch (packet->code) {
         case CMD_LIST:
             printf("Listing remote files\n");
@@ -325,8 +322,9 @@ void print_response(const Packet *packet) {
 
     // Handle additional data if `data_ptr` is not NULL
     if (packet->data_ptr && data_size_be > 0) {
-        printf("Additional Data:\n%.*s\n", data_size_be, packet->data_ptr);
-    } else {
+		print_string(packet->data_ptr, data_size_be);
+    }
+	else {
         printf("No additional data.\n");
     }
 }
