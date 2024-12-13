@@ -200,7 +200,7 @@ int student_client(int channel, int argc, char *argv[]) {
         // TODO: Check existing files and process as needed
     }
 
-    // TODO: Populate the packet structure based on user commands or file input
+    // TODO: Populate the packet structure based on file input
     // TODO: Send the packet using send_pkt()
     return 0; // Success
 }
