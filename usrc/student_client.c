@@ -172,6 +172,10 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
                     printf("\nUNKNOWN ERROR\n");
             }
     
+            if(response_code == SUCCESS){
+                print_response(answer);
+            }
+
             // Free the allocated memory after processing the command
             free(package);
             free(answer);

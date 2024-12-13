@@ -54,4 +54,6 @@ int student_client(int channel, int argc, char *argv[]);
 
 int CmdlinetoPacket(const char *input, Packet *pkt);
 
+void print_response(const Packet *packet);
+
 #endif // STRUCT_PACKET_H
