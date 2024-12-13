@@ -37,7 +37,7 @@
 #include <dirent.h> // For directory handling.
 #include <stdlib.h>
 
-const int INT_MAX = 2048 - 70; 
+const int INT_MAX = 2048 - 70;
 
 // FUNCTIONS
 // ...
@@ -362,11 +362,11 @@ Packet **list_files(Packet* in, char destination[]){
     char* trash;
     int packnum = print_lines(string, 1, trash,0);
 
-    Packet *out;
-    Packet **list;
+    //Packet *out;
+    Packet **list = calloc(packnum, sizeof(Packet));
 
     for(int i = 0; i < packnum; i++){
-      out = empty_packet();
+      Packet * out = empty_packet();
       char *buffer = malloc(INT_MAX * sizeof(char));
       out->code = 6;
       strcpy(out->option1, itoa(packnum, 10));
@@ -375,7 +375,8 @@ Packet **list_files(Packet* in, char destination[]){
       out-> data_size = strlen(buffer);
       out->data_ptr = buffer;
       list[i] = out;
-      } return list; 
+      } 
+      return list;
   }
 }
 // Copy a remote file to the local filesystem (WIP)
