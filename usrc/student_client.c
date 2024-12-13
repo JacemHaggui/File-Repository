@@ -135,7 +135,7 @@ int student_client(int argc, char *argv[]) {
             //print_packet(package);
 
             // Converting the packet into a string for sending
-            char package_string = malloc((70 + package->data_size)*sizeof(char));
+            char* package_string = malloc((70 + package->data_size)*sizeof(char));
             packet_to_string(package, package_string);
 
             // Sending the packet to the server
