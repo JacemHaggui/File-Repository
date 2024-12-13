@@ -51,7 +51,7 @@ int student_client(int argc, char *argv[]) {
         OUTPUT :
             0
     */
-    int channel = connect_to_server(argv[1], argv[2]);
+    int channel = connect_to_server(argv[1], atoi(argv[2]) );
 
     // Ignore SIGPIPE signals
     signal(SIGPIPE, SIG_IGN);
@@ -139,12 +139,13 @@ int student_client(int argc, char *argv[]) {
             packet_to_string(package, package_string);
 
             // Sending the packet to the server
-            send_pkt(package, channel);
+            send_pkt(package_string, channel);
 
             // Receiving the response from the server
-            Packet* answer = malloc(sizeof(Packet)); // Allocate memory for the packet response
-
-            int response_code = recv_pkt(answer, channel);
+            //Total packet size must not exceed 2048 bytes, including the header.
+            char* answer_string = malloc((2048)*sizeof(char));
+            
+            int response_code = recv_pkt(answer_string, channel);
 
             switch (response_code) {
                 case BAD_PACKET_FORMAT:
@@ -179,12 +180,31 @@ int student_client(int argc, char *argv[]) {
             }
     
             if(response_code == SUCCESS){
-                print_response(answer);
+                // Convert the command into a packet
+                Packet* answer_package = malloc(sizeof(Packet)); // Allocate memory for the packet
+
+                if (answer_package == NULL) {
+                    printf("Memory allocation failed. Exiting.\n");
+                    continue; // Exit if memory allocation fails
+                }
+
+                // Check if the command can be converted to a packet
+                if (CmdlinetoPacket(answer_string, answer_package) == -1) {
+                    printf("Error: Command not recognized. Please try again.\n");
+                    free(answer_package); // Free the memory to avoid memory leak
+                    continue; // Skip to the next loop iteration
+                }
+                print_response(answer_package);
             }
+
+
+
+
 
             // Free the allocated memory after processing the command
             free(package);
-            free(answer);
+            free(answer_string);
+            free(package_string);
         }
         // Close the file
         fclose(file);
@@ -231,22 +251,21 @@ int student_client(int argc, char *argv[]) {
         }
 
         // Print the packet for debugging (optional)
-        print_packet(package);
+        //print_packet(package);
 
 
-        //Converting the packet to a string
+        // Converting the packet into a string for sending
         char package_string[2048];//maximum number of bytes is 2048
         packet_to_string(package, package_string);
-        // Print the string we will send for debugging (optional)
-        print_string(package_string, 70);
 
-        //Sending the packet
-        //send_pkt(package_string, 00000); // Using 00000 as channel code
+        // Sending the packet to the server
+        send_pkt(package_string, channel);
 
         // Receiving the response from the server
-        Packet* answer = malloc(sizeof(Packet)); // Allocate memory for the packet response
-
-        int response_code = recv_pkt(answer, 00000); // Using 00000 as channel code
+        //Total packet size must not exceed 2048 bytes, including the header.
+        char* answer_string = malloc((2048)*sizeof(char));
+            
+        int response_code = recv_pkt(answer_string, channel);
 
         switch (response_code) {
             case BAD_PACKET_FORMAT:
@@ -278,11 +297,29 @@ int student_client(int argc, char *argv[]) {
                 break;
             default:
                 printf("\nUNKNOWN ERROR\n");
-        }
+            }
+    
+        if(response_code == SUCCESS){
+            // Convert the command into a packet
+            Packet* answer_package = malloc(sizeof(Packet)); // Allocate memory for the packet
+
+            if (answer_package == NULL) {
+                printf("Memory allocation failed. Exiting.\n");
+                continue; // Exit if memory allocation fails
+            }
+
+            // Check if the command can be converted to a packet
+            if (CmdlinetoPacket(answer_string, answer_package) == -1) {
+                printf("Error: Command not recognized. Please try again.\n");
+                free(answer_package); // Free the memory to avoid memory leak
+                continue; // Skip to the next loop iteration
+            }
+            print_response(answer_package);
+            }
 
         // Free the allocated memory after processing the command
         free(package);
-        free(answer);
+        free(answer_string);
         }
     }
 
