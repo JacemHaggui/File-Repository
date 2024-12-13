@@ -123,10 +123,50 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
             print_packet(package);
 
             // Sending the packet to the server
-            // Send_pkt(package_string, 863548516);
+            // Send_pkt(package_string, channel code);
+
+            // Receiving the response from the server
+            Packet* answer = malloc(sizeof(Packet)); // Allocate memory for the packet response
+
+            int response_code = recv_pkt(answer, 00000);// Using 00000 as channel code
+
+            switch (response_code) {
+                case -1:
+                    printf("\nBad packet format\n");
+                    break;
+                case -2:
+                    printf("\nFile not found\n");
+                    break;
+                case -3:
+                    printf("\nFile already exists\n");
+                    break;
+                case -4:
+                    printf("\nCommand fails (for other server-side failures)\n");
+                    break;
+                case -5:
+                    printf("\nQuota exceeded\n");
+                    break;
+                case -6:
+                    printf("\nSyntax error in command line\n");
+                    break;
+                case -7:
+                    printf("\nBad response form server\n");
+                    break;
+                case -8:
+                    printf("\nConnection closed\n");
+                    break;
+                case 0:
+                    printf("\nSuccesfully received the server's response\n");
+                    break;
+                default:
+                    print("\nUNKNOWN ERROR\n");
+                }
     
+
+
             // Free the allocated memory after processing the command
             free(package);
+            free(answer);
         }
         // Close the file
         fclose(file);
@@ -183,10 +223,48 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
         print_string(package_string, 70);
 
         //Sending the packet
-        //send_pkt(package_string, 863548516);
+        //send_pkt(package_string, 00000); // Using 00000 as channel code
+
+        // Receiving the response from the server
+        Packet* answer = malloc(sizeof(Packet)); // Allocate memory for the packet response
+
+        int response_code = recv_pkt(answer, 00000); // Using 00000 as channel code
+
+        switch (response_code) {
+            case -1:
+                printf("\nBad packet format\n");
+                break;
+            case -2:
+                printf("\nFile not found\n");
+                break;
+            case -3:
+                printf("\nFile already exists\n");
+                break;
+            case -4:
+                printf("\nCommand fails (for other server-side failures)\n");
+                break;
+            case -5:
+                printf("\nQuota exceeded\n");
+                break;
+            case -6:
+                printf("\nSyntax error in command line\n");
+                break;
+            case -7:
+                printf("\nBad response form server\n");
+                break;
+            case -8:
+                printf("\nConnection closed\n");
+                break;
+            case 0:
+                printf("\nSuccesfully received the server's response\n");
+                break;
+            default:
+                print("\nUNKNOWN ERROR\n");
+            }
 
         // Free the allocated memory after processing the command
         free(package);
+        free(answer);
         }
     }
 
