@@ -30,6 +30,8 @@
 #include "../include/utilities.h"
 #include "../uinclude/client.h"
 #include "../uinclude/struct_packet.h"
+#include "../uinclude/functions.h"
+
 #include <signal.h>
 #include <stdbool.h> // bool type
 #include <string.h>
@@ -64,47 +66,7 @@ const char *const server_help_options = "\
 \n\
 ";
 
-// Converts an int to string
-char* itoa(int val, int base){
-	
-	static char buf[32] = {0};
-	
-	int i = 30;
-	
-	for(; val && i ; --i, val /= base)
-	
-		buf[i] = "0123456789abcdef"[val % base];
-	
-	return &buf[i+1];
-	
-}
 
-char* cats(char* dest, char* source){
-  char* both = malloc(sizeof(char) * (strlen(source) + strlen(dest)));
-  strcpy(both, dest);
-  strcat(both, source);
-  return both;
-}
-
-/* Returns the number of lines in a string. */
-int line_count(char string[]) {
-  int leng = strlen(string);
-  if (leng == 0) {
-    return 0;
-  }
-  int c = 1;
-  for (int i = 0; i < leng; i++) {
-    if (string[i] == '\n') {
-      c++;
-    }
-  }
-  return c;
-}
-
-bool file_exists(char *filename) { // Checks for file existence.
-  struct stat buffer;
-  return (stat(filename, &buffer) == 0);
-}
 
 int print_lines(char string[], int n, char outstring[], bool print_state) { // returns number of packets needed to store.
   int l = 0;

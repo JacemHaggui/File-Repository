@@ -2,6 +2,7 @@
 #include "../include/utilities.h"
 #include "../uinclude/communication.h"
 #include "../uinclude/struct_packet.h"
+#include "../uinclude/functions.h"
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>

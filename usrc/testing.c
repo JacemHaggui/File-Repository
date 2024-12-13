@@ -6,6 +6,8 @@
 #include <string.h>
 #include "../uinclude/struct_packet.h"
 #include "../include/student_server.h"
+#include "../uinclude/functions.h"
+
 
 int main(int argc, char *argv[]) {
   
@@ -60,6 +62,40 @@ int main(int argc, char *argv[]) {
 
   printf("\n == PACKET 4 == \n");
   print_packet(out4);
+
+  
+
+  // TESTING: ROMAIN CATS :
+  printf("\n == TEST ROMAIN == \nTest CATS function :\n");
+  char * test_string_1 = "01234";
+  char * test_string_2 = "56789";
+  char * test_result_cats = cats(test_string_1, test_string_2);
+  printf("\tsize string 1 : %ld\tcontent string 1: %s\n", strlen(test_string_1), test_string_1);
+  printf("\tsize string 2 : %ld\tcontent string 2: %s\n", strlen(test_string_2), test_string_2);
+  printf("\tsize result : %ld\tcontent result : %s\n", strlen(test_result_cats), test_result_cats);
+
+  set_server_directory("./"); 
+  printf("\n\nDIRECTORY : %s\n", SERVER_DIRECTORY);
+
+  set_server_directory("."); 
+  printf("DIRECTORY : %s\n", SERVER_DIRECTORY);
+
+  force_server_directory_format();
+  printf("DIRECTORY : %s\n", SERVER_DIRECTORY);
+
+
+  set_client_directory("./"); 
+  printf("\n\nDIRECTORY : %s\n", CLIENT_DIRECTORY);
+
+  set_client_directory("."); 
+  printf("DIRECTORY : %s\n", CLIENT_DIRECTORY);
+
+  force_client_directory_format();
+  printf("DIRECTORY : %s\n", CLIENT_DIRECTORY);
+
+
+
+
 
   return 0;
 }

@@ -4,7 +4,7 @@ export
 
 .PHONY: clean test reset
 
-all: dirs ulib/communication.o ulib/struct_packet.o ulib/student_client.o ulib/student_server.o ulib/testing.o bin/EDclient/client bin/EDserver/server bin/usrc/testing
+all: dirs ulib/communication.o ulib/functions.o ulib/struct_packet.o ulib/student_client.o ulib/student_server.o ulib/testing.o bin/EDclient/client bin/EDserver/server bin/usrc/testing
 
 dirs: 
 	mkdir -p bin
@@ -19,6 +19,10 @@ ulib/communication.o: uinclude/communication.h usrc/communication.c
 	@echo "Compiling $@"
 	$(CC) -c -o $@ usrc/communication.c
 
+ulib/functions.o: uinclude/functions.h usrc/functions.c
+	@echo "Compiling $@"
+	$(CC) -c -o $@ usrc/functions.c
+
 ulib/struct_packet.o: uinclude/struct_packet.h usrc/struct_packet.c
 	@echo "Compiling $@"
 	$(CC) -c -o $@ usrc/struct_packet.c
@@ -31,24 +35,24 @@ ulib/student_server.o: include/student_server.h usrc/student_server.c
 	@echo "Compiling $@"
 	$(CC) -c -o $@ usrc/student_server.c
 
-bin/EDclient/client: lib/nettools.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o
+bin/EDclient/client: lib/nettools.o ulib/functions.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o
 	@echo "Compiling $@"
-	$(CC) -o $@ lib/nettools.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o ulib/struct_packet.o
+	$(CC) -o $@ lib/nettools.o ulib/functions.o lib/utilities.o ulib/student_client.o ulib/communication.o lib/client.o ulib/struct_packet.o
 	ln -f $@ bin/
 
-bin/EDserver/server: lib/nettools.o ulib/student_server.o ulib/communication.o lib/server.o
+bin/EDserver/server: lib/nettools.o ulib/functions.o ulib/student_server.o ulib/communication.o lib/server.o
 	@echo "Compiling $@"
-	$(CC) -o $@ lib/nettools.o ulib/student_server.o ulib/struct_packet.o ulib/communication.o lib/server.o
+	$(CC) -o $@ lib/nettools.o ulib/functions.o ulib/student_server.o ulib/struct_packet.o ulib/communication.o lib/server.o
 	ln -f $@ bin/
 
 ulib/testing.o: usrc/testing.c
 	@echo "Compiling $@"
 	$(CC) -c -o $@ usrc/testing.c
 
-bin/usrc/testing: ulib/testing.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
+bin/usrc/testing: ulib/testing.o ulib/functions.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
 	@echo "Compiling $@"
 	mkdir -p bin/usrc
-	$(CC) -o $@ ulib/testing.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
+	$(CC) -o $@ ulib/testing.o ulib/functions.o lib/nettools.o ulib/student_server.o ulib/communication.o  ulib/struct_packet.o ulib/student_client.o
 	ln -f $@ usrc/
 
 clean:

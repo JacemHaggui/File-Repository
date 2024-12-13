@@ -23,12 +23,6 @@
 #define CMD_ADD       2   // Add a remote file
 #define CMD_PRINT     1   // Print n lines of a file
 
-// DIRECTORY  VARIABLES HANDLER
-extern char * SERVER_DIRECTORY; // SERVER WORKING DIRECTORY
-extern char * CLIENT_DIRECTORY; // CLIENT WORKING DIRECTORY
-
-void set_server_directory(const char *string);
-void set_client_directory(const char *string);
 
 // PACKET STRUCTURE
 typedef struct  {
