@@ -4,30 +4,55 @@
 #include <inttypes.h>
 #include <ctype.h>
 #include "../uinclude/struct_packet.h"
-#include <stddef.h> // DEBUG ONLY
+#include <stddef.h>  // DEBUG ONLY
+
 
 Packet * empty_packet() {
+	/* 
+		Create an empty Packet. 
+		Each packet begins with E, D and r.
+	INPUT :
+	OUTPUT :
+		packet : Empty Packet
+	*/
 	Packet * packet = calloc(1, sizeof(*packet));
 	packet->E = 'E'; packet->D = 'D'; packet->r = 'r';
 	//Packet * packet = (Packet *)malloc(sizeof(Packet));
 	return packet;
 }
 
+
 Packet * error_packet(int errcode){
+	/* 
+		Create a Packet containing an error code.
+	INPUT :
+		errcode : Error code
+	OUTPUT :
+		out : Packet with error code
+	*/
 	Packet * out = empty_packet();
 	out->data_size = 0; out->code = errcode;
 	return out;
 }
 
+
 void free_packet(Packet * packet) {
-	/* Free Packet if exist */
+	/* 
+		Free Packet if exist 
+	INPUT :
+		packet : The pointer to a given packet which will be overwritted
+	OUTPUT :
+	*/
 	if (packet) free(packet);
 }
 
+
 void print_packet(Packet * packet) {
 	/* 
-		ONLY FOR DEBUGGING : 
-		Print the Packet in a decent format
+		ONLY FOR DEBUGGING : Print the Packet in a decent format
+	INPUT :
+		packet : The pointer to a given packet which will be overwritted
+	OUTPUT :
 	*/
 	printf("Print Packet :\n");
 	if (! packet) 	{printf("\t-Empty Packet\n");  return ;} 
@@ -36,16 +61,20 @@ void print_packet(Packet * packet) {
 	if ( packet->r) printf("\t-Const r : %c\n", packet->r); else printf("\t-No Const r\n");
 	if ( packet->data_size) printf("\t-Data Size : %d bytes\n", packet->data_size); else printf("\t-No Data Size\n");
 	if ( packet->code) printf("\t-Code : %d\n", packet->code); else printf("\t-No Code\n");
-	if ( packet->option1) printf("\t-Option 1 : %s\n", packet->option1); else printf("\t-No Option 1\n");
-	if ( packet->option2) printf("\t-Option 2 : %s\n", packet->option2); else printf("\t-No Option 2\n");
+	if ( strlen( packet->option1 ) > 0) printf("\t-Option 1 : %s\n", packet->option1); else printf("\t-No Option 1\n");
+	if ( strlen( packet->option2 ) > 0) printf("\t-Option 2 : %s\n", packet->option2); else printf("\t-No Option 2\n");
 	if (packet->data_ptr) printf("\t-Data Pointer provided ? : %d (1 <=> True)\n", *(packet->data_ptr) != '\0'  ); else printf("\t-No Data Pointer Provided\n");
 }
 
+
 void print_string(char * str, int n) {
 	/* 
-		ONLY FOR DEBUGGING :
-		Print the first n characters in the string.
-		<!> 0x0000 and '\0' are the same character in C. They will be shown as '\0' .
+		ONLY FOR DEBUGGING : Print the first n characters in the string.
+	<!> 0x0000 and '\0' are the same character in C. They will be shown as '\0' 
+	INPUT :
+		str : The string to print
+		n : Number of lines we want to print
+	OUTPUT :
 	*/
 	for (int i = 0; i < n ; i ++) {
 		unsigned char c = (unsigned char) str[i];
@@ -57,27 +86,25 @@ void print_string(char * str, int n) {
 }
 
 
-
 int string_to_packet (char * string, Packet * packet) { 
-	/* Convert a string argument to a struct packet given 
+	/* 
+		Convert a string argument to a struct packet given 
 	INPUT :
-		string	: the string to convert
-		packet	: the pointer to a given packet which will be overwritted
+		string : The string to convert
+		packet : The pointer to a given packet which will be overwritted
 	OUTPUT :
-		0	: Conversion is complete
-		-1 	: Error Code - Empty String
-		-2	: Error Code - Constant Value (E,D,r) not here
-		-3	: Error Code - Option 1 is too long
-		-4	: Error Code - Option 2 is too long
+		0 : Success - Conversion is complete
+		-1 : Error Code - Bad packet format
+		-5 : Error Code - Quota exceeded
 	*/
 		if ( ! *string) { return -1 ; }  // String is Empty
 
 	char * ptr = string ; // ptr is pointing to the first element in string
 
 	// CONSTANTS PART
-	if (*ptr) 	packet->E = *ptr;  	else return -2 ;
-	if (*(++ptr))	packet->D = *(ptr);	else return -2 ;
-	if (*(++ptr))	packet->r = *(ptr);	else return -2 ;
+	if (*ptr) 	packet->E = *ptr;  	else return -1 ;  // Constant Value E not here
+	if (*(++ptr))	packet->D = *(ptr);	else return -1 ;  // Constant Value D not here
+	if (*(++ptr))	packet->r = *(ptr);	else return -1 ;  // Constant Value r not here
 
 	// DATA SIZE PART
 	uint16_t data_size = (uint16_t)(  (unsigned char)(  (unsigned char)(*(++ptr)) ) | (unsigned char)(  (unsigned char)( *(++ptr) ) << 8 ) );
@@ -92,7 +119,7 @@ int string_to_packet (char * string, Packet * packet) {
 	int i = 0;
 	++ptr; // Skip the code final character
 	while(*(ptr) != '\0') {
-		if (i > 31) return -3;
+		if (i > 31) return -5;  // Option 1 is too long
 		packet->option1[i] = *ptr;
 		i ++;
 		++ptr;
@@ -102,7 +129,7 @@ int string_to_packet (char * string, Packet * packet) {
 	int j = 0;
 	++ptr; // Skip the option1 last character : '\0'
 	while(*(ptr) != '\0' ) {
-		if (j > 31) return -4 ;
+		if (j > 31) return -5 ;  // Option 2 is too long
 		packet->option2[j] = *ptr;
 		j ++;
 		++ptr;
@@ -114,20 +141,17 @@ int string_to_packet (char * string, Packet * packet) {
 
 	return 0;
 
-
-
-
 } 
  
 
 int packet_to_string(Packet * packet, char * string) {
-	/*
-	Convert a packet given in a string format.
+	/* 
+		Convert a packet given in a string format.
 	INPUT :
 		packet : The packet to transform in a string
 		string : The string which will be filled in place
 	OUTPUT :
-		0 : R.A.S (All goooooood)
+		0 : Success
 	*/
 	*(string) 	= packet->E;
 	*(++string) 	= packet->D;
@@ -154,6 +178,98 @@ int packet_to_string(Packet * packet, char * string) {
 	}
 
 	return 0;
+}
+
+
+int CmdlinetoPacket(const char *input, Packet *pkt) {
+	/* 
+		Convert a string given in a packet format.
+	INPUT :
+		input : The string to transform in a packet
+		pkt : The packet which will be filled in place
+	OUTPUT :
+		0 : Success
+		-6 : Syntax error in command line
+	*/
+
+    // Initialize the packet with fixed values
+    pkt->E = 'E';
+    pkt->D = 'D';
+    pkt->r = 'r';
+    
+    // Initializing data_size and the option1 and option2 arrays to zero.
+    // We use memset here to efficiently set all 32 bytes of each array to 0.
+    // This ensures that the options are empty before we populate them with actual data.
+    memset(pkt->option1, 0, sizeof(pkt->option1));
+    memset(pkt->option2, 0, sizeof(pkt->option2));
+    pkt->data_size = 0;
+
+    // Split input into command and arguments
+    // Buffers to store command and arguments
+    char command[64];  // Size 64 for most commands
+    char option1[256]; // Size 256 for first argument (e.g., filename)
+    char option2[256]; // Size 256 for second argument (if needed)
+
+    // Parse the input into command and options
+    int args = sscanf(input, "%s %s %s", command, option1, option2); 
+    /* sscanf Explanation
+    * The sscanf function is used to read formatted input from the string `input`.
+    * 
+    * - "%s %s %s" is the format string that tells sscanf to:
+    *   - Read a string (word) up to the first space and store it in `command`
+    *   - Read the next string up to the next space and store it in `option1`
+    *   - Read the next string up to the next space and store it in `option2`
+    * 
+    * In the case of an input like "put myfile.txt /path/to/destination":
+    * - `command` will store "put"
+    * - `option1` will store "myfile.txt"
+    * - `option2` will store "/path/to/destination"
+    * 
+    * `args` will store the number of successful assignments, which is 3 in this case 
+    * because three strings were successfully extracted from the `input`.
+    */
+    
+    if (args < 3) {
+		printf("CmdLineToPacket : args < 3 and args = %d \n", args);
+    }
+
+    strncpy(pkt->option1, option1, sizeof(pkt->option1) - 1);  // Copy the first option (e.g., filename)
+    strncpy(pkt->option2, option2, sizeof(pkt->option2) - 1);  // Copy the second option (if available)
+
+    // Determine which command was entered
+	if (strcmp(command, "cat") == 0) {
+        pkt->code = 1;  // Command code for "cat"
+    }
+    else if (strcmp(command, "put") == 0) {
+        pkt->code = 2;  // Command code for "put" (not permanent)
+    }
+	else if (strcmp(command, "mv") == 0) {
+        pkt->code = 3;  // Command code for "mv"
+        // pkt->option1 and pkt->option2 have already been set earlier
+    }
+    else if (strcmp(command, "rm") == 0) {
+        pkt->code = 4;  // Command code for "rm"
+    }
+    else if (strcmp(command, "get") == 0) {
+        pkt->code = 5;  // Command code for "get"
+        // pkt->option1 and pkt->option2 have already been set earlier
+    }
+    else if (strcmp(command, "ls") == 0) {
+        pkt->code = 6;  // Command code for "ls"
+    }
+    else if (strcmp(command, "quit") == 0 || strcmp(command, "exit") == 0) {
+        pkt->code = 7;  // Command byte for "quit" or "exit"
+    }
+    else if (strcmp(command, "restart") == 0) {
+        pkt->code = 8;  // Command byte for "restart"
+    }
+
+    else {
+        fprintf(stderr, "Error: Unknown command '%s'\n", command);
+        return -6;
+    }
+
+    return 0;  // Success
 }
 
 
@@ -197,86 +313,3 @@ void main() {
 }
 
 */
-
-
-
-int CmdlinetoPacket(const char *input, Packet *pkt) {
-    // Initialize the packet with fixed values
-    pkt->E = 'E';
-    pkt->D = 'D';
-    pkt->r = 'r';
-    
-    // Initializing data_size and the option1 and option2 arrays to zero.
-    // We use memset here to efficiently set all 32 bytes of each array to 0.
-    // This ensures that the options are empty before we populate them with actual data.
-    memset(pkt->option1, 0, sizeof(pkt->option1));
-    memset(pkt->option2, 0, sizeof(pkt->option2));
-    pkt->data_size = 0;
-
-    // Split input into command and arguments
-    // Buffers to store command and arguments
-    char command[64];  // Size 64 for most commands
-    char option1[256]; // Size 256 for first argument (e.g., filename)
-    char option2[256]; // Size 256 for second argument (if needed)
-
-    // Parse the input into command and options
-    int args = sscanf(input, "%s %s %s", command, option1, option2); 
-    /* sscanf Explanation
-    * The sscanf function is used to read formatted input from the string `input`.
-    * 
-    * - "%s %s %s" is the format string that tells sscanf to:
-    *   - Read a string (word) up to the first space and store it in `command`
-    *   - Read the next string up to the next space and store it in `option1`
-    *   - Read the next string up to the next space and store it in `option2`
-    * 
-    * In the case of an input like "put myfile.txt /path/to/destination":
-    * - `command` will store "put"
-    * - `option1` will store "myfile.txt"
-    * - `option2` will store "/path/to/destination"
-    * 
-    * `args` will store the number of successful assignments, which is 3 in this case 
-    * because three strings were successfully extracted from the `input`.
-    */
-
-    strncpy(pkt->option1, option1, sizeof(pkt->option1) - 1);  // Copy the first option (e.g., filename)
-    strncpy(pkt->option2, option2, sizeof(pkt->option2) - 1);  // Copy the second option (if available)
-
-    // Determine which command was entered
-    if (strcmp(command, "put") == 0) {
-        pkt->code = 1;  // Command code for "put" (not permanent)
-        //TODO: Put the entire file contents in data
-        //Seems weird since the packet only takes a pointer to data ?
-        //Reminder: Discuss with the group 
-    } 
-    else if (strcmp(command, "rm") == 0) {
-        pkt->code = 2;  // Command code for "rm"
-    } 
-    else if (strcmp(command, "get") == 0) {
-        pkt->code = 3;  // Command code for "get"
-        // pkt->option1 and pkt->option2 have already been set earlier
-    } 
-    else if (strcmp(command, "ls") == 0) {
-        pkt->code = 4;  // Command code for "ls"
-    } 
-    else if (strcmp(command, "cat") == 0) {
-        pkt->code = 5;  // Command code for "cat"
-    } 
-    else if (strcmp(command, "mv") == 0) {
-        pkt->code = 6;  // Command code for "mv"
-        // pkt->option1 and pkt->option2 have already been set earlier
-    } 
-    else if (strcmp(command, "quit") == 0 || strcmp(command, "exit") == 0) {
-        pkt->code = 7;  // Command byte for "quit" or "exit"
-    } 
-    else if (strcmp(command, "restart") == 0) {
-        pkt->code = 8;  // Command byte for "restart"
-    }
-
-    else {
-        fprintf(stderr, "Error: Unknown command '%s'\n", command);
-        return -1;
-    }
-
-    return 1;  // Indicate success
-}
-

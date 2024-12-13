@@ -1,0 +1,25 @@
+
+
+**Function command**
+ORIGIN  CODE    VALUE
+GROUP   8       Command byte for "restart"
+GROUP   7       Command byte for "quit" or "exit"
+PROF    6       Listing remote files
+PROF    5       Getting a remote file 
+PROF    4       Removing a remote file 
+PROF    3       Renaming a remote file 
+PROF    2       Adding a remote file 
+PROF    1       Printing n lines of a file
+
+GROUP   0       Success
+
+**Error handling**
+PROF    -1      Bad packet format
+PROF    -2      File not found
+PROF    -3      File already exists
+PROF    -4      Command fails (for other server-side failures)
+PROF    -5      Quota exceeded 
+PROF    -6      Syntax error in command line
+PROF    -7      Bad response form server
+PROF    -8      Connection closed
+

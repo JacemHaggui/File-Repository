@@ -29,6 +29,7 @@
  */
 #include "../include/utilities.h"
 #include "../uinclude/client.h"
+#include "../uinclude/struct_packet.h"
 #include <signal.h>
 #include <stdbool.h> // bool type
 #include <string.h>
@@ -78,6 +79,13 @@ char* itoa(int val, int base){
 	
 }
 
+char* cats(char* dest, char* source){
+  char* both = malloc(sizeof(char) * (strlen(source) + strlen(dest)));
+  strcpy(both, dest);
+  strcat(both, source);
+  return both;
+}
+
 /* Returns the number of lines in a string. */
 int line_count(char string[]) {
   int leng = strlen(string);
@@ -114,31 +122,38 @@ int print_lines(char string[], int n, char outstring[], bool print_state) { // r
   return 1;
 }
 
-int file_to_string(char filename[], char* buffer){
-  long length;
-  FILE * f = fopen (filename, "rb");
-  if (f)
-  {
-    fseek (f, 0, SEEK_END);
-    length = ftell (f);
-    fseek (f, 0, SEEK_SET);
-    buffer = malloc (length);
-    if (buffer)
-    {
-      fread (buffer, 1, length, f);
-    }
-    fclose (f);
-    return 0;
-  }
-  else{
+int file_to_string(char *filename, char *text)
+{ 
+  char c;
+  int cpt = 0;
+
+  if(!file_exists(filename)){
     printf("Error: File '%s' does not exist.\n", filename);
-    return -2; // FILE NOT FOUND
+    return -2;
+    }
+
+  /*Counts size file.*/
+  FILE *f = fopen(filename, "r");
+
+  while (fscanf(f, "%c", &c) != EOF)
+  {
+    cpt = cpt + 1;
   }
+  fclose(f);
+  /* Stocks file content into a string*/
+  text[cpt] = '\0';
+  f = fopen(filename, "r");
+  cpt = 0;
+
+  while (fscanf(f, "%c", &c) != EOF)
+  {
+    text[cpt] = c;
+    cpt = cpt + 1;
+  }
+  return 0;
 }
 
 
-/* TO DO: THESE FUNCTIONS MUST FAIL IF THE FILE ALREADY EXISTS! NO OVERWRITING
- * IS ALLOWED.*/
 int write_to_file(char filepath[], char data[],
                    char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
                                          // MUST CONTAIN THE PATH TO THE FILE!
@@ -148,9 +163,10 @@ int write_to_file(char filepath[], char data[],
     return -3; // FILE ALREADY EXISTS.
   }
 
+
   FILE *new;
-  new = fopen(strcat(destination,filepath), "w");
-  fprintf(new, data);
+  new = fopen(filepath, "w");
+  fputs(data, new);
   fclose(new);
   return 0;
 }
@@ -189,7 +205,7 @@ int rename_file(char newfile[], char oldfile[]) { // full paths need to be given
   FILE *fptr;
 
   fptr = fopen(newfile, "w");
-  fprintf(fptr, buffer);
+  fputs(buffer, fptr);
   fclose(fptr);
   // Now that we've added the context of the oldfile to the newfile, since we're
   // renaming the file, we have to remove the old one. Note that we have to add
@@ -206,19 +222,22 @@ void slice(const char* str, char* result, size_t start, size_t end) {
 }
 
 /*Returns multiple packets.*/
-Packet **f_print_n_lines(Packet* in, char directory[]){
-  char *filename = strcat(directory, in->option1);
-
-  char * string; 
-  int errcode = file_to_string(filename, string);
+Packet **f_print_n_lines(Packet* input, char *directory){
   
+ char * filename = cats(directory, input->option1);
+
+  char * stringf = malloc(sizeof(char) * 1000); // Bad allocation!
+  int errcode = file_to_string(filename, stringf);
+
   if(errcode != 0){
-    return error_packet(errcode);
+    Packet ** single_slot = calloc(1, sizeof(Packet));
+    single_slot[0] = error_packet(errcode);
+    return single_slot;
   }
 
-  char * datastring;
+  char * datastring = malloc(sizeof(char) * strlen(datastring));
 
-  int packnum = print_lines(filename, atoi(in->option2), datastring, 1);
+  int packnum = print_lines(stringf, atoi(input->option2), datastring, 1);
 
   Packet ** list = calloc(packnum, sizeof(Packet));
   Packet * out;
@@ -229,7 +248,7 @@ Packet **f_print_n_lines(Packet* in, char directory[]){
     out->code = 1;
     strcpy(out->option1, itoa(packnum,10));
     out->E = 'E'; out->D = 'D'; out->r = 'r'; 
-    slice(datastring, buffer, i*packnum, (i+1)*packnum);
+    slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
     list[i] = out;
@@ -238,8 +257,12 @@ Packet **f_print_n_lines(Packet* in, char directory[]){
 }
 
 Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the operation. Packet.code = 0 if correctly done, -1 otherwise (file named filename already exists)
-  int errcode = write_to_file(strcat(directory, in->option1), in->data_ptr, directory);
   
+  char * filename = cats(directory, in->option1);
+  
+  int errcode = write_to_file(filename, in->data_ptr, directory);
+
+
   if(errcode != 0){
     return error_packet(errcode);
   }
@@ -252,7 +275,10 @@ Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the
 }
 
 Packet * renamefile(Packet* in, char directory[]){
-  int errcode = rename_file(strcat(directory, in->option2), strcat(directory, in->option1));
+  char * oldfilename = cats(directory, in->option1);
+  char * newfilename = cats(directory, in->option2);
+
+  int errcode = rename_file(newfilename, oldfilename);
 
   return error_packet(errcode);
 }
@@ -267,25 +293,21 @@ int remove_file(char filename[]) {
 }
 
 Packet * removefile(Packet* in, char directory[]){
-  int errcode = remove_file(strcat(directory, in->option1));
+  int errcode = remove_file(cats(directory, in->option1));
   
   return error_packet(errcode);
 }
 
-/*Very similar to print_n_lines */
+/* UNFINISHED! */
+/* Essentially does the same as */
 Packet **fetch(Packet* in, char directory[]){
-  char *filename = strcat(directory, in->option1);
+  char *contents = malloc(sizeof(char) * 2056);
+  
+  file_to_string(cats(directory, in->option1), contents);
 
-  char * string;
-  int errcode = file_to_string(filename, string);
+  char * datastring = malloc(sizeof(char) * strlen(contents));
 
-  if(errcode != 0){
-    return error_packet(errcode);
-  }
-
-  char * datastring;
-
-  int packnum = print_lines(filename, line_count(string), datastring, 0);
+  int packnum = print_lines(contents, line_count(contents), datastring, 0);
 
   Packet ** list = calloc(packnum, sizeof(Packet));
   Packet * out;
@@ -294,13 +316,13 @@ Packet **fetch(Packet* in, char directory[]){
     out = empty_packet();
     char buffer[INT_MAX];
     out->code = 5;
-    strcpy(out->option1, itoa(packnum, 10));
-    slice(string, buffer, i*packnum, (i+1)*packnum);
+    strcpy(out->option1, itoa(packnum,10));
+    out->E = 'E'; out->D = 'D'; out->r = 'r'; 
+    slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
     list[i] = out;
   }
-
   return list;
 }
 
@@ -318,17 +340,22 @@ Packet **list_files(Packet* in, char destination[]){
       return list; 
   } 
   else{
-    char* string;
-    while (de = readdir(dr) != NULL) {
+    char * string;
+    while ((de = readdir(dr)) != NULL) {
       // printf("%s\n", de->d_name); 
-      strcat(string, de->d_name);
-      strcat(string, ",");
+      
+      string = cats(string, de->d_name);
+      string = cats(string, ",");
+      //strcat(string, de->d_name);
+      //strcat(string, ",");
       
       struct stat* restrict buf;
       stat(de->d_name, buf);
-
-      strcat(string, ",");
-      strcat(string, buf->st_size);
+	
+      string = cats(string, ",");
+      string = cats(string, itoa(buf->st_size, 10));
+      //strcat(string, ",");
+      //strcat(string, buf->st_size);
     }
     closedir(dr);
     string[strlen(string) - 1] = '\0'; // o remove the last comma and add a null terminator at the end.
@@ -340,7 +367,7 @@ Packet **list_files(Packet* in, char destination[]){
 
     for(int i = 0; i < packnum; i++){
       out = empty_packet();
-      char buffer[INT_MAX];
+      char *buffer = malloc(INT_MAX * sizeof(char));
       out->code = 6;
       strcpy(out->option1, itoa(packnum, 10));
       out->E = 'E'; out->D = 'D'; out->r = 'r'; 
