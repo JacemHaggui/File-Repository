@@ -363,26 +363,26 @@ void student_server(int channel, int argc, char *argv[]) {
   force_server_directory_format();
 
   // buffer to receive packets (max size: 81)
-  char recvbuf[2048];
+  char string_packet_received[2048];
   // infinite loop -> use ^C to exit the program
   while (1) {
     // get the command from user, exit if it fails
     printf(" -- wait a packet (^C to exit) --\n");
     // get the packet
-    int res = recv_pkt(recvbuf, channel);
-    if (!res)
-      return; // return if communication error occured
-    printf("RECU\n");
+    int res = recv_pkt(string_packet_received, channel);
+    printf("Code : %d , string :", res);
+    print_string(string_packet_received, 80);
+
+    // PROCESS THE STRING PACKET RECEIVED CONTENT
+    Packet * packet_received = empty_packet();
+    int error_code_conversion = string_to_packet(string_packet_received, packet_received);
+    print_packet(packet_received);
+
+
+    //if (res )
+    //  return; // return if communication error occured
     // prints the command, relying on the number of parameters
-    if (*recvbuf == 0)
-      printf("     command: %s\n", recvbuf + 1);
-    else if (*recvbuf == 1)
-      printf("     command: %s   param: %s\n", recvbuf + 1, recvbuf + 17);
-    else
-      printf("     command: %s   param1: %s   param2: %s\n", recvbuf + 1,
-             recvbuf + 17, recvbuf + 49);
+  
   }
-  // -----------------------------------------------------
-  //  END of EXAMPLE code to be replace by your own code |
-  // -----------------------------------------------------
+
 }

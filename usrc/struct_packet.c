@@ -120,30 +120,47 @@ int string_to_packet (char * string, Packet * packet) {
 	int i = 0;
 	++ptr; // Skip the code final character
 	while(*(ptr) != '\0') {
+		printf("\t\t%d : %c\n", i, *ptr);
 		if (i > 31) return -5;  // Option 1 is too long
 		packet->option1[i] = *ptr;
 		i ++;
 		++ptr;
 	}
+	++ptr; // Skip the option1 last character : '\0'
+	i++;
+
+	// OPTION 1 SKIP '.' noise after '\0' null terminator :
+	while( i < 32) {
+		++ptr;
+		i ++ ;
+	}
 
 	// OPTION 2 PART
 	int j = 0;
-	++ptr; // Skip the option1 last character : '\0'
+	
 	while(*(ptr) != '\0' ) {
+		printf("\t\t%d : %c\n", i, *ptr);
 		if (j > 31) return -5 ;  // Option 2 is too long
 		packet->option2[j] = *ptr;
 		j ++;
 		++ptr;
 	}
+	++ptr; // Skip the option2 last character : '\0'
+	j++;
+
+	// OPTION 1 SKIP '.' noise after '\0' null terminator :
+	while( j < 32) {
+		++ptr;
+		j ++ ;
+	}
 
 	// DATA PART
-	++ptr; // Skip the option2 last character : '\0'
 	packet->data_ptr = ptr;
 
 	return 0;
 
 } 
- 
+
 
 int packet_to_string(Packet * packet, char * string) {
 	/* 
@@ -340,45 +357,3 @@ void print_response(const Packet *packet) {
     }
 }
 
-
-
-/*
-void main() {
-
-
-	Packet * packet = empty_packet();
-	char * string1 = "EDr\x00\x0A\x02OptionA\0Another option\0Hello\0XXX";
-	char * string2 = "EDr\x00\x0A\x02Opt1\0Opt2\0";
-	char * string3 = "EDr\x01\xF4\x05ThisIsOption1WithFullLength1234\0ThisIsOption2WithFullLength6543\0";
-	char * string4 = "EDr\x00\x14\x03\0\0";
-	char * string5 = "EDr\x00\x10\x04OptPartiallyFilled\0";
-	char * string6 = "EDr\x00\x64\x07OptionEndingHere123\0AnotherOptionBoundary123\0data \0";
-	char *string_list[] = {
-        	string1,
-        	string2,
-        	string3,
-        	string4,
-        	string5,
-        	string6
-	};
-	
-	for (int i = 1; i < 7 ; i ++) { 
-		Packet * packet = empty_packet();
-		int code = string_to_packet(string_list[i-1], packet);
-		printf("--- STRING %d --- \n", i );
-		print_packet(packet);
-		printf("\nCode %d\n", code);
-	} 
-	
-	//Packet * packet = empty_packet();
-	int code = string_to_packet(string_list[0], packet);
-	print_packet(packet);
-	printf("\nCode %d\n", code);
-	int n = 6 + strlen(packet->option1) + 1 + strlen(packet->option2) + 1 + packet->data_size;
-	char * string_receiver = calloc(sizeof(packet) + packet->data_size , sizeof(string1));
-	packet_to_string(packet, string_receiver);
-	print_string(string_receiver, n);
-	free_packet(packet);
-}
-
-*/

@@ -45,7 +45,7 @@ const char * const client_help_options = "\
 //------------------------------------------------------------------------------
 //int student_client(int channel, int argc, char *argv[])
 
-int student_client_old(int argc, char *argv[]) { 
+int student_client_old(int argc, char *argv[]) {
     /* 0
         INPUT :
             0
@@ -61,7 +61,7 @@ int student_client_old(int argc, char *argv[]) {
     int analyze_flag = 0;
     int interactive_flag = 0;
     char analyze_file[256] = {0};
-    char directory[256] = {0}; // Directory MUST ENDS WITH '/' 
+    char directory[256] = {0}; // Directory MUST ENDS WITH '/'
 
     //check if the user is asking for help
     if(argc == 2 && strcmp(argv[1], "help") == 0 ){

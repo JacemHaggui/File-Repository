@@ -36,6 +36,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h> // For close()
+#include "../uinclude/struct_packet.h"
 
 int connect_to_server(const char* server_ip, int port) {
     // Create socket
@@ -110,6 +111,9 @@ int recv_pkt(char *pkt, int channel) {
             buf += amount_received; // Move the buffer pointer forward
         }
     }
+
+    printf("\nString Encoded :\n\t");
+    print_string(pkt,70 + data_size);
 
     return 0; // Success
 }
