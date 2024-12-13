@@ -396,6 +396,9 @@ void student_server(int channel, int argc, char *argv[]) {
   //  EXAMPLE.  To be replaced by your project code   |
   // --------------------------------------------------
 
+  set_server_directory("./"); // DIRECTORY DEFAULT SERVER IS "./"
+  printf("DIRECTORY : %s\n", SERVER_DIRECTORY);
+
   // buffer to receive packets (max size: 81)
   char recvbuf[81];
   // infinite loop -> use ^C to exit the program

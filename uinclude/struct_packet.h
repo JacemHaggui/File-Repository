@@ -9,6 +9,8 @@
 
 #include <stddef.h> // DEBUG ONLY
 
+
+
 // ORIGIN GROUP: Command Codes for GROUP
 #define CMD_RESTART   8   // Restart command
 #define CMD_QUIT      7   // Quit or exit command
@@ -21,6 +23,14 @@
 #define CMD_ADD       2   // Add a remote file
 #define CMD_PRINT     1   // Print n lines of a file
 
+// DIRECTORY  VARIABLES HANDLER
+extern char * SERVER_DIRECTORY; // SERVER WORKING DIRECTORY
+extern char * CLIENT_DIRECTORY; // CLIENT WORKING DIRECTORY
+
+void set_server_directory(const char *string);
+void set_client_directory(const char *string);
+
+// PACKET STRUCTURE
 typedef struct  {
 	char E; // 1 byte
 	char D; // 1 byte

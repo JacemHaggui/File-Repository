@@ -6,6 +6,55 @@
 #include "../uinclude/struct_packet.h"
 #include <stddef.h>  // DEBUG ONLY
 
+char * SERVER_DIRECTORY = NULL; // DEFINE NULL at the beginning (Will be updated in student_server function)
+char * CLIENT_DIRECTORY = NULL; // DEFINE NULL at the beginning (Will be updated in student_client function)
+
+void set_server_directory(const char *string) {
+	/*  Set the directory path for the server side.
+	INPUT :
+		string : The New Absolute Path (or relative in fact) to the server working directory
+	OUTPUT :
+	*/
+    // IF SERVER_DIRECTORY IS ALREADY FILLED -> FREE IT
+    if (SERVER_DIRECTORY != NULL) {
+        free(SERVER_DIRECTORY); 
+        SERVER_DIRECTORY = NULL;
+    }
+
+    SERVER_DIRECTORY = malloc((strlen(string) + 1) * sizeof(char));
+    if (SERVER_DIRECTORY == NULL) {
+        // Only if malloc didn't succeed
+        printf("Error Malloc SERVER_DIRECTORY\n");
+        return;
+    }
+
+    strcpy(SERVER_DIRECTORY, string); // Fill SERVER_DIRECTORY Global Variable with the content of string 
+}
+
+void set_client_directory(const char *string) {
+	/*  Set the directory path for the client side.
+	INPUT :
+		string : The New Absolute Path (or relative in fact) to the client working directory
+	OUTPUT :
+	*/
+    // IF CLIENT_DIRECTORY IS ALREADY FILLED -> FREE IT
+    if (CLIENT_DIRECTORY != NULL) {
+        free(CLIENT_DIRECTORY); 
+        CLIENT_DIRECTORY = NULL;
+    }
+
+    CLIENT_DIRECTORY = malloc((strlen(string) + 1) * sizeof(char));
+    if (CLIENT_DIRECTORY == NULL) {
+        // Only if malloc didn't succeed
+        printf("Error Malloc CLIENT_DIRECTORY\n");
+        return;
+    }
+
+    strcpy(CLIENT_DIRECTORY, string); // Fill CLIENT_DIRECTORY Global Variable with the content of string 
+}
+
+
+
 
 Packet * empty_packet() {
 	/* 

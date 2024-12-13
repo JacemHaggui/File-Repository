@@ -264,7 +264,7 @@ int student_client(int argc, char *argv[]) {
         // Receiving the response from the server
         //Total packet size must not exceed 2048 bytes, including the header.
         char* answer_string = malloc((2048)*sizeof(char));
-            
+
         int response_code = recv_pkt(answer_string, channel);
 
         switch (response_code) {
