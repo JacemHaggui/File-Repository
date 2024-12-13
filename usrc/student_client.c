@@ -42,14 +42,16 @@ const char * const client_help_options = "\
 ";
 
 //------------------------------------------------------------------------------
+//int student_client(int channel, int argc, char *argv[])
 
-int student_client(int channel, int argc, char *argv[]) {  // We don't use channel for now
+int student_client(int argc, char *argv[]) { 
     /* 0
         INPUT :
             0
         OUTPUT :
             0
     */
+    int channel = connect_to_server(argv[1], argv[2]);
 
     // Ignore SIGPIPE signals
     signal(SIGPIPE, SIG_IGN);
@@ -66,7 +68,7 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
     };
 
     // Step 1: Parse command-line arguments, figuring out which mode to activate
-    for (int i = 1; i < argc; i++) {
+    for (int i = 3; i < argc; i++) {
 
         if (strcmp(argv[i], "-analyze") == 0) {
             if (analyze_flag || i + 1 >= argc) {
@@ -131,6 +133,10 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
 
             // Print the packet for debugging (optional)
             //print_packet(package);
+
+            // Converting the packet into a string for sending
+            char package_string = malloc((70 + package->data_size)*sizeof(char));
+            packet_to_string(package, package_string);
 
             // Sending the packet to the server
             send_pkt(package, channel);

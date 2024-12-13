@@ -32,6 +32,39 @@
 
 #include <inttypes.h>
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h> // For close()
+
+int connect_to_server(const char* server_ip, int port) {
+    // Create socket
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        perror("Socket creation failed");
+        return -1;
+    }
+
+    // Set up server address struct
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr.s_addr = inet_addr(server_ip); // or use inet_pton
+
+    // Connect to the server
+    if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Connection failed");
+        close(sock);
+        return -1;
+    }
+
+    printf("Connected to server at %s:%d\n", server_ip, port);
+    return sock;
+}
+
+
+
+
 /* a function to receive a packet (in pkt) on a socket channel 
  * it assumes that the received packet respects the format.
  * (in a real program, this should be checked... )
