@@ -101,11 +101,9 @@ void send_pkt(char *pkt, int channel) {
                 fprintf(stderr, "Connection closed\n");
             else
                 perror("Cannot write");
-            return 0;
         }
         if (amount_sent == 0) { // Connection issue
             fprintf(stderr, "Write problem\n");
-            return 0;
         }
 
         total_size -= amount_sent; // Update remaining size to send

@@ -133,7 +133,7 @@ int student_client(int channel, int argc, char *argv[]) {  // We don't use chann
             //print_packet(package);
 
             // Sending the packet to the server
-            Send_pkt(package, channel);
+            send_pkt(package, channel);
 
             // Receiving the response from the server
             Packet* answer = malloc(sizeof(Packet)); // Allocate memory for the packet response
