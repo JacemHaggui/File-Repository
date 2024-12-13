@@ -85,7 +85,7 @@ int recv_pkt(char *pkt, int channel) {
  * The "packet" parameter must respect the specified format (see before).
  * Returns 1 for success and 0 for failure
  */
-int send_pkt(char *pkt, int channel) {
+void send_pkt(char *pkt, int channel) {
     // Header is 70 bytes: 3 for 'E', 'D', 'r' + 2 for data_size + 1 for command/error
     // + 32 for option1 + 32 for option2 = 70.
     uint16_t data_size = *(uint16_t*)(pkt + 3);
@@ -111,5 +111,5 @@ int send_pkt(char *pkt, int channel) {
         total_size -= amount_sent; // Update remaining size to send
         buf += amount_sent; // Move buffer pointer forward
     }
-    return 1; // Success
+    printf("Succesfully sent packet\n");
 }
