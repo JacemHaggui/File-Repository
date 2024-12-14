@@ -50,6 +50,8 @@ char* itoa(int val, int base);
 
 void slice(const char* str, char* result, size_t start, size_t end);
 
+int write_to_file(char filepath[], char data[], char destination[]);
+
 int line_count(char string[]);
 
 bool file_exists(char *filename);
