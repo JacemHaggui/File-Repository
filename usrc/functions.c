@@ -8,6 +8,11 @@
 #include <dirent.h> // For directory handling.
 #include "../uinclude/struct_packet.h"
 #include "../include/utilities.h"
+#include "../uinclude/functions.h"
+
+
+
+
 
 char *  cats(char* dest, char* source){
   char* both = malloc(sizeof(char) * (strlen(source) + strlen(dest)));

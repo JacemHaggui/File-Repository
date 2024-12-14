@@ -9,20 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-// Define constants for packet
-#define HEADER_SIZE 70
-#define MAX_PACKET_SIZE 2048
-#define MAX_DATA_SIZE (MAX_PACKET_SIZE - HEADER_SIZE)
-// Defining error codes
-#define BAD_PACKET_FORMAT    -1
-#define FILE_NOT_FOUND       -2
-#define FILE_ALREADY_EXISTS  -3
-#define COMMAND_FAILS        -4
-#define QUOTA_EXCEEDED       -5
-#define SYNTAX_ERROR         -6
-#define BAD_SERVER_RESPONSE  -7
-#define CONNECTION_CLOSED    -8
-#define SUCCESS              0
+
 
 
 /**  help message for commandline options */

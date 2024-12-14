@@ -343,9 +343,41 @@ Packet **list_files(Packet* in, char destination[]){
 }
 // Copy a remote file to the local filesystem (WIP)
 
-// !! This is the function you must implement for your project.
-// Here we provide an implementation related to the example, not
-// to the project... return makes the server wait for next client.
+int process_packet(Packet * packet, int channel) {
+  /* 
+		Process the packet received in parameter, launch the function dedicated to it
+	INPUT :
+    packet: packet to be processed
+	OUTPUT :
+		...
+	*/
+  if (packet->code == CMD_PRINT) { // PRINT N LINES 
+    Packet ** list_packet_to_send = f_print_n_lines(packet, SERVER_DIRECTORY);
+    Packet * first_packet = list_packet_to_send[0];
+
+    // HOW MANY PACKETS SHOULD WE SEND ?
+    int number_packet_to_send = 0;
+    int error_code = first_packet->code;
+    if (error_code < 0) { // ERROR HAPPENED
+      int number_packet_to_send = 1 ;
+    } else {
+      int number_packet_to_send = atoi(first_packet->option1);
+    }
+
+    // SEND THE PACKETS
+    for (int i = 0; i < number_packet_to_send; i ++) {
+        char packet_string_to_send[2048];
+        int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
+        int res = send_pkt(packet_string_to_send, channel);
+    }
+
+
+  }
+
+
+}
+
+
 void student_server(int channel, int argc, char *argv[]) {
   // Writing to a closed socket causes a SIGPIPE signal, which makes
   // the program exits. The following line prevents this default behaviour.
@@ -354,29 +386,42 @@ void student_server(int channel, int argc, char *argv[]) {
   // with "EPIPE" in send_pkt in usrc/communication.c).
   signal(SIGPIPE, SIG_IGN);
 
-  // --------------------------------------------------
-  //  EXAMPLE.  To be replaced by your project code   |
-  // --------------------------------------------------
 
   set_server_directory("./"); // DIRECTORY DEFAULT SERVER IS "./"
-  printf("DIRECTORY : %s\n", SERVER_DIRECTORY);
+  printf("\nCURRENT DIRECTORY : %s\n", SERVER_DIRECTORY);
   force_server_directory_format();
 
   // buffer to receive packets (max size: 81)
   char string_packet_received[2048];
   // infinite loop -> use ^C to exit the program
   while (1) {
-    // get the command from user, exit if it fails
+    // GET USER COMMAND
     printf(" -- wait a packet (^C to exit) --\n");
-    // get the packet
-    int res = recv_pkt(string_packet_received, channel);
-    printf("Code : %d , string :", res);
-    print_string(string_packet_received, 80);
 
-    // PROCESS THE STRING PACKET RECEIVED CONTENT
-    Packet * packet_received = empty_packet();
-    int error_code_conversion = string_to_packet(string_packet_received, packet_received);
-    print_packet(packet_received);
+    //GET THE PACKET
+    int res = recv_pkt(string_packet_received, channel);
+
+    if (res == CONNECTION_CLOSED) {
+      // DO SOMETHING
+
+    }
+    else if (res == CANNOT_READ) {
+      // DO SOMETHING
+
+    }else if (res == SUCCESS) {
+      // PROCESS THE STRING PACKET RECEIVED CONTENT
+      Packet * packet_received = empty_packet();
+      int error_code_conversion = string_to_packet(string_packet_received, packet_received);
+      print_packet(packet_received);
+
+      int error_code_process = process_packet(packet_received, channel);
+
+    }else {
+      printf("Error - Not Implemented\n");
+    }
+
+
+
 
 
     //if (res )

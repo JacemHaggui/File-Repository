@@ -37,6 +37,7 @@
 #include <arpa/inet.h>
 #include <unistd.h> // For close()
 #include "../uinclude/struct_packet.h"
+#include "../uinclude/functions.h"
 
 int connect_to_server(const char* server_ip, int port) {
     // Create socket
@@ -72,6 +73,17 @@ int connect_to_server(const char* server_ip, int port) {
  * Returns 1 in case of success, 0 in case of failure
  */
 int recv_pkt(char *pkt, int channel) {
+    /*
+        Stores in the string pkt the data received from channel
+	INPUT :
+		pkt :       The string filled with the data received
+		channel :   The channel on which we are listening
+	OUTPUT :
+        CONNECTION_CLOSED : The connection has been closed
+        CANNOT_READ :       The data can't be read
+        SUCCESS :           The data have been received and transmitted to pkt
+	*/
+
     int amount_received;
     int total_size = 70; // First, we expect the 70-byte header
     char *buf = pkt; // pointer to data buffer
@@ -80,11 +92,11 @@ int recv_pkt(char *pkt, int channel) {
     amount_received = read(channel, buf, total_size);
     if (amount_received == -1) { // Error case
         perror("Cannot read");
-        return 0;
+        return CANNOT_READ;
     }
     if (amount_received == 0) { // Connection closed
         fprintf(stderr, "Connection closed\n");
-        return 0;
+        return CONNECTION_CLOSED;
     }
     printf("\nString Received :\n\t");
     print_string(buf,amount_received);
@@ -100,11 +112,11 @@ int recv_pkt(char *pkt, int channel) {
             amount_received = read(channel, buf, total_size);
             if (amount_received == -1) { // Error case
                 perror("Cannot read");
-                return 0;
+                return CANNOT_READ;
             }
             if (amount_received == 0) { // Connection closed
                 fprintf(stderr, "Connection closed\n");
-                return 0;
+                return CONNECTION_CLOSED;
             }
 
             total_size -= amount_received; // Update the remaining data size to read
@@ -115,7 +127,7 @@ int recv_pkt(char *pkt, int channel) {
     printf("\nString Encoded :\n\t");
     print_string(pkt,70 + data_size);
 
-    return 0; // Success
+    return SUCCESS; // Success
 }
 
 
