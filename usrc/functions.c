@@ -14,9 +14,9 @@
 
 char *  cats(char* dest, char* source){
   /*  
-      Concatenate dest and source into a new string both.
+  Concatenate dest and source into a new string both.
   INPUT :
-	    dest : Source string that will be copied into a new string
+      dest : Source string that will be copied into a new string
       source : Source string that will be concatenated to the end of dest
   OUTPUT :
       both : New string containing the concatenation of dest and source
