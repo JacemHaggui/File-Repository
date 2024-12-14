@@ -80,6 +80,8 @@ void print_string(char * str, int n) {
 	for (int i = 0; i < n ; i ++) {
 		unsigned char c = (unsigned char) str[i];
 		if (c == '\0') printf("\\0");
+		else if(c == '\x0A') printf("\\n");
+		else if(c == '\x0D') printf("\\r");
 		else if (isprint(c)) printf("%c", c);
 		else printf("\\x%02X", c);
 	}

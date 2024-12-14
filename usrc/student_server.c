@@ -84,35 +84,48 @@ int print_lines(char string[], int n, char outstring[], bool print_state) { // r
   return 1;
 }
 
-int file_to_string(char *filename, char *text)
-{ 
-  char c;
-  int cpt = 0;
+int * file_to_string(char *filename, char ** text){
+  // INPUT size of text will be determined during this function
+  // OUTPUT : [number of caracters, number of lines]
+  int * result = malloc(sizeof(int) * 2);
 
   if(!file_exists(filename)){
     printf("Error: File '%s' does not exist.\n", filename);
-    return -2;
-    }
+    result[0] = FILE_NOT_FOUND;
+    result[1] = FILE_NOT_FOUND;
+    return result;
+  }
+
+  char c;
+  int cpt_carac = 0;
+  int cpt_line = 0;
 
   /*Counts size file.*/
   FILE *f = fopen(filename, "r");
 
   while (fscanf(f, "%c", &c) != EOF)
   {
-    cpt = cpt + 1;
+    cpt_carac = cpt_carac + 1;
   }
   fclose(f);
+
   /* Stocks file content into a string*/
-  text[cpt] = '\0';
+  *text = malloc(sizeof(char) * cpt_carac);
+  (*text)[cpt_carac] = '\0';
   f = fopen(filename, "r");
-  cpt = 0;
+  cpt_carac = 0;
 
   while (fscanf(f, "%c", &c) != EOF)
   {
-    text[cpt] = c;
-    cpt = cpt + 1;
+    if (c == EOF) break;
+    else if (c == '\n') cpt_line++;
+    (*text)[cpt_carac] = c;
+    cpt_carac++;
   }
-  return 0;
+  
+  result[0] = cpt_carac; // '\0' included !
+  result[1] = cpt_line;
+  return result;
 }
 
 
@@ -183,23 +196,30 @@ void slice(const char* str, char* result, size_t start, size_t end) {
     strncpy(result, str + start, end - start);
 }
 
+
+
+
 /*Returns multiple packets.*/
-Packet **f_print_n_lines(Packet* input, char *directory){
+Packet ** f_print_n_lines(Packet* input, char *directory){
   
  char * filename = cats(directory, input->option1);
 
-  char * stringf = malloc(sizeof(char) * 1000); // Bad allocation!
-  int errcode = file_to_string(filename, stringf);
 
-  if(errcode != 0){
+  char * file_string = "";
+  int * result = file_to_string(filename, &file_string); // HERE WE DON'T THE CONTENT OF RESULT EXCEPT FOR ERRORS.
+  
+  if(result[0] < 0){
     Packet ** single_slot = calloc(1, sizeof(Packet));
-    single_slot[0] = error_packet(errcode);
+    single_slot[0] = error_packet(result[0]);
     return single_slot;
   }
 
-  char * datastring = malloc(sizeof(char) * strlen(datastring));
+  int number_lines = atoi(input->option2);
+  int number_caracters_to_print = count_caracter_inside_n_first_lines(file_string, number_lines);
 
-  int packnum = print_lines(stringf, atoi(input->option2), datastring, 1);
+  char * datastring = malloc(sizeof(char) * number_caracters_to_print);
+
+  int packnum = print_lines(file_string, atoi(input->option2), datastring, 0);
 
   Packet ** list = calloc(packnum, sizeof(Packet));
   Packet * out;
@@ -263,27 +283,36 @@ Packet * removefile(Packet* in, char directory[]){
 /* UNFINISHED! */
 /* Essentially does the same as */
 Packet **fetch(Packet* in, char directory[]){
-  char *contents = malloc(sizeof(char) * 2056);
+  char * filename = cats(directory, in->option1);
+
+  char * contents = "" ;
   
-  file_to_string(cats(directory, in->option1), contents);
+  int * result = file_to_string(filename, &contents);
+  int number_caracter = result[0];
 
-  char * datastring = malloc(sizeof(char) * strlen(contents));
+  if (number_caracter < 0) { // ERROR !
+    Packet ** single_slot = calloc(1, sizeof(Packet));
+    single_slot[0] = error_packet(result[0]);
+    return single_slot;
+  }
 
-  int packnum = print_lines(contents, line_count(contents), datastring, 0);
+  int packnum = 1;
+  if (number_caracter > INT_MAX ) packnum = number_caracter / INT_MAX + 1;
 
   Packet ** list = calloc(packnum, sizeof(Packet));
-  Packet * out;
-
-  for(int i = 0; i < packnum; i++){
-    out = empty_packet();
+  
+  for (int i = 0; i < packnum; i++){
+    Packet * out = empty_packet();
     char buffer[INT_MAX];
     out->code = 5;
-    strcpy(out->option1, itoa(packnum,10));
-    out->E = 'E'; out->D = 'D'; out->r = 'r'; 
-    slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
+    strcpy(out->option1, itoa(packnum,10)); // FOR NOW BUT WILL CHANGE WHEN WE SEND THE PACKET
+    strcpy(out->option2, itoa(number_caracter,10)); // STAY LIKE THAT
+    out->E = 'E'; out->D = 'D'; out->r = 'r';
+    slice(contents, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
     out->data_ptr = buffer;
     list[i] = out;
+    print_packet(out);
   }
   return list;
 }
@@ -300,47 +329,46 @@ Packet **list_files(Packet* in, char destination[]){
       Packet ** list = malloc(sizeof(Packet));
       list[0] = error_packet(FILE_NOT_FOUND); // FILE NOT FOUND (here it's a directory)
       return list; 
-  } 
-  else{
-    printf("Directory opened !\n");
-    char * string;
-    while ((de = readdir(dr)) != NULL) {
-      // printf("%s\n", de->d_name); 
-      
-      string = cats(string, de->d_name);
-      string = cats(string, ",");
-      //strcat(string, de->d_name);
-      //strcat(string, ",");
-      
-      struct stat* restrict buf;
-      stat(de->d_name, buf);
-	
-      string = cats(string, ",");
-      string = cats(string, itoa(buf->st_size, 10));
-      //strcat(string, ",");
-      //strcat(string, buf->st_size);
-    }
-    closedir(dr);
-    string[strlen(string) - 1] = '\0'; // o remove the last comma and add a null terminator at the end.
-    char* trash;
-    int packnum = print_lines(string, 1, trash,0);
-
-    //Packet *out;
-    Packet **list = calloc(packnum, sizeof(Packet));
-
-    for(int i = 0; i < packnum; i++){
-      Packet * out = empty_packet();
-      char *buffer = malloc(INT_MAX * sizeof(char));
-      out->code = 6;
-      strcpy(out->option1, itoa(packnum, 10));
-      //out->E = 'E'; out->D = 'D'; out->r = 'r';
-      slice(string, buffer, i*packnum, (i+1)*packnum);
-      out-> data_size = strlen(buffer);
-      out->data_ptr = buffer;
-      list[i] = out;
-      }
-      return list;
   }
+
+  char * string = "";
+  while ((de = readdir(dr)) != NULL) {
+    if (strcmp(de->d_name , ".") == 0 || strcmp(de->d_name , "..") == 0) continue;
+
+    string = cats(string, de->d_name);
+    string = cats(string, ",");
+    struct stat buf ;
+    stat(de->d_name, &buf);
+    string = cats(string, itoa(buf.st_size, 10));
+    string = cats(string, ",");
+
+  }
+  closedir(dr);
+
+  int number_caracter = strlen(string);
+  string[number_caracter - 1] = '\0'; // o remove the last comma and add a null terminator at the end.
+
+  // SORT THE STRING :
+  if(!sort_dir(string))
+    fprintf(stderr," Error while sorting\n\n"); // ERROR
+
+  int packnum = 1;
+  if (number_caracter > packnum) packnum = number_caracter / INT_MAX + 1;
+
+  Packet **list = calloc(packnum, sizeof(Packet));
+
+  for(int i = 0; i < packnum; i++){
+    Packet * out = empty_packet();
+    char *buffer = malloc(INT_MAX * sizeof(char));
+    out->code = 6;
+    strcpy(out->option1, itoa(packnum, 10));
+    //slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
+    slice(string, buffer, i*INT_MAX, (i+1)*INT_MAX);
+    out-> data_size = strlen(buffer);
+    out->data_ptr = buffer;
+    list[i] = out;
+    }
+    return list;
 }
 // Copy a remote file to the local filesystem (WIP)
 
@@ -367,13 +395,16 @@ int process_packet(Packet * packet, int channel) {
     }
 
     // SEND THE PACKETS
+    printf("\n\n--- SENDING PACKETS: ---\n\n");
     for (int i = 0; i < number_packet_to_send; i ++) {
-        char packet_string_to_send[2048];
+        char packet_string_to_send[MAX_PACKET_SIZE];
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
-        printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
+        printf("Packet %d Send: \n\t\tError Code : %d\n\t\tSend Code: %d\n\t\t", i+1, error_code, res);
+        print_string(packet_string_to_send, 70 + list_packet_to_send[i]->data_size);
+        print_packet(list_packet_to_send[i]);
     }
-
+    printf("\n\n--- END SENDING PACKETS: ---\n\n");
   }
 
   // ADDING A REMOTE FILE
@@ -382,7 +413,7 @@ int process_packet(Packet * packet, int channel) {
     Packet * packet_error_code = add_remote_file(packet, SERVER_DIRECTORY);
     
     // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE CREATION OF THE REMOTE FILE
-    char packet_string_to_send[2048];
+    char packet_string_to_send[MAX_PACKET_SIZE];
     int error_code = packet_to_string(packet_error_code, packet_string_to_send);
     int res = send_pkt(packet_string_to_send, channel);
     printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
@@ -395,7 +426,7 @@ int process_packet(Packet * packet, int channel) {
     Packet * packet_error_code = renamefile(packet, SERVER_DIRECTORY);
 
     // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE RENAMING OF THE REMOTE FILE
-    char packet_string_to_send[2048];
+    char packet_string_to_send[MAX_PACKET_SIZE];
     int error_code = packet_to_string(packet_error_code, packet_string_to_send);
     int res = send_pkt(packet_string_to_send, channel);
     printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
@@ -408,7 +439,7 @@ int process_packet(Packet * packet, int channel) {
     Packet * packet_error_code = removefile(packet, SERVER_DIRECTORY);
 
     // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE REMOVAL OF THE REMOTE FILE
-    char packet_string_to_send[2048];
+    char packet_string_to_send[MAX_PACKET_SIZE];
     int error_code = packet_to_string(packet_error_code, packet_string_to_send);
     int res = send_pkt(packet_string_to_send, channel);
     printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
@@ -427,15 +458,17 @@ int process_packet(Packet * packet, int channel) {
     if (error_code < 0) { // ERROR HAPPENED
       number_packet_to_send = 1 ; // ERROR ONLY ONE PACKET WILL BE SENT
     } else {
-      number_packet_to_send = atoi(first_packet->option2); //OPTION 2 contains the number of packets
+      number_packet_to_send = atoi(first_packet->option1); //OPTION 1 contains the number of packets
     }
 
     // SEND THE PACKETS
     for (int i = 0; i < number_packet_to_send; i ++) {
-        char packet_string_to_send[2048];
+        char packet_string_to_send[MAX_PACKET_SIZE];
+        if (error_code >= 0) strcpy(list_packet_to_send[i]->option1, packet->option1);
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
         printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
+        print_packet(list_packet_to_send[i]);
     }
   }
 
@@ -457,10 +490,12 @@ int process_packet(Packet * packet, int channel) {
 
     // SEND THE PACKETS
     for (int i = 0; i < number_packet_to_send; i ++) {
-        char packet_string_to_send[2048];
+        char packet_string_to_send[MAX_PACKET_SIZE];
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
         printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
+        print_packet(list_packet_to_send[i]);
+        print_string(list_packet_to_send[i]->data_ptr , list_packet_to_send[i]->data_size);
     }
 
   }

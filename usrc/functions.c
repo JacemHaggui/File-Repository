@@ -159,6 +159,23 @@ void force_client_directory_format(){
 	}
 } 
 
+int count_caracter_inside_n_first_lines(char * file, int n) {
+  int l = 0;
+  int i = 0;
+  int length_file = strlen(file);
+  int count = 0;
+
+  for (i = 0; i < length_file && l < n; i++) {
+    count++;
+    if (file[i] == '\n') {
+      l++;
+    }
+  }
+
+  return count;
+}
+
+
 
 int convert_cmd_string_to_packet_string(char * cmd, char * string) {
   /*

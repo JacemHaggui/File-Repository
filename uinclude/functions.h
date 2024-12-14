@@ -60,6 +60,9 @@ void set_client_directory(const char *string);
 void force_server_directory_format();
 void force_client_directory_format();
 
+
+int count_caracter_inside_n_first_lines(char * file, int n);
+
 int convert_cmd_string_to_packet_string(char * cmd, char * string);
 
 #endif // STRUCT_FUNCTIONS_H
