@@ -355,7 +355,7 @@ int student_client(int channel, int argc, char *argv[]) {
         printf("PRINT CLIENT COMMAND :\n\t");
         print_string(cmdline, strlen(cmdline) - 1);
 
-        char cmd_to_packet_string[2048];
+        char cmd_to_packet_string[MAX_PACKET_SIZE];
         int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string);
 
         printf("\nString Send :\n\t");
