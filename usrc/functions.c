@@ -186,7 +186,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
     string : A buffer to store the resulting packet string
   OUTPUT :
     error_code : Error code from the packet_to_string function
-    0 : Success
+    Success 
   */
   Packet * packet = empty_packet();
 
@@ -246,7 +246,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
 
   }
 
-  return 0; // A CHANGER
+  return SUCCESS; 
 
 }
 

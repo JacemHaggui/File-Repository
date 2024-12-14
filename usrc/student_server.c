@@ -68,7 +68,19 @@ const char *const server_help_options = "\
 
 
 
-int print_lines(char string[], int n, char outstring[], bool print_state) { // returns number of packets needed to store.
+int print_lines(char string[], int n, char outstring[], bool print_state) {
+    /*
+      Print (or not depending on the parameter print_state) the n first lines of string.
+      Stores in outstring the first n lines of string.
+      And output the number of packet needed to stores the first n lines of string.
+    INPUT :
+        string : The string to process
+        n : the number of line to get
+        outstring : the string in which the  n lines will be written
+        print_state : 1 <=> Print the content
+    OUTPUT :
+        integer : the number of packet needed to stores the first n lines of string.
+    */
   int l = 0;
   int i = 0;
   for (i = 0; i < strlen(string) && l < n; i++) {
@@ -85,8 +97,15 @@ int print_lines(char string[], int n, char outstring[], bool print_state) { // r
 }
 
 int * file_to_string(char *filename, char ** text){
-  // INPUT size of text will be determined during this function
-  // OUTPUT : [number of caracters, number of lines]
+    /*
+      Open a file with its filename, and convert it into the text string given in parameter
+      Output an array : [number of caracters, number of lines] based on the file stats.
+    INPUT :
+        filename : The name of the file to process and to open
+        text : the string that will contains the content of the file
+    OUTPUT :
+        Array : [number of caracters, number of lines] needed
+    */
   int * result = malloc(sizeof(int) * 2);
 
   if(!file_exists(filename)){
@@ -111,6 +130,7 @@ int * file_to_string(char *filename, char ** text){
 
   /* Stocks file content into a string*/
   *text = malloc(sizeof(char) * cpt_carac);
+
   (*text)[cpt_carac] = '\0';
   f = fopen(filename, "r");
   cpt_carac = 0;
@@ -132,10 +152,20 @@ int * file_to_string(char *filename, char ** text){
 int write_to_file(char filepath[], char data[],
                    char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
                                          // MUST CONTAIN THE PATH TO THE FILE!
+    /*
+      Open a file with its filename, and convert it into the text string given in parameter
+      Output an array : [number of caracters, number of lines] based on the file stats.
+    INPUT :
+        filepath : The path to the file to process and to open
+        data : data that will be written inside the file
+    OUTPUT : ERROR CODES
+      FILE_ALREADY_EXISTS
+      SUCCESS
+    */
   if (file_exists(filepath)) {
     printf("ERROR: File %s already exists on directory!\n", filepath);
     printf("No modifications will be made.\n");
-    return -3; // FILE ALREADY EXISTS.
+    return FILE_ALREADY_EXISTS; // FILE ALREADY EXISTS.
   }
 
 
@@ -143,23 +173,33 @@ int write_to_file(char filepath[], char data[],
   new = fopen(filepath, "w");
   fputs(data, new);
   fclose(new);
-  return 0;
+  return SUCCESS; // Success !
 }
 
 /* Returns -1 if trying to rename to existing file, returns -2 if trying to rename a non-existing file. Returns 0 if done correctly.*/
 int rename_file(char newfile[], char oldfile[]) { // full paths need to be given in parameter.
+    /*
+      Rename the file at oldfile place with newfile name
+    INPUT :
+        newfile : The path to the new file
+        oldfile : The path to the old file to rename
+    OUTPUT : ERROR CODES
+      FILE_NOT_FOUND
+      FILE_ALREADY_EXISTS
+      SUCCESS
+    */
   FILE *oldf;
 
   if(!file_exists(oldfile)){
     printf("ERROR: File %s does not exist on directory!\n", oldfile);
     printf("No modifications will be made.\n");
-    return -2;
+    return FILE_NOT_FOUND;
   }
 
   if (file_exists(newfile)) {
     printf("ERROR: File %s already exists on directory!\n", newfile);
     printf("No modifications will be made.\n");
-    return -3;
+    return FILE_ALREADY_EXISTS;
   }
 
   oldf = fopen(oldfile, "r");
@@ -188,11 +228,20 @@ int rename_file(char newfile[], char oldfile[]) { // full paths need to be given
   // exists.)
 
   remove(oldfile);
-  return 0;
+  return SUCCESS;
 }
 
 
 void slice(const char* str, char* result, size_t start, size_t end) {
+  /*
+      Extract a substring from the input string str and store it in result.
+    INPUT:
+        str    : The original string from which a slice is extracted.
+        result : A pre-allocated buffer to store the resulting substring.
+        start  : The starting index (inclusive) of the slice in the original string.
+        end    : The ending index (exclusive) of the slice in the original string.
+    OUTPUT:
+  */
     strncpy(result, str + start, end - start);
 }
 
@@ -201,6 +250,14 @@ void slice(const char* str, char* result, size_t start, size_t end) {
 
 /*Returns multiple packets.*/
 Packet ** f_print_n_lines(Packet* input, char *directory){
+   /*
+    Generate a list of packets that contains the data from a file given in the input packet
+    INPUT:
+        input    :  The command packet
+        directory : The path to the directory where the file should be.
+    OUTPUT:
+      List of Packets
+  */
   
  char * filename = cats(directory, input->option1);
 
@@ -238,8 +295,15 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
   return list;
 }
 
-Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the operation. Packet.code = 0 if correctly done, -1 otherwise (file named filename already exists)
-  
+Packet * add_remote_file(Packet* in, char directory[]){ 
+  /*
+    Generate a file with data content of the packet data field
+    INPUT:
+        in    :  The command packet
+        directory : The path to the directory where the file should be.
+    OUTPUT:
+      Packet with error code associated to the conversion
+  */
   char * filename = cats(directory, in->option1);
   
   int errcode = write_to_file(filename, in->data_ptr, directory);
@@ -257,6 +321,14 @@ Packet *add_remote_file(Packet* in, char directory[]){ // Returns Packet for the
 }
 
 Packet * renamefile(Packet* in, char directory[]){
+  /*
+    Rename a file based on the input packet
+    INPUT:
+        in    :  The command packet
+        directory : The path to the directory where the file should be renamed.
+    OUTPUT:
+      Packet with error code associated to the conversion
+  */
   char * oldfilename = cats(directory, in->option1);
   char * newfilename = cats(directory, in->option2);
 
@@ -266,11 +338,19 @@ Packet * renamefile(Packet* in, char directory[]){
 }
 
 int remove_file(char filename[]) {
+  /*
+    Remove a file based on the input packet
+    INPUT:
+        in    :  The command packet
+        directory : The path to the directory where the file should be there.
+    OUTPUT:
+      Packet with error code associated to the removal
+  */
   if(!remove(filename)){
-    return -2;
+    return FILE_NOT_FOUND;
   }
   else{
-    return 0;
+    return SUCCESS;
   }
 }
 
@@ -280,8 +360,7 @@ Packet * removefile(Packet* in, char directory[]){
   return error_packet(errcode);
 }
 
-/* UNFINISHED! */
-/* Essentially does the same as */
+
 Packet **fetch(Packet* in, char directory[]){
   char * filename = cats(directory, in->option1);
 
