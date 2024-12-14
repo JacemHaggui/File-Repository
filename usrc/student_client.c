@@ -43,8 +43,9 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
     */
     int datalen = strlen(data);
 
-    int reqpacknum = (datalen / INT_MAX) + 1; // number of packets required to store all data.
-    Packet** list = calloc(reqpacknum, sizeof(Packet));
+    int reqpacknum = 1;
+    if (datalen > INT_MAX) reqpacknum = (datalen  / INT_MAX ) + 1; // number of packets required to store all data.
+     
 
     Packet* pack0 = empty_packet(); // This is the "test packet". It will be sent with the INT_MAX first characters of the file to see if the file can be created.
 
@@ -59,30 +60,42 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
     char pktbuff[MAX_PACKET_SIZE];
     packet_to_string(pack0, pktbuff);
     send_pkt(pktbuff, channel);
-    recv_pkt(pktbuff, channel);
-    Packet* status = empty_packet(); 
+
+    // WAIT FOR THE SERVER ANSWER
+    while (1) {
+        // COPY STUDENT CLIENT CODE
+        recv_pkt(pktbuff, channel);
+
+    }
+
+    Packet* status = empty_packet();
     string_to_packet(pktbuff, status);
 
     if(status->code != 0){ // a.k.a if something went wrong...
+        Packet** list = calloc(1, sizeof(Packet));
         pack0->code = COMMAND_FAILS;
-        list[0] = pack0;
+        list[0] = error_packet(COMMAND_FAILS); 
         return list;
-    } else {
-    
-    list[0] = pack0;
-    for(int i = 1; i < reqpacknum; i++){
-        Packet * out = empty_packet();
-        char *buffer = malloc(INT_MAX * sizeof(char));
-        out->code = 2;
-        strcpy(out->option1, filename);
-        strcpy(out->option2, itoa(datalen, 10));
-        slice(data, buffer, i*INT_MAX, (i+1)*INT_MAX);
-        out-> data_size = strlen(buffer);
-        out->data_ptr = buffer;
-        list[i] = out;
+
     }
-    return list;
+    else {
+        Packet** list = calloc(reqpacknum-1, sizeof(Packet));
+
+        //list[0] = pack0;
+        for(int i = 1; i < reqpacknum; i++){
+            Packet * out = empty_packet();
+            char *buffer = malloc(INT_MAX * sizeof(char));
+            out->code = 2;
+            strcpy(out->option1, filename);
+            strcpy(out->option2, itoa(datalen, 10));
+            slice(data, buffer, i*INT_MAX, (i+1)*INT_MAX);
+            out-> data_size = strlen(buffer);
+            out->data_ptr = buffer;
+            list[i-1] = out;
+        }
+        return list; // SHOULD SEND ONLY THE ELEMENTS AFTER INDEX 0. (0 excluded)
     }
+
 }
 
 int student_client_old(int argc, char *argv[]) {
