@@ -663,9 +663,7 @@ void student_server(int channel, int argc, char *argv[]) {
           break;
         }
         default : {
-          printf("-----DEBUG LA ?\n");
           int error_code_process = process_packet(packet_received, channel);
-          printf("-----DEBUG LA ?\n");
         }
       }
 
