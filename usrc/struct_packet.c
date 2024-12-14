@@ -100,14 +100,14 @@ int string_to_packet (char * string, Packet * packet) {
 		-1 : Error Code - Bad packet format
 		-5 : Error Code - Quota exceeded
 	*/
-		if ( ! *string) { return -1 ; }  // String is Empty
+		if ( ! *string) { return BAD_PACKET_FORMAT ; }  // String is Empty
 
 	char * ptr = string ; // ptr is pointing to the first element in string
 
 	// CONSTANTS PART
-	if (*ptr) 	packet->E = *ptr;  	else return -1 ;  // Constant Value E not here
-	if (*(++ptr))	packet->D = *(ptr);	else return -1 ;  // Constant Value D not here
-	if (*(++ptr))	packet->r = *(ptr);	else return -1 ;  // Constant Value r not here
+	if (*ptr) 	packet->E = *ptr;  	else return BAD_PACKET_FORMAT ;  // Constant Value E not here
+	if (*(++ptr))	packet->D = *(ptr);	else return BAD_PACKET_FORMAT ;  // Constant Value D not here
+	if (*(++ptr))	packet->r = *(ptr);	else return BAD_PACKET_FORMAT ;  // Constant Value r not here
 
 	// DATA SIZE PART
 	uint16_t data_size = (uint16_t)(  (unsigned char)(  (unsigned char)(*(++ptr)) ) | (unsigned char)(  (unsigned char)( *(++ptr) ) << 8 ) );
@@ -123,7 +123,7 @@ int string_to_packet (char * string, Packet * packet) {
 	++ptr; // Skip the code final character
 	while(*(ptr) != '\0') {
 		//printf("\t\t%d : %c\n", i, *ptr);
-		if (i > 31) return -5;  // Option 1 is too long
+		if (i > 31) return QUOTA_EXCEEDED;  // Option 1 is too long
 		packet->option1[i] = *ptr;
 		i ++;
 		++ptr;
@@ -142,7 +142,7 @@ int string_to_packet (char * string, Packet * packet) {
 	
 	while(*(ptr) != '\0' ) {
 		//printf("\t\t%d : %c\n", i, *ptr);
-		if (j > 31) return -5 ;  // Option 2 is too long
+		if (j > 31) return QUOTA_EXCEEDED ;  // Option 2 is too long
 		packet->option2[j] = *ptr;
 		j ++;
 		++ptr;
@@ -159,7 +159,7 @@ int string_to_packet (char * string, Packet * packet) {
 	// DATA PART
 	packet->data_ptr = ptr;
 
-	return 0;
+	return SUCESS;
 
 } 
 

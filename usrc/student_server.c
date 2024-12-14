@@ -645,11 +645,19 @@ void student_server(int channel, int argc, char *argv[]) {
     int res = recv_pkt(string_packet_received, channel);
 
     if (res == CONNECTION_CLOSED) {
-      // DO SOMETHING
+      printf("--[Connection Closed]--\n\n");
+      return ;
 
     }
     else if (res == CANNOT_READ) {
-      // DO SOMETHING
+      // CREATE ERROR PACKET
+      Packet * packet_error_code = error_packet(CANNOT_READ);
+      // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE REMOVAL OF THE REMOTE FILE
+      char packet_string_to_send[MAX_PACKET_SIZE];
+      int error_code = packet_to_string(packet_error_code, packet_string_to_send);
+      int res = send_pkt(packet_string_to_send, channel);
+      printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+      break;
 
     }else if (res == SUCCESS) {
       // PROCESS THE STRING PACKET RECEIVED CONTENT
@@ -657,7 +665,23 @@ void student_server(int channel, int argc, char *argv[]) {
       int error_code_conversion = string_to_packet(string_packet_received, packet_received);
       print_packet(packet_received);
 
-      int error_code_process = process_packet(packet_received, channel);
+      switch (error_code_conversion) {
+        case BAD_PACKET_FORMAT:
+        case QUOTA_EXCEEDED:
+          // CREATE ERROR PACKET
+          Packet * packet_error_code = error_packet(error_code_conversion);
+          // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE REMOVAL OF THE REMOTE FILE
+          char packet_string_to_send[MAX_PACKET_SIZE];
+          int error_code = packet_to_string(packet_error_code, packet_string_to_send);
+          int res = send_pkt(packet_string_to_send, channel);
+          printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+          break;
+
+        default :
+          int error_code_process = process_packet(packet_received, channel);
+      }
+
+      
 
     }else {
       printf("Error - Not Implemented\n");
