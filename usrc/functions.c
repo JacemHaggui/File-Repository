@@ -3,18 +3,24 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <ctype.h>
-#include <stdbool.h> // bool type
-#include <sys/stat.h> // stat
-#include <dirent.h> // For directory handling.
+#include <stdbool.h>  // bool type
+#include <sys/stat.h>  // stat
+#include <dirent.h>  // For directory handling.
 #include "../uinclude/struct_packet.h"
 #include "../include/utilities.h"
 #include "../uinclude/functions.h"
 
 
 
-
-
 char *  cats(char* dest, char* source){
+  /*  
+    Concatenate dest and source into a new string both.
+	INPUT :
+		dest : Source string that will be copied into a new string
+    source : Source string that will be concatenated to the end of dest
+	OUTPUT :
+    both : New string containing the concatenation of dest and source
+	*/
   char* both = malloc(sizeof(char) * (strlen(source) + strlen(dest)));
   strcpy(both, dest);
   strcat(both, source);
@@ -22,21 +28,31 @@ char *  cats(char* dest, char* source){
 }
 
 
-// Converts an int to string
-char* itoa(int val, int base){
+char* itoa(int val, int base) {
+  /*  
+    Converts an int to string.
+	INPUT :
+		val : The integer value to be converted
+    base : The numerical base for the conversion
+	OUTPUT :
+    &buf[i+1] : Pointer to the string representation of the integer in the specified base
+	*/
 	static char buf[32] = {0};
-
 	int i = 30;
-
 	for(; val && i ; --i, val /= base)
-
 		buf[i] = "0123456789abcdef"[val % base];
-
 	return &buf[i+1];
 }
 
-/* Returns the number of lines in a string. */
+
 int line_count(char string[]) {
+  /*  
+    Returns the number of lines in a string.
+	INPUT :
+		string[] : The string to analyze
+	OUTPUT :
+    c : Number of lines in the string
+	*/
   int leng = strlen(string);
   if (leng == 0) {
     return 0;
@@ -56,36 +72,37 @@ bool file_exists(char *filename) { // Checks for file existence.
 }
 
 
-
 char * SERVER_DIRECTORY = NULL; // DEFINE NULL at the beginning (Will be updated in student_server function)
 char * CLIENT_DIRECTORY = NULL; // DEFINE NULL at the beginning (Will be updated in student_client function)
 
 
-
 void set_server_directory(const char *string) {
-	/*  Set the directory path for the server side.
+	/*  
+    Set the directory path for the server side.
 	INPUT :
 		string : The New Absolute Path (or relative in fact) to the server working directory
 	OUTPUT :
 	*/
-    // IF SERVER_DIRECTORY IS ALREADY FILLED -> FREE IT
-    if (SERVER_DIRECTORY != NULL) {
-        free(SERVER_DIRECTORY);
-        SERVER_DIRECTORY = NULL;
-    }
+  // IF SERVER_DIRECTORY IS ALREADY FILLED -> FREE IT
+  if (SERVER_DIRECTORY != NULL) {
+      free(SERVER_DIRECTORY);
+      SERVER_DIRECTORY = NULL;
+  }
 
-    SERVER_DIRECTORY = malloc((strlen(string) + 1) * sizeof(char));
-    if (SERVER_DIRECTORY == NULL) {
-        // Only if malloc didn't succeed
-        printf("Error Malloc SERVER_DIRECTORY\n");
-        return;
-    }
+  SERVER_DIRECTORY = malloc((strlen(string) + 1) * sizeof(char));
+  if (SERVER_DIRECTORY == NULL) {
+      // Only if malloc didn't succeed
+      printf("Error Malloc SERVER_DIRECTORY\n");
+      return;
+  }
 
     strcpy(SERVER_DIRECTORY, string); // Fill SERVER_DIRECTORY Global Variable with the content of string 
 }
 
+
 void set_client_directory(const char *string) {
-	/*  Set the directory path for the client side.
+	/*  
+    Set the directory path for the client side.
 	INPUT :
 		string : The New Absolute Path (or relative in fact) to the client working directory
 	OUTPUT :
@@ -106,8 +123,10 @@ void set_client_directory(const char *string) {
     strcpy(CLIENT_DIRECTORY, string); // Fill CLIENT_DIRECTORY Global Variable with the content of string 
 }
 
+
 void force_server_directory_format(){
-	/*  Apply the convention to the server directory string, Must ends with '/', and change it if it's not the case.
+	/*  
+    Apply the convention to the server directory string, Must ends with '/', and change it if it's not the case.
 	INPUT :
 	OUTPUT :
 	*/
@@ -122,8 +141,10 @@ void force_server_directory_format(){
 	}
 } 
 
+
 void force_client_directory_format(){
-	/*  Apply the convention to the client directory string, Must ends with '/', and change it if it's not the case.
+	/*  
+    Apply the convention to the client directory string, Must ends with '/', and change it if it's not the case.
 	INPUT :
 	OUTPUT :
 	*/
@@ -141,7 +162,15 @@ void force_client_directory_format(){
 
 int convert_cmd_string_to_packet_string(char * cmd, char * string) {
   /*
-    We're going to use the Packet Structure to pass from string (cmd line) -> Struct Packet -> string packet format
+    Convert a string to a packet format.
+    The function uses a defined packet structure to transform a command-line string into a structured packet,
+    then converts the packet into a string format.
+  INPUT :
+    cmd : The command-line string to be converted
+    string : A buffer to store the resulting packet string
+	OUTPUT :
+    error_code : Error code from the packet_to_string function
+    0 : Success
   */
   Packet * packet = empty_packet();
 
