@@ -27,6 +27,18 @@ char *  cats(char* dest, char* source){
   return both;
 }
 
+void slice(const char* str, char* result, size_t start, size_t end) {
+  /*
+      Extract a substring from the input string str and store it in result.
+    INPUT:
+        str    : The original string from which a slice is extracted.
+        result : A pre-allocated buffer to store the resulting substring.
+        start  : The starting index (inclusive) of the slice in the original string.
+        end    : The ending index (exclusive) of the slice in the original string.
+    OUTPUT:
+  */
+    strncpy(result, str + start, end - start);
+}
 
 char* itoa(int val, int base) {
   /*  

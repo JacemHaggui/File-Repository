@@ -27,6 +27,60 @@ const char * const client_help_options = "\
 \n\
 ";
 
+#define INT_MAX 2048 - 70 // Maximum data_size for packet data.
+
+Packet** add_file_request(char* data, char* filename, char* directory, int channel){
+    /*
+        Creates a packet that requests the creation of a file, as per the "add remote file" function.
+    INPUT :
+        data : The content to be stored in the file.
+        filename: the file's name.
+        directory: the directory in which to store the file.
+        channel: A socket file descriptor used to communicate with the server
+    OUTPUT :
+        A list of the packets required to send the data split into sections of less than INT_MAX size.
+        If the server failed to receive the file (e.g because the filename already exists), the list contains only an ABORT error packet.
+    */
+    int datalen = strlen(data);
+
+    int reqpacknum = (datalen / INT_MAX) + 1; // number of packets required to store all data.
+    Packet** list = calloc(reqpacknum, sizeof(Packet));
+
+    Packet* pack0 = empty_packet(); // This is the "test packet". It will be sent with the INT_MAX first characters of the file to see if the file can be created.
+
+    char *buffer = malloc(INT_MAX * sizeof(char));
+    pack0->code = 2;
+    strcpy(pack0->option1, filename);
+    strcpy(pack0->option2, itoa(datalen, 10));
+    slice(data, buffer, 0, INT_MAX);
+    pack0-> data_size = strlen(buffer);
+    pack0-> data_ptr = buffer;
+
+    send_pkt(pack0, channel);
+    Packet* status = empty_packet();
+    recv_pkt(status, channel);
+
+    if(status->code != 0){ // a.k.a if something went wrong...
+        pack0->code = COMMAND_FAILS;
+        list[0] = pack0;
+        return list;
+    } else {
+    
+    list[0] = pack0;
+    for(int i = 1; i < reqpacknum; i++){
+        Packet * out = empty_packet();
+        char *buffer = malloc(INT_MAX * sizeof(char));
+        out->code = 2;
+        strcpy(out->option1, filename);
+        strcpy(out->option2, itoa(datalen, 10));
+        slice(data, buffer, i*INT_MAX, (i+1)*INT_MAX);
+        out-> data_size = strlen(buffer);
+        out->data_ptr = buffer;
+        list[i] = out;
+    }
+    return list;
+    }
+}
 
 int student_client_old(int argc, char *argv[]) {
     /*

@@ -39,7 +39,7 @@
 #include <dirent.h> // For directory handling.
 #include <stdlib.h>
 
-const int INT_MAX = 2048 - 70; // Maximum data_size for packet data.
+#define INT_MAX 2048 - 70 // Maximum data_size for packet data.
 
 // FUNCTIONS
 // ...
@@ -229,20 +229,6 @@ int rename_file(char newfile[], char oldfile[]) { // full paths need to be given
 
   remove(oldfile);
   return SUCCESS;
-}
-
-
-void slice(const char* str, char* result, size_t start, size_t end) {
-  /*
-      Extract a substring from the input string str and store it in result.
-    INPUT:
-        str    : The original string from which a slice is extracted.
-        result : A pre-allocated buffer to store the resulting substring.
-        start  : The starting index (inclusive) of the slice in the original string.
-        end    : The ending index (exclusive) of the slice in the original string.
-    OUTPUT:
-  */
-    strncpy(result, str + start, end - start);
 }
 
 
