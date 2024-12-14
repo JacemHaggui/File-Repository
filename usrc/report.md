@@ -3,32 +3,43 @@
 
 ## **How to launch the program**  
 
-To launch the program, you have to enter `make` in the command prompt.  
-Then you can type all these instructions :
+To launch the program, you have to :
 
-`put filename` : to add a remote file called filename
+* Clone the git repository by typing this command ```git clone https://gitlab.eurecom.fr/della1/basicos2024-team07.git```. If you want to clone it in shh, use this command ```git@gitlab.eurecom.fr:della1/basicos2024-team07.git```.
 
-`rm filename` : to remove a remote file called filename
+* Go to usrc directory using ```cd usrc```.
 
-`get filename localfilename` : to get a remote file called filename
+* Enter the command `make` in the command prompt.  
 
-`ls` : to list remote files
+* server lance repertoire executable
 
-`cat filename n` : to print the first n lines of a file called filename
+* client lance
 
-`mv originfilename destinationfilename` : to rename a remote file called originfilename
+Then you can type all the functions that follow.
 
-`quit` or `exit` : to exit
-
-`restart` : to reset the connection
-
-`help` : to have the description of the available commands
 
 <br />
 
 ## **Functions**  
 
-(input, Output)
+Use `put filename` to copy a local file to the Eurecom Drive. This function takes the name of the file as input and returns either 0 (success) or an error code.
+
+Use `rm filename` to remove a remote file from the Eurecom Drive. This function takes the name of the file as input and retruns either 0 (success) or an error code.
+
+Use `get filename localfilename` to copy a remote file to the local file system. This function takes the name of the file and the the name of the copied file and returns either 0 (success) or an error code.
+
+Use `ls` to list all the files remotely stored in the Eurecom Drive. This function returns the files or an error code.
+
+Use `cat filename n` to print the first n lines of a file. This function takes the name of the file as input and returns the first n lines or an error code.
+
+Use `mv originfilename destinationfilename` to rename a remote file. This function takes the name of the file as input and returns either 0 (success) or an error code.
+
+Use `quit` or `exit` to exit.
+
+Use `restart` to reset the connection.
+
+Use `help` to have the description of the available commands.
+
 
 <br />
 
