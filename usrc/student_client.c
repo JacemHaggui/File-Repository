@@ -27,7 +27,7 @@ const char * const client_help_options = "\
 \n\
 ";
 
-#define INT_MAX 1978 // Maximum data_size for packet data.
+#define INT_MAX 1978 // Maximum data_size for packet data. (2048 - 70)
 
 Packet** add_file_request(char* data, char* filename, char* directory, int channel){
     /*
@@ -63,9 +63,9 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
 
     // WAIT FOR THE SERVER ANSWER
     while (1) {
-        // COPY STUDENT CLIENT CODE
-        recv_pkt(pktbuff, channel);
-
+        if(recv_pkt(pktbuff, channel)){
+            break;
+        }
     }
 
     Packet* status = empty_packet();
@@ -391,7 +391,46 @@ int student_client_old(int argc, char *argv[]) {
     return 0; // Success
 }
 
+void received_from_server(Packet** received, char* directory){
+    int packnum;
 
+    if(received[0]->code == CMD_PRINT){ // PRINT_N_LINES
+        packnum= atoi(received[0]->option1);
+        for (int i = 0; i < packnum; i++){
+            printf("%s", received[i]->data_ptr);
+        }
+    }
+    else if(received[0]->code == CMD_GET){ // FETCH
+        int fetchfilesize = atoi(received[0]->option2);
+        if (fetchfilesize > INT_MAX) {packnum = (fetchfilesize  / INT_MAX ) + 1;} else {packnum = 1;}
+        char* file = malloc(sizeof(char) * fetchfilesize);
+        for (int i = 0; i < packnum; i++){
+            file = cats(file, received[i]->data_ptr);
+        }
+        write_to_file(received[0]->option1, file, directory);
+    }
+    else if(received[0]->code == CMD_LIST){ // LS
+        packnum= atoi(received[0]->option1);
+        for (int i =0; i < packnum; i++){
+            for(int j = 0; j < received[i]->data_size; j++){
+                bool tab = true;
+                if( (received[i]->data_ptr)[j] == ',' ){
+                    if (tab) {
+                        printf("\t");
+                        } else {
+                        printf("\n");
+                    }
+                } 
+                else{
+                    printf("%c", (received[i]->data_ptr)[j]);
+                }
+            }
+        }
+    }
+    else{
+        print_response(received[0]);
+    }
+}
 
 int student_client(int channel, int argc, char *argv[]) {
     /*
