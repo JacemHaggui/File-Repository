@@ -148,34 +148,6 @@ int * file_to_string(char *filename, char ** text){
   return result;
 }
 
-
-int write_to_file(char filepath[], char data[],
-                   char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
-                                         // MUST CONTAIN THE PATH TO THE FILE!
-    /*
-      Open a file with its filename, and convert it into the text string given in parameter
-      Output an array : [number of caracters, number of lines] based on the file stats.
-    INPUT :
-        filepath : The path to the file to process and to open
-        data : data that will be written inside the file
-    OUTPUT : ERROR CODES
-      FILE_ALREADY_EXISTS
-      SUCCESS
-    */
-  if (file_exists(filepath)) {
-    printf("ERROR: File %s already exists on directory!\n", filepath);
-    printf("No modifications will be made.\n");
-    return FILE_ALREADY_EXISTS; // FILE ALREADY EXISTS.
-  }
-
-
-  FILE *new;
-  new = fopen(filepath, "w");
-  fputs(data, new);
-  fclose(new);
-  return SUCCESS; // Success !
-}
-
 /* Returns -1 if trying to rename to existing file, returns -2 if trying to rename a non-existing file. Returns 0 if done correctly.*/
 int rename_file(char newfile[], char oldfile[]) { // full paths need to be given in parameter.
     /*
