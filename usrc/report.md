@@ -1,19 +1,26 @@
 # **Report**
 
+## **Table of Contents**
+* [How to launch the program](#launch)
+* [Functions](#functions)
+* [Packet Structure](#packet-structure)
+* [Server & Client Directory](#server-&-client-directory)
+* [Example of communication between client and server](#example)
 
-## **How to launch the program**  
+
+<br />
+
+## **How to launch the program** <a name="launch"></a>
 
 To launch the program, you have to :
 
-* Clone the git repository by typing this command ```git clone https://gitlab.eurecom.fr/della1/basicos2024-team07.git```. If you want to clone it in shh, use this command ```git@gitlab.eurecom.fr:della1/basicos2024-team07.git```.
+1. Clone the git repository by typing this command `git clone https://gitlab.eurecom.fr/della1/basicos2024-team07.git`. If you want to clone it in shh, use this command ```git@gitlab.eurecom.fr:della1/basicos2024-team07.git```.
 
-* Go to usrc directory using ```cd usrc```.
+2. Go to usrc directory using `cd usrc && make` in the command prompt.  
 
-* Enter the command `make` in the command prompt.  
+3. The server launches the program using `./bin/EDserver/server` and returns a port and an IP adress.
 
-* The server launches the program using ```./ bin/EDserver/server``` and returns a port and an IP adress.
-
-* Th client launches the program using  ```./ bin/eEDclient/client``` with the IP adress and the port given by the server. 
+4. Th client launches the program using  `./bin/EDclient/client` with the IP adress and the port given by the server. 
 
 
 Then you can type all the functions that follow.
@@ -21,7 +28,7 @@ Then you can type all the functions that follow.
 
 <br />
 
-## **Functions**  
+## **Functions** <a name="functions"></a>
 
 Use `put filename` to copy a local file to the Eurecom Drive. This function takes the name of the file as input and returns either 0 (success) or an error code.
 
@@ -44,7 +51,7 @@ Use `help` to have the description of the available commands.
 
 <br />
 
-## **Packet Structure**  
+## **Packet Structure** <a name="packet-structure"></a>
 
 We've implemented a packet structure that simplifies code accessibility. 
 
@@ -76,14 +83,14 @@ Each packet begins with E, D and r so we can recognise the packet.
 
 Then we implemented methods that use the packet structure.  
 
-The function ```string_to_packet(char * string, Packet * packet)``` converts a string argument to a struct packet given.
+The function `string_to_packet(char * string, Packet * packet)` converts a string argument to a struct packet given.
 
-The function ```packet_to_string(Packet * packet, char * string)``` converts a packet given in a string format.
+The function `packet_to_string(Packet * packet, char * string)` converts a packet given in a string format.
 
 
 <br />
 
-## **Server & Client Directory**
+## **Server & Client Directory** <a name="server-and-client-directory"></a>
 
 Server and client use a global variable to indicate the directory in which they work.
 
@@ -93,15 +100,15 @@ $ echo "Hello World"
 
 <br />
 
-## **Example of communication between client and server**
+## **Example of communication between client and server** <a name="example"></a>
 
 The client wants to print 3 lines of the file :  
 
 <br />
 
-```make```  
+`make` 
 
-```cat MyFile.txt 3``` 
+`cat MyFile.txt 3` 
 
 <br />
 
@@ -111,8 +118,8 @@ The server converts the 0s and 1s into a “packet string”, then into a packet
 
 <br />
 
-```First line.``` 
+`First line.` 
 
-```Second line.```  
+`Second line.`  
 
-```Third line.```  
+`Third line.`  
