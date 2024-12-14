@@ -120,9 +120,11 @@ int student_client_old(int argc, char *argv[]) {
     char directory[256] = {0};  // Directory MUST ENDS WITH '/'
 
     // Check if the user is asking for help
+    /*
     if(argc == 2 && strcmp(argv[1], "help") == 0 ){
         printf("\n%s", client_help_options);
     };
+    */
 
     // Step 1: Parse command-line arguments, figuring out which mode to activate
     for (int i = 3; i < argc; i++) {
@@ -451,36 +453,97 @@ int student_client(int channel, int argc, char *argv[]) {
     // (see the line with "EPIPE" in send_pkt in usrc/communication.c).
     signal(SIGPIPE, SIG_IGN);
 
+
+
+    // Variables for command-line options
+    int analyze_flag = 0;
+    int interactive_flag = 0;
+    char analyze_file[256] = {0};
+    char directory[256] = {0};  // Directory MUST ENDS WITH '/'
+
     // Buffer to receive the command line
     char cmdline[128];
     // Buffer to build the packet to send (max size: 81)
     char sendbuf[2048];
 
-    // Print info to terminal
-    printf("(^C to exit)\n\n");
-    // Infinite loop -> use ^C to exit the program 
-    while (1) {
-        // Get the command from user, exit if it fails
-        printf("Enter a command > ");
-        if(! fgets(cmdline, 128, stdin)){
-            printf("Cannot read command line\n");
-            // Return CANNOT_READ to exit
-            return CANNOT_READ;
+    for (int i = 3; i < argc; i++) {
+
+        if (strcmp(argv[i], "-analyze") == 0) {
+            if (analyze_flag || i + 1 >= argc) {
+                // If the program encounters -analyze, it expects a value (commands.txt) immediately after it.
+                // If i + 1 >= argc,there are no more arguments after argv[i]
+                fprintf(stderr, "Error: Invalid or duplicate -analyze option\n");  // In case the user is messing with us
+                return SYNTAX_ERROR;
+            }
+            analyze_flag = 1;
+            strncpy(analyze_file, argv[++i], sizeof(analyze_file) - 1);
+        }
+        else if (strcmp(argv[i], "-interactive") == 0) {
+            if (interactive_flag) {
+                fprintf(stderr, "Error: Duplicate -interactive option\n");
+                return SYNTAX_ERROR;
+            }
+            interactive_flag = 1;
+        }
+        else if (strcmp(argv[i], "-directory") == 0) {// DIRECTORY STRING MUST END WITH '/'
+            if (directory[0] || i + 1 >= argc) { // BY DEFAULT directory is './'
+                fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
+                return SYNTAX_ERROR;
+            }
+            strncpy(directory, argv[++i], sizeof(directory) - 1);
+        }
+        else {
+            fprintf(stderr, "Error: Unknown option %s\n", argv[i]);  // User isn't making any sense
+            return SYNTAX_ERROR;
+        }
+    }
+
+    // Step 2: Handle -analyze option
+    if (analyze_flag) {
+
+        FILE *file = fopen(analyze_file, "r");
+
+        char line[256];  // maximum length of the line
+        // Print info to terminal
+        printf("(^C to exit)\n\n");
+        // Infinite loop -> use ^C to exit the program
+        while (fgets(line, 256, file)) { // FINITE TIMES
+
+            // GENERATE Packet Command Line using a string format
+            char cmd_to_packet_string[MAX_PACKET_SIZE];
+            int error_code = convert_cmd_string_to_packet_string(line, cmd_to_packet_string);
+
+            // TO DO MANAGE ERROR CODE
+
+            // SEND the packet
+            int res = send_pkt(cmd_to_packet_string, channel);
         }
 
-        printf("PRINT CLIENT COMMAND :\n\t");
-        print_string(cmdline, strlen(cmdline) - 1);
-
-        char cmd_to_packet_string[MAX_PACKET_SIZE];
-        int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string);
-
-        printf("\nString Send :\n\t");
-        print_string(cmd_to_packet_string, 70);  // HEADER ONLY
-
-        // Attempt to send the packet
-        int res = send_pkt(cmd_to_packet_string, channel);
-        printf("RES : %d\n", res);
-        // Returns 1 to restart if somme communication error occured
-        // If (!res) return 1;
     }
+
+    // Step 3: Handle -interactive option
+    if (interactive_flag) {
+        while (1) { // INFINITE TIMES
+            char cmdline[256];
+
+            // Get the command from user, exit if it fails
+            printf("> ");  // Command prompt simulator XD
+            if(! fgets(cmdline, 128, stdin)){
+                printf("Cannot read command line\n");
+                // Return CANNOT_READ to exit
+                return CANNOT_READ;
+            }
+
+            // GENERATE Packet Command Line using a string format
+            char cmd_to_packet_string[MAX_PACKET_SIZE];
+            int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string);
+
+            // TO DO MANAGE ERROR CODE (HELP, QUIT, LEAVE etc...)
+
+            // SEND the packet
+            int res = send_pkt(cmd_to_packet_string, channel);
+        }
+    }
+
+    return SUCCESS; // USELESS
 }
