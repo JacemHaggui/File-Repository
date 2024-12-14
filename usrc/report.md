@@ -11,9 +11,10 @@ To launch the program, you have to :
 
 * Enter the command `make` in the command prompt.  
 
-* server lance repertoire executable
+* The server launches the program using ```./ bin/EDserver/server``` and returns a port and an IP adress.
 
-* client lance
+* Th client launches the program using  ```./ bin/eEDclient/client``` with the IP adress and the port given by the server. 
+
 
 Then you can type all the functions that follow.
 
@@ -83,9 +84,8 @@ The function ```packet_to_string(Packet * packet, char * string)``` converts a p
 <br />
 
 ## **Server & Client Directory**
-utilisation d'une variable globale????
 
-
+Server and client use a global variable to indicate the directory in which they work.
 
 <br />
 
