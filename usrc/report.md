@@ -1,16 +1,18 @@
 # **Report**
 
+<br />
+
 ## **Table of Contents**
 * [How to launch the program](#launch)
-* [Functions](#functions)
-* [Packet Structure](#packet-structure)
-* [Server & Client Directory](#server-&-client-directory)
-* [Example of communication between client and server](#example)
-
+* [Implementation choices](#implementation)
+> * [Functions](#functions)
+> * [Packet Structure](#packet-structure)
+> * [Server & Client Directory](#server-&-client-directory)
+> * [Example of communication between client and server](#example)
 
 <br />
 
-## **How to launch the program** <a name="launch"></a>
+## <a name="launch"></a> **How to launch the program** 
 
 To launch the program, you have to :
 
@@ -28,30 +30,32 @@ Then you can type all the functions that follow.
 
 <br />
 
-## **Functions** <a name="functions"></a>
+## <a name="implementation"></a> **Implementation choices** 
 
-Use `put filename` to copy a local file to the Eurecom Drive. This function takes the name of the file as input and returns either 0 (success) or an error code.
+### <a name="functions"></a> **Functions** 
 
-Use `rm filename` to remove a remote file from the Eurecom Drive. This function takes the name of the file as input and retruns either 0 (success) or an error code.
+Use `put filename` to **copy a local file** to the Eurecom Drive. This function takes the name of the file as input and returns either 0 (success) or an error code.
 
-Use `get filename localfilename` to copy a remote file to the local file system. This function takes the name of the file and the the name of the copied file and returns either 0 (success) or an error code.
+Use `rm filename` to **remove a remote file** from the Eurecom Drive. This function takes the name of the file as input and retruns either 0 (success) or an error code.
 
-Use `ls` to list all the files remotely stored in the Eurecom Drive. This function returns the files or an error code.
+Use `get filename localfilename` to **copy a remote file** to the local file system. This function takes the name of the file and the the name of the copied file and returns either 0 (success) or an error code.
 
-Use `cat filename n` to print the first n lines of a file. This function takes the name of the file as input and returns the first n lines or an error code.
+Use `ls` to **list all the files** remotely stored in the Eurecom Drive. This function returns the files or an error code.
 
-Use `mv originfilename destinationfilename` to rename a remote file. This function takes the name of the file as input and returns either 0 (success) or an error code.
+Use `cat filename n` to **print the first n lines** of a file. This function takes the name of the file as input and returns the first n lines or an error code.
 
-Use `quit` or `exit` to exit.
+Use `mv originfilename destinationfilename` to **rename a remote file**. This function takes the name of the file as input and returns either 0 (success) or an error code.
 
-Use `restart` to reset the connection.
+Use `quit` or `exit` to **exit**.
 
-Use `help` to have the description of the available commands.
+Use `restart` to **reset the connection**.
+
+Use `help` to have the **description of the available commands**.
 
 
 <br />
 
-## **Packet Structure** <a name="packet-structure"></a>
+### <a name="packet-structure"></a> **Packet Structure** 
 
 We've implemented a packet structure that simplifies code accessibility. 
 
@@ -90,7 +94,7 @@ The function `packet_to_string(Packet * packet, char * string)` converts a packe
 
 <br />
 
-## **Server & Client Directory** <a name="server-and-client-directory"></a>
+### <a name="server-&-client-directory"></a> **Server & Client Directory** 
 
 Server and client use a global variable to indicate the directory in which they work.
 
@@ -100,7 +104,7 @@ $ echo "Hello World"
 
 <br />
 
-## **Example of communication between client and server** <a name="example"></a>
+### <a name="example"></a> **Example of communication between client and server** 
 
 The client wants to print 3 lines of the file :  
 
