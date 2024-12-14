@@ -39,7 +39,7 @@
 #include <dirent.h> // For directory handling.
 #include <stdlib.h>
 
-#define INT_MAX 2048 - 70 // Maximum data_size for packet data.
+#define INT_MAX 1978 // Maximum data_size for packet data.
 
 // FUNCTIONS
 // ...
@@ -245,8 +245,7 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
       List of Packets
   */
   
- char * filename = cats(directory, input->option1);
-
+  char * filename = cats(directory, input->option1);
 
   char * file_string = "";
   int * result = file_to_string(filename, &file_string); // HERE WE DON'T THE CONTENT OF RESULT EXCEPT FOR ERRORS.
@@ -474,7 +473,7 @@ int process_packet(Packet * packet, int channel) {
 		...
 	*/
   // PRINT N LINES
-  if (packet->code == CMD_PRINT) {  
+  if (packet->code == CMD_PRINT) {
     Packet ** list_packet_to_send = f_print_n_lines(packet, SERVER_DIRECTORY);
     Packet * first_packet = list_packet_to_send[0];
 
@@ -664,7 +663,9 @@ void student_server(int channel, int argc, char *argv[]) {
           break;
         }
         default : {
+          printf("-----DEBUG LA ?\n");
           int error_code_process = process_packet(packet_received, channel);
+          printf("-----DEBUG LA ?\n");
         }
       }
 
