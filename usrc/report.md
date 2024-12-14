@@ -70,10 +70,13 @@ The function ```packet_to_string(Packet * packet, char * string)``` converts a p
 ## **Example of communication between client and server**
 
 > The client wants to print 3 lines of the file :  
+<br />
 ```make```  
 ```cat MyFile.txt 3```  
+<br />
 The string of the first 3 lines of MyFile.txt is converted into a packet format. The packet is then converted into a 32-bit “packet string” starting with E, D, r, then converted into 0's and 1's and sent to the server.  
 The server converts the 0s and 1s into a “packet string”, then into a packet and analyzes it. It then sends the first 3 lines with the same process back to the client, who will see :  
+<br />
 ```First line.```  
 ```Second line.```  
 ```Third line.```  
