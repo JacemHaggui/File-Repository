@@ -3,12 +3,12 @@
 <br />
 
 ## **Table of Contents**
-* [How to launch the program](#launch)
-* [Implementation choices](#implementation)
+1. [How to launch the program](#launch)
+2. [Implementation choices](#implementation)
 > * [Functions](#functions)
 > * [Packet Structure](#packet-structure)
 > * [Server & Client Directory](#server-&-client-directory)
-> * [Example of communication between client and server](#example)
+> * [Example of communication between client and server](#example)  
 
 <br />
 
