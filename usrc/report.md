@@ -87,6 +87,10 @@ The function ```packet_to_string(Packet * packet, char * string)``` converts a p
 
 Server and client use a global variable to indicate the directory in which they work.
 
+```bash
+$ echo "Hello World"
+```
+
 <br />
 
 ## **Example of communication between client and server**
