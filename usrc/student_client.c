@@ -63,7 +63,7 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
 
     // WAIT FOR THE SERVER ANSWER
     while (1) {
-        if(recv_pkt(pktbuff, channel)){
+        if(recv_pkt(pktbuff, channel) == SUCCESS){
             break;
         }
     }
@@ -424,6 +424,7 @@ void received_from_server(Packet** received, char* directory){
                     }
                 } 
                 else{
+                    printf("\n");
                     printf("%c", (received[i]->data_ptr)[j]);
                 }
             }
@@ -431,6 +432,40 @@ void received_from_server(Packet** received, char* directory){
     }
     else{
         print_response(received[0]);
+    }
+}
+
+void wait_for_response(int channel){
+    // WIP: This one should create a list of the packets received by the server after request.
+    // Something goes wrong. It seems to get into a while true and never gets out of it. 
+
+    char pktbuff[2049];
+    Packet* pkt = empty_packet();
+    int packnum = 1;
+    while (1){
+    if(recv_pkt(pktbuff, channel) == SUCCESS){ // Waits until it receives a packet.
+        string_to_packet(pktbuff, pkt);
+        strcpy(pktbuff, ""); 
+        if(pkt->code == CMD_PRINT || pkt->code == CMD_LIST){ // Retrieves the number of packets that it should receive.
+            packnum = atoi(pkt->option1);
+        }
+        else if(pkt-> code == CMD_GET){ // Retrieves the number of packets that it should receive.
+            int fetchfilesize = atoi(pkt->option2);
+            if (fetchfilesize > INT_MAX) {packnum = (fetchfilesize  / INT_MAX ) + 1;}
+        }
+        Packet ** PacketList = malloc(packnum * sizeof(Packet));
+        PacketList[0] = pkt;
+        int i = 1;
+        while(i < packnum){ // Waits until it receives all desired packets. This might be where things go wrong.
+            if(recv_pkt(pktbuff, channel) == SUCCESS){
+                string_to_packet(pktbuff, PacketList[i]);
+                strcpy(pktbuff, ""); 
+                i++;
+                }
+            } 
+        received_from_server(PacketList, CLIENT_DIRECTORY); // Calls the function that reads the list and executes the desired action (print lines, get file, etc).
+        break;
+    }
     }
 }
 
@@ -517,6 +552,8 @@ int student_client(int channel, int argc, char *argv[]) {
 
             // SEND the packet
             int res = send_pkt(cmd_to_packet_string, channel);
+
+            wait_for_response(channel);
         }
 
     }
@@ -542,6 +579,9 @@ int student_client(int channel, int argc, char *argv[]) {
 
             // SEND the packet
             int res = send_pkt(cmd_to_packet_string, channel);
+
+            // WAIT for a response from the server! (the function doesn't work yet)
+            wait_for_response(channel);
         }
     }
 
