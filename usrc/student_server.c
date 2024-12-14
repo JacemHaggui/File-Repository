@@ -296,12 +296,13 @@ Packet **list_files(Packet* in, char destination[]){
 
   if (dr == NULL)  // opendir returns NULL if couldn't open directory 
   { 
-      printf("Could not open current directory"); 
+      printf("Could not open current directory\n");
       Packet ** list = malloc(sizeof(Packet));
-      list[0] = error_packet(-9); // Directory not found.
+      list[0] = error_packet(FILE_NOT_FOUND); // FILE NOT FOUND (here it's a directory)
       return list; 
   } 
   else{
+    printf("Directory opened !\n");
     char * string;
     while ((de = readdir(dr)) != NULL) {
       // printf("%s\n", de->d_name); 
@@ -332,12 +333,12 @@ Packet **list_files(Packet* in, char destination[]){
       char *buffer = malloc(INT_MAX * sizeof(char));
       out->code = 6;
       strcpy(out->option1, itoa(packnum, 10));
-      out->E = 'E'; out->D = 'D'; out->r = 'r'; 
+      //out->E = 'E'; out->D = 'D'; out->r = 'r';
       slice(string, buffer, i*packnum, (i+1)*packnum);
       out-> data_size = strlen(buffer);
       out->data_ptr = buffer;
       list[i] = out;
-      } 
+      }
       return list;
   }
 }
@@ -362,7 +363,7 @@ int process_packet(Packet * packet, int channel) {
     if (error_code < 0) { // ERROR HAPPENED
       number_packet_to_send = 1 ; // ERROR ONLY ONE PACKET WILL BE SENT
     } else {
-      number_packet_to_send = atoi(first_packet->option1);
+      number_packet_to_send = atoi(first_packet->option1); //OPTION 1 contains the number of packets
     }
 
     // SEND THE PACKETS
@@ -402,7 +403,7 @@ int process_packet(Packet * packet, int channel) {
 
 
   // REMOVING A REMOTE FILE
-  else if (packet->code == CMD_RENAME) {
+  else if (packet->code == CMD_REMOVE) {
     // REMOVING THE REMOTE FILE
     Packet * packet_error_code = removefile(packet, SERVER_DIRECTORY);
 
@@ -412,6 +413,58 @@ int process_packet(Packet * packet, int channel) {
     int res = send_pkt(packet_string_to_send, channel);
     printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
   }
+
+
+  // GETTING A REMOTE FILE
+  else if (packet->code == CMD_GET) {
+    // GET THE DATA INSIDE THE FILE
+    Packet ** list_packet_to_send = fetch(packet, SERVER_DIRECTORY);
+    Packet * first_packet = list_packet_to_send[0];
+
+    // HOW MANY PACKETS SHOULD WE SEND ?
+    int number_packet_to_send = 0;
+    int error_code = first_packet->code;
+    if (error_code < 0) { // ERROR HAPPENED
+      number_packet_to_send = 1 ; // ERROR ONLY ONE PACKET WILL BE SENT
+    } else {
+      number_packet_to_send = atoi(first_packet->option2); //OPTION 2 contains the number of packets
+    }
+
+    // SEND THE PACKETS
+    for (int i = 0; i < number_packet_to_send; i ++) {
+        char packet_string_to_send[2048];
+        int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
+        int res = send_pkt(packet_string_to_send, channel);
+        printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
+    }
+  }
+
+
+  // LISTING REMOTE FILES
+  else if (packet->code == CMD_LIST) {
+    // LIST THE FILES
+    Packet ** list_packet_to_send = list_files(packet, SERVER_DIRECTORY);
+    Packet * first_packet = list_packet_to_send[0];
+
+    // HOW MANY PACKETS SHOULD WE SEND ?
+    int number_packet_to_send = 0;
+    int error_code = first_packet->code;
+    if (error_code < 0) { // ERROR HAPPENED
+      number_packet_to_send = 1 ; // ERROR ONLY ONE PACKET WILL BE SENT
+    } else {
+      number_packet_to_send = atoi(first_packet->option1); //OPTION 1 contains the number of packets
+    }
+
+    // SEND THE PACKETS
+    for (int i = 0; i < number_packet_to_send; i ++) {
+        char packet_string_to_send[2048];
+        int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
+        int res = send_pkt(packet_string_to_send, channel);
+        printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
+    }
+
+  }
+
 }
 
 

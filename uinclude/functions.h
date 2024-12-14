@@ -28,6 +28,7 @@ extern char * CLIENT_DIRECTORY; // CLIENT WORKING DIRECTORY
 #define BAD_SERVER_RESPONSE  -7
 #define CONNECTION_CLOSED    -8
 #define CANNOT_READ          -9
+
 #define SUCCESS              0
 
 // ORIGIN GROUP: Command Codes for GROUP
