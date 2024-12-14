@@ -5,11 +5,11 @@
 ## **Table of Contents**
 1. [How to launch the program](#launch)
 2. [Implementation choices](#implementation)
-> * [Functions](#functions)
-> * [Packet Structure](#packet-structure)
-> * [Server & Client Directory](#server-&-client-directory)
-> * [Example of communication between client and server](#example)  
-
+    1. [Functions](#functions)
+    2. [Packet Structure](#packet-structure)
+    3. [Server & Client Directory](#server-&-client-directory)
+    4. [Example of communication between client and server](#example)  
+	
 <br />
 
 ## <a name="launch"></a> **How to launch the program** 
