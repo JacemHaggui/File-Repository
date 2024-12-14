@@ -653,7 +653,7 @@ void student_server(int channel, int argc, char *argv[]) {
 
       switch (error_code_conversion) {
         case BAD_PACKET_FORMAT:
-        case QUOTA_EXCEEDED:
+        case QUOTA_EXCEEDED: {
           // CREATE ERROR PACKET
           Packet * packet_error_code = error_packet(error_code_conversion);
           // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE REMOVAL OF THE REMOTE FILE
@@ -662,9 +662,10 @@ void student_server(int channel, int argc, char *argv[]) {
           int res = send_pkt(packet_string_to_send, channel);
           printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
           break;
-
-        default :
+        }
+        default : {
           int error_code_process = process_packet(packet_received, channel);
+        }
       }
 
       
