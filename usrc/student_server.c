@@ -351,7 +351,8 @@ int process_packet(Packet * packet, int channel) {
 	OUTPUT :
 		...
 	*/
-  if (packet->code == CMD_PRINT) { // PRINT N LINES 
+  // PRINT N LINES
+  if (packet->code == CMD_PRINT) {  
     Packet ** list_packet_to_send = f_print_n_lines(packet, SERVER_DIRECTORY);
     Packet * first_packet = list_packet_to_send[0];
 
@@ -359,9 +360,9 @@ int process_packet(Packet * packet, int channel) {
     int number_packet_to_send = 0;
     int error_code = first_packet->code;
     if (error_code < 0) { // ERROR HAPPENED
-      int number_packet_to_send = 1 ;
+      number_packet_to_send = 1 ; // ERROR ONLY ONE PACKET WILL BE SENT
     } else {
-      int number_packet_to_send = atoi(first_packet->option1);
+      number_packet_to_send = atoi(first_packet->option1);
     }
 
     // SEND THE PACKETS
@@ -369,12 +370,48 @@ int process_packet(Packet * packet, int channel) {
         char packet_string_to_send[2048];
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
+        printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
     }
-
 
   }
 
+  // ADDING A REMOTE FILE
+  else if (packet->code == CMD_ADD) {
+    //ADD THE REMOTE FILE USING THE PACKET DATA
+    Packet * packet_error_code = add_remote_file(packet, SERVER_DIRECTORY);
+    
+    // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE CREATION OF THE REMOTE FILE
+    char packet_string_to_send[2048];
+    int error_code = packet_to_string(packet_error_code, packet_string_to_send);
+    int res = send_pkt(packet_string_to_send, channel);
+    printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+  }
 
+
+  // RENAMING A REMOTE FILE
+  else if (packet->code == CMD_RENAME) {
+    // RENAME THE REMOTE FILE
+    Packet * packet_error_code = renamefile(packet, SERVER_DIRECTORY);
+
+    // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE RENAMING OF THE REMOTE FILE
+    char packet_string_to_send[2048];
+    int error_code = packet_to_string(packet_error_code, packet_string_to_send);
+    int res = send_pkt(packet_string_to_send, channel);
+    printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+  }
+
+
+  // REMOVING A REMOTE FILE
+  else if (packet->code == CMD_RENAME) {
+    // REMOVING THE REMOTE FILE
+    Packet * packet_error_code = removefile(packet, SERVER_DIRECTORY);
+
+    // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE REMOVAL OF THE REMOTE FILE
+    char packet_string_to_send[2048];
+    int error_code = packet_to_string(packet_error_code, packet_string_to_send);
+    int res = send_pkt(packet_string_to_send, channel);
+    printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+  }
 }
 
 

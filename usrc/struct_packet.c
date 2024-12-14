@@ -120,7 +120,7 @@ int string_to_packet (char * string, Packet * packet) {
 	int i = 0;
 	++ptr; // Skip the code final character
 	while(*(ptr) != '\0') {
-		printf("\t\t%d : %c\n", i, *ptr);
+		//printf("\t\t%d : %c\n", i, *ptr);
 		if (i > 31) return -5;  // Option 1 is too long
 		packet->option1[i] = *ptr;
 		i ++;
@@ -139,7 +139,7 @@ int string_to_packet (char * string, Packet * packet) {
 	int j = 0;
 	
 	while(*(ptr) != '\0' ) {
-		printf("\t\t%d : %c\n", i, *ptr);
+		//printf("\t\t%d : %c\n", i, *ptr);
 		if (j > 31) return -5 ;  // Option 2 is too long
 		packet->option2[j] = *ptr;
 		j ++;
