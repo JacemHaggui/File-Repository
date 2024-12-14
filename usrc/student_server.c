@@ -341,8 +341,7 @@ int remove_file(char filename[]) {
   /*
     Remove a file based on the input packet
     INPUT:
-        in    :  The command packet
-        directory : The path to the directory where the file should be there.
+        filename : the name of the file.
     OUTPUT:
       Packet with error code associated to the removal
   */
@@ -355,6 +354,14 @@ int remove_file(char filename[]) {
 }
 
 Packet * removefile(Packet* in, char directory[]){
+    /*
+    Remove file Handler
+    INPUT:
+        in    :  The command packet
+        directory : The path to the directory where the file should be there.
+    OUTPUT:
+      Packet with error code associated to the removal
+  */
   int errcode = remove_file(cats(directory, in->option1));
   
   return error_packet(errcode);
@@ -362,6 +369,14 @@ Packet * removefile(Packet* in, char directory[]){
 
 
 Packet **fetch(Packet* in, char directory[]){
+  /*
+    Get the data inside of a file given by the packet in parameter
+    INPUT:
+        in    :  The command packet
+        directory : The path to the directory where the file should be there.
+    OUTPUT:
+      List with the data Packet from the file
+  */
   char * filename = cats(directory, in->option1);
 
   char * contents = "" ;
@@ -397,17 +412,25 @@ Packet **fetch(Packet* in, char directory[]){
 }
 
 Packet **list_files(Packet* in, char destination[]){
-  struct dirent *de;  // Pointer for directory entry 
+  /*
+    List the files inside of a given destination
+    INPUT:
+        in    :  The command packet
+        directory : The path to the directory where the files should be.
+    OUTPUT:
+      List with the Packet containing the names and size of the files
+  */
+  struct dirent *de;  // Pointer for directory entry
 
-  // opendir() returns a pointer of DIR type.  
-  DIR *dr = opendir(destination); 
+  // opendir() returns a pointer of DIR type.
+  DIR *dr = opendir(destination);
 
-  if (dr == NULL)  // opendir returns NULL if couldn't open directory 
-  { 
+  if (dr == NULL)  // opendir returns NULL if couldn't open directory
+  {
       printf("Could not open current directory\n");
       Packet ** list = malloc(sizeof(Packet));
       list[0] = error_packet(FILE_NOT_FOUND); // FILE NOT FOUND (here it's a directory)
-      return list; 
+      return list;
   }
 
   char * string = "";
@@ -428,8 +451,12 @@ Packet **list_files(Packet* in, char destination[]){
   string[number_caracter - 1] = '\0'; // o remove the last comma and add a null terminator at the end.
 
   // SORT THE STRING :
-  if(!sort_dir(string))
-    fprintf(stderr," Error while sorting\n\n"); // ERROR
+  if(!sort_dir(string)) {
+    fprintf(stderr," Error while sorting\n\n");
+    Packet ** list = malloc(sizeof(Packet));
+    list[0] = error_packet(COMMAND_FAILS);
+    return list;
+  }
 
   int packnum = 1;
   if (number_caracter > packnum) packnum = number_caracter / INT_MAX + 1;
@@ -456,6 +483,7 @@ int process_packet(Packet * packet, int channel) {
 		Process the packet received in parameter, launch the function dedicated to it
 	INPUT :
     packet: packet to be processed
+    channel : in which the answer packets will be sent
 	OUTPUT :
 		...
 	*/
@@ -578,6 +606,17 @@ int process_packet(Packet * packet, int channel) {
     }
 
   }
+  else {
+    // CREATE ERROR PACKET
+    Packet * packet_error_code = error_packet(SYNTAX_ERROR);
+    // SEND PACKET WITH THE ERROR CODE ASSOCIATED TO THE REMOVAL OF THE REMOTE FILE
+    char packet_string_to_send[MAX_PACKET_SIZE];
+    int error_code = packet_to_string(packet_error_code, packet_string_to_send);
+    int res = send_pkt(packet_string_to_send, channel);
+    printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+  }
+
+  return SUCCESS;
 
 }
 

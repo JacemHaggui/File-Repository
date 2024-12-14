@@ -22,5 +22,5 @@ PROF    -5      Quota exceeded
 PROF    -6      Syntax error in command line
 PROF    -7      Bad response form server
 PROF    -8      Connection closed
-GROUP   -9      Can't read data
+GROUP   -9      Can't read file
 
