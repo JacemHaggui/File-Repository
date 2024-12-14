@@ -10,9 +10,7 @@
 #include <stdlib.h>
 
 
-
-
-/**  help message for commandline options */
+/* help message for commandline options */
 const char * const client_help_options = "\
  client options are:\n\
 \n\
@@ -29,17 +27,18 @@ const char * const client_help_options = "\
 \n\
 ";
 
-//------------------------------------------------------------------------------
-//int student_client(int channel, int argc, char *argv[])
 
 int student_client_old(int argc, char *argv[]) {
-    /* 0
-        INPUT :
-            0
-        OUTPUT :
-            0
+    /*
+        Implements a client-side program that interacts with a server.
+    INPUT :
+        argc : The number of command-line arguments
+        *argv[] : An array of strings containing the command-line arguments
+    OUTPUT :
+        0 : Sucess
+        -1 : Bad packet format
     */
-    int channel = connect_to_server(argv[1], atoi(argv[2]) );
+    int channel = connect_to_server(argv[1], atoi(argv[2]));
 
     // Ignore SIGPIPE signals
     signal(SIGPIPE, SIG_IGN);
@@ -48,9 +47,9 @@ int student_client_old(int argc, char *argv[]) {
     int analyze_flag = 0;
     int interactive_flag = 0;
     char analyze_file[256] = {0};
-    char directory[256] = {0}; // Directory MUST ENDS WITH '/'
+    char directory[256] = {0};  // Directory MUST ENDS WITH '/'
 
-    //check if the user is asking for help
+    // Check if the user is asking for help
     if(argc == 2 && strcmp(argv[1], "help") == 0 ){
         printf("\n%s", client_help_options);
     };
@@ -60,9 +59,9 @@ int student_client_old(int argc, char *argv[]) {
 
         if (strcmp(argv[i], "-analyze") == 0) {
             if (analyze_flag || i + 1 >= argc) {
-                //If the program encounters -analyze, it expects a value (commands.txt) immediately after it.
-                //If i + 1 >= argc,there are no more arguments after argv[i]
-                fprintf(stderr, "Error: Invalid or duplicate -analyze option\n");//In case the user is messing with us
+                // If the program encounters -analyze, it expects a value (commands.txt) immediately after it.
+                // If i + 1 >= argc,there are no more arguments after argv[i]
+                fprintf(stderr, "Error: Invalid or duplicate -analyze option\n");  // In case the user is messing with us
                 return -1;
             }
             analyze_flag = 1;
@@ -76,7 +75,7 @@ int student_client_old(int argc, char *argv[]) {
             interactive_flag = 1;
         }
         else if (strcmp(argv[i], "-directory") == 0) {
-		// DIRECTORY STRING MUST END WITH '/'
+        // DIRECTORY STRING MUST END WITH '/'
             if (directory[0] || i + 1 >= argc) { // BY DEFAULT directory is './'
                 fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
                 return -1;
@@ -84,7 +83,7 @@ int student_client_old(int argc, char *argv[]) {
             strncpy(directory, argv[++i], sizeof(directory) - 1);
         }
         else {
-            fprintf(stderr, "Error: Unknown option %s\n", argv[i]);//User isn't making any sense
+            fprintf(stderr, "Error: Unknown option %s\n", argv[i]);  // User isn't making any sense
             return -1;
         }
     }
@@ -109,18 +108,18 @@ int student_client_old(int argc, char *argv[]) {
 
             if (package == NULL) {
                 printf("Memory allocation failed. Exiting.\n");
-                continue; // Exit if memory allocation fails
+                continue;  // Exit if memory allocation fails
             }
 
             // Check if the command can be converted to a packet
             if (CmdlinetoPacket(line, package) == -1) {
                 printf("Error: Command not recognized. Please try again.\n");
-                free(package); // Free the memory to avoid memory leak
-                continue; // Skip to the next loop iteration
+                free(package);  // Free the memory to avoid memory leak
+                continue;  // Skip to the next loop iteration
             }
 
             // Print the packet for debugging (optional)
-            //print_packet(package);
+            // print_packet(package);
 
             // Converting the packet into a string for sending
             char* package_string = malloc((70 + package->data_size)*sizeof(char));
@@ -130,7 +129,7 @@ int student_client_old(int argc, char *argv[]) {
             send_pkt(package_string, channel);
 
             // Receiving the response from the server
-            //Total packet size must not exceed 2048 bytes, including the header.
+            // Total packet size must not exceed 2048 bytes, including the header.
             char* answer_string = malloc((2048)*sizeof(char));
             
             int response_code = recv_pkt(answer_string, channel);
@@ -169,18 +168,18 @@ int student_client_old(int argc, char *argv[]) {
     
             if(response_code == SUCCESS){
                 // Convert the command into a packet
-                Packet* answer_package = malloc(sizeof(Packet)); // Allocate memory for the packet
+                Packet* answer_package = malloc(sizeof(Packet));  // Allocate memory for the packet
 
                 if (answer_package == NULL) {
                     printf("Memory allocation failed. Exiting.\n");
-                    continue; // Exit if memory allocation fails
+                    continue;  // Exit if memory allocation fails
                 }
 
                 // Check if the command can be converted to a packet
                 if (CmdlinetoPacket(answer_string, answer_package) == -1) {
                     printf("Error: Command not recognized. Please try again.\n");
-                    free(answer_package); // Free the memory to avoid memory leak
-                    continue; // Skip to the next loop iteration
+                    free(answer_package);  // Free the memory to avoid memory leak
+                    continue;  // Skip to the next loop iteration
                 }
                 print_response(answer_package);
             }
@@ -206,7 +205,7 @@ int student_client_old(int argc, char *argv[]) {
     // Continuous loop for interactive mode
     while (1) {
         char command[256];
-        printf("> "); // Command prompt simulator XD
+        printf("> ");  // Command prompt simulator XD
 
         // Read a command from the command line
         if (fgets(command, sizeof(command), stdin) == NULL) {
@@ -225,32 +224,32 @@ int student_client_old(int argc, char *argv[]) {
         printf("Processing command: %s\n", command);
 
         // Convert the command into a packet
-        Packet* package = malloc(sizeof(Packet)); // Allocate memory for the packet
+        Packet* package = malloc(sizeof(Packet));  // Allocate memory for the packet
         if (package == NULL) {
             printf("Memory allocation failed. Exiting.\n");
-            continue; // Exit if memory allocation fails
+            continue;  // Exit if memory allocation fails
         }
 
         // Check if the command can be converted to a packet
         if (CmdlinetoPacket(command, package) == -1) {
             printf("Error: Command not recognized. Please try again.\n");
-            free(package); // Free the memory to avoid memory leak
-            continue; // Skip to the next loop iteration
+            free(package);  // Free the memory to avoid memory leak
+            continue;  // Skip to the next loop iteration
         }
 
         // Print the packet for debugging (optional)
-        //print_packet(package);
+        // print_packet(package);
 
 
         // Converting the packet into a string for sending
-        char package_string[2048];//maximum number of bytes is 2048
+        char package_string[2048];  // Maximum number of bytes is 2048
         packet_to_string(package, package_string);
 
         // Sending the packet to the server
         send_pkt(package_string, channel);
 
         // Receiving the response from the server
-        //Total packet size must not exceed 2048 bytes, including the header.
+        // Total packet size must not exceed 2048 bytes, including the header
         char* answer_string = malloc((2048)*sizeof(char));
 
         int response_code = recv_pkt(answer_string, channel);
@@ -299,8 +298,8 @@ int student_client_old(int argc, char *argv[]) {
             // Check if the command can be converted to a packet
             if (CmdlinetoPacket(answer_string, answer_package) == -1) {
                 printf("Error: Command not recognized. Please try again.\n");
-                free(answer_package); // Free the memory to avoid memory leak
-                continue; // Skip to the next loop iteration
+                free(answer_package);  // Free the memory to avoid memory leak
+                continue;  // Skip to the next loop iteration
             }
             print_response(answer_package);
             }
@@ -325,11 +324,19 @@ int student_client_old(int argc, char *argv[]) {
 
 
 int student_client(int channel, int argc, char *argv[]) {
-    // CHANGE BY ROMAIN WAIT !!
+    /*
+        Implements a client-side program that interacts with a servernthrough a socket channel.
+    INPUT :
+        channel : A socket file descriptor used to communicate with the server
+        argc : The number of command-line arguments
+        *argv[] : An array of strings containing the command-line arguments
+    OUTPUT :
+        CANNOT_READ : to exit
+        
+    */
 
-
-    // Writing to a closed socket causes a SIGPIPE signal, which makes 
-    // the program exits. The following line inhibits this default behaviour.
+    // Writing to a closed socket causes a SIGPIPE signal, which makes the program exits. 
+    // The following line inhibits this default behaviour.
     // Thus, writing to a cloned socket will simply return -1 with the EPIPE
     // error in errno and will therefore not cause an exit. 
     // (see the line with "EPIPE" in send_pkt in usrc/communication.c).
@@ -340,16 +347,16 @@ int student_client(int channel, int argc, char *argv[]) {
     // Buffer to build the packet to send (max size: 81)
     char sendbuf[2048];
 
-    // print info to terminal
+    // Print info to terminal
     printf("(^C to exit)\n\n");
-    // infinite loop -> use ^C to exit the program 
+    // Infinite loop -> use ^C to exit the program 
     while (1) {
-        // get the command from user, exit if it fails
+        // Get the command from user, exit if it fails
         printf("Enter a command > ");
         if(! fgets(cmdline, 128, stdin)){
             printf("Cannot read command line\n");
-            // return 0 to exit
-            return 0;
+            // Return CANNOT_READ to exit
+            return CANNOT_READ;
         }
 
         printf("PRINT CLIENT COMMAND :\n\t");
@@ -359,14 +366,12 @@ int student_client(int channel, int argc, char *argv[]) {
         int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string);
 
         printf("\nString Send :\n\t");
-        print_string(cmd_to_packet_string, 70); // HEADER ONLY
+        print_string(cmd_to_packet_string, 70);  // HEADER ONLY
 
-        // attempt to send the packet
+        // Attempt to send the packet
         int res = send_pkt(cmd_to_packet_string, channel);
         printf("RES : %d\n", res);
-        //returns 1 to restart if somme communication error occured
-        //if (!res) return 1;
-        
+        // Returns 1 to restart if somme communication error occured
+        // If (!res) return 1;
     }
-
 }
