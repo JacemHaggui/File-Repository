@@ -48,6 +48,8 @@ char *  cats(char* dest, char* source);
 
 char* itoa(int val, int base);
 
+void slice(const char* str, char* result, size_t start, size_t end);
+
 int line_count(char string[]);
 
 bool file_exists(char *filename);
