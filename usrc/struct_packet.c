@@ -159,7 +159,7 @@ int string_to_packet (char * string, Packet * packet) {
 	// DATA PART
 	packet->data_ptr = ptr;
 
-	return SUCESS;
+	return SUCCESS;
 
 } 
 
