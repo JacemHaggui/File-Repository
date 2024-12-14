@@ -16,7 +16,7 @@ char *  cats(char* dest, char* source){
   /*  
     Concatenate dest and source into a new string both.
 	INPUT :
-		dest : Source string that will be copied into a new string
+	  dest : Source string that will be copied into a new string
     source : Source string that will be concatenated to the end of dest
 	OUTPUT :
     both : New string containing the concatenation of dest and source
@@ -32,7 +32,7 @@ char* itoa(int val, int base) {
   /*  
     Converts an int to string.
 	INPUT :
-		val : The integer value to be converted
+	  val : The integer value to be converted
     base : The numerical base for the conversion
 	OUTPUT :
     &buf[i+1] : Pointer to the string representation of the integer in the specified base
@@ -49,7 +49,7 @@ int line_count(char string[]) {
   /*  
     Returns the number of lines in a string.
 	INPUT :
-		string[] : The string to analyze
+	  string[] : The string to analyze
 	OUTPUT :
     c : Number of lines in the string
 	*/
@@ -80,7 +80,7 @@ void set_server_directory(const char *string) {
 	/*  
     Set the directory path for the server side.
 	INPUT :
-		string : The New Absolute Path (or relative in fact) to the server working directory
+	  string : The New Absolute Path (or relative in fact) to the server working directory
 	OUTPUT :
 	*/
   // IF SERVER_DIRECTORY IS ALREADY FILLED -> FREE IT
@@ -104,7 +104,7 @@ void set_client_directory(const char *string) {
 	/*  
     Set the directory path for the client side.
 	INPUT :
-		string : The New Absolute Path (or relative in fact) to the client working directory
+	  string : The New Absolute Path (or relative in fact) to the client working directory
 	OUTPUT :
 	*/
     // IF CLIENT_DIRECTORY IS ALREADY FILLED -> FREE IT
@@ -163,8 +163,7 @@ void force_client_directory_format(){
 int convert_cmd_string_to_packet_string(char * cmd, char * string) {
   /*
     Convert a string to a packet format.
-    The function uses a defined packet structure to transform a command-line string into a structured packet,
-    then converts the packet into a string format.
+    The function uses a defined packet structure to transform a command-line string into a structured packet, then converts the packet into a string format.
   INPUT :
     cmd : The command-line string to be converted
     string : A buffer to store the resulting packet string
