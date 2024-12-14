@@ -98,7 +98,7 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
 
 }
 
-int student_client_old(int argc, char *argv[]) {
+int student_client_old(int channel, int argc, char *argv[]) {
     /*
         Implements a client-side program that interacts with a server.
     INPUT :
@@ -108,7 +108,6 @@ int student_client_old(int argc, char *argv[]) {
         0 : Sucess
         -1 : Bad packet format
     */
-    int channel = connect_to_server(argv[1], atoi(argv[2]));
 
     // Ignore SIGPIPE signals
     signal(SIGPIPE, SIG_IGN);
@@ -202,41 +201,13 @@ int student_client_old(int argc, char *argv[]) {
 
             // Receiving the response from the server
             // Total packet size must not exceed 2048 bytes, including the header.
+
+            
             char* answer_string = malloc((2048)*sizeof(char));
             
             int response_code = recv_pkt(answer_string, channel);
 
-            switch (response_code) {
-                case BAD_PACKET_FORMAT:
-                    printf("\nBad packet format\n");
-                    break;
-                case FILE_NOT_FOUND:
-                    printf("\nFile not found\n");
-                    break;
-                case FILE_ALREADY_EXISTS:
-                    printf("\nFile already exists\n");
-                    break;
-                case COMMAND_FAILS:
-                    printf("\nCommand fails (for other server-side failures)\n");
-                    break;
-                case QUOTA_EXCEEDED:
-                    printf("\nQuota exceeded\n");
-                    break;
-                case SYNTAX_ERROR:
-                    printf("\nSyntax error in command line\n");
-                    break;
-                case BAD_SERVER_RESPONSE:
-                    printf("\nBad response from server\n");
-                    break;
-                case CONNECTION_CLOSED:
-                    printf("\nConnection closed\n");
-                    break;
-                case SUCCESS:
-                    printf("\nSuccessfully received the server's response\n");
-                    break;
-                default:
-                    printf("\nUNKNOWN ERROR\n");
-            }
+            treat_response_code(response_code);
     
             if(response_code == SUCCESS){
                 // Convert the command into a packet
@@ -255,10 +226,6 @@ int student_client_old(int argc, char *argv[]) {
                 }
                 print_response(answer_package);
             }
-
-
-
-
 
             // Free the allocated memory after processing the command
             free(package);
@@ -326,37 +293,7 @@ int student_client_old(int argc, char *argv[]) {
 
         int response_code = recv_pkt(answer_string, channel);
 
-        switch (response_code) {
-            case BAD_PACKET_FORMAT:
-                printf("\nBad packet format\n");
-                break;
-            case FILE_NOT_FOUND:
-                printf("\nFile not found\n");
-                break;
-            case FILE_ALREADY_EXISTS:
-                printf("\nFile already exists\n");
-                break;
-            case COMMAND_FAILS:
-                printf("\nCommand fails (for other server-side failures)\n");
-                break;
-            case QUOTA_EXCEEDED:
-                printf("\nQuota exceeded\n");
-                break;
-            case SYNTAX_ERROR:
-                printf("\nSyntax error in command line\n");
-                break;
-            case BAD_SERVER_RESPONSE:
-                printf("\nBad response from server\n");
-                break;
-            case CONNECTION_CLOSED:
-                printf("\nConnection closed\n");
-                break;
-            case SUCCESS:
-                printf("\nSuccessfully received the server's response\n");
-                break;
-            default:
-                printf("\nUNKNOWN ERROR\n");
-            }
+        treat_response_code(response_code);
     
         if(response_code == SUCCESS){
             // Convert the command into a packet
@@ -460,6 +397,8 @@ int student_client(int channel, int argc, char *argv[]) {
     int interactive_flag = 0;
     char analyze_file[256] = {0};
     char directory[256] = {0};  // Directory MUST ENDS WITH '/'
+
+    // Step 1: Parse command-line arguments, figuring out which mode to activate
 
     // Buffer to receive the command line
     char cmdline[128];

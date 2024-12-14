@@ -39,38 +39,22 @@
 #include "../uinclude/struct_packet.h"
 #include "../uinclude/functions.h"
 
-int connect_to_server(const char* server_ip, int port) {
-    // Create socket
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        perror("Socket creation failed");
-        return -1;
-    }
+// Defining error codes
+#define BAD_PACKET_FORMAT    -1
+#define FILE_NOT_FOUND       -2
+#define FILE_ALREADY_EXISTS  -3
+#define COMMAND_FAILS        -4
+#define QUOTA_EXCEEDED       -5
+#define SYNTAX_ERROR         -6
+#define BAD_SERVER_RESPONSE  -7
+#define CONNECTION_CLOSED    -8
+#define CANNOT_READ          -9
 
-    // Set up server address struct
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr = inet_addr(server_ip); // or use inet_pton
-
-    // Connect to the server
-    if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        perror("Connection failed");
-        close(sock);
-        return -1;
-    }
-
-    printf("Connected to server at %s:%d\n", server_ip, port);
-    return sock;
-}
-
-
-
+#define SUCCESS              0
 
 /* a function to receive a packet (in pkt) on a socket channel 
  * it assumes that the received packet respects the format.
  * (in a real program, this should be checked... )
- * Returns 1 in case of success, 0 in case of failure
  */
 int recv_pkt(char *pkt, int channel) {
     /*
@@ -162,4 +146,39 @@ void send_pkt(char *pkt, int channel) {
         buf += amount_sent; // Move buffer pointer forward
     }
     printf("Succesfully sent packet\n");
+}
+
+
+void treat_response_code(int code){
+    switch (code) {
+        case BAD_PACKET_FORMAT:
+            printf("\nBad packet format\n");
+            break;
+        case FILE_NOT_FOUND:
+            printf("\nFile not found\n");
+            break;
+        case FILE_ALREADY_EXISTS:
+            printf("\nFile already exists\n");
+            break;
+        case COMMAND_FAILS:
+            printf("\nCommand fails (for other server-side failures)\n");
+            break;
+        case QUOTA_EXCEEDED:
+            printf("\nQuota exceeded\n");
+            break;
+        case SYNTAX_ERROR:
+            printf("\nSyntax error in command line\n");
+            break;
+        case BAD_SERVER_RESPONSE:
+            printf("\nBad response from server\n");
+            break;
+        case CONNECTION_CLOSED:
+            printf("\nConnection closed\n");
+            break;
+        case SUCCESS:
+            printf("\nSuccessfully received the server's response\n");
+            break;
+        default:
+            printf("\nUNKNOWN ERROR\n");
+        }
 }
