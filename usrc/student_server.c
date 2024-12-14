@@ -39,7 +39,7 @@
 #include <dirent.h> // For directory handling.
 #include <stdlib.h>
 
-const int INT_MAX = 2048 - 70;
+const int INT_MAX = 2048 - 70; // Maximum data_size for packet data.
 
 // FUNCTIONS
 // ...
