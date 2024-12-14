@@ -20,7 +20,7 @@ char *  cats(char* dest, char* source){
     source : Source string that will be concatenated to the end of dest
   OUTPUT :
     both : New string containing the concatenation of dest and source
-	*/
+  */
   char* both = malloc(sizeof(char) * (strlen(source) + strlen(dest)));
   strcpy(both, dest);
   strcat(both, source);
@@ -36,7 +36,7 @@ char* itoa(int val, int base) {
     base : The numerical base for the conversion
   OUTPUT :
     &buf[i+1] : Pointer to the string representation of the integer in the specified base
-	*/
+  */
 	static char buf[32] = {0};
 	int i = 30;
 	for(; val && i ; --i, val /= base)
@@ -52,7 +52,7 @@ int line_count(char string[]) {
     string[] : The string to analyze
   OUTPUT :
     c : Number of lines in the string
-	*/
+  */
   int leng = strlen(string);
   if (leng == 0) {
     return 0;
@@ -77,12 +77,12 @@ char * CLIENT_DIRECTORY = NULL; // DEFINE NULL at the beginning (Will be updated
 
 
 void set_server_directory(const char *string) {
-	/*  
+  /*  
     Set the directory path for the server side.
   INPUT :
     string : The New Absolute Path (or relative in fact) to the server working directory
   OUTPUT :
-	*/
+  */
   // IF SERVER_DIRECTORY IS ALREADY FILLED -> FREE IT
   if (SERVER_DIRECTORY != NULL) {
       free(SERVER_DIRECTORY);
@@ -101,12 +101,12 @@ void set_server_directory(const char *string) {
 
 
 void set_client_directory(const char *string) {
-	/*  
+  /*  
     Set the directory path for the client side.
   INPUT :
     string : The New Absolute Path (or relative in fact) to the client working directory
   OUTPUT :
-	*/
+  */
     // IF CLIENT_DIRECTORY IS ALREADY FILLED -> FREE IT
     if (CLIENT_DIRECTORY != NULL) {
         free(CLIENT_DIRECTORY); 
@@ -125,11 +125,11 @@ void set_client_directory(const char *string) {
 
 
 void force_server_directory_format(){
-	/*  
+  /*  
     Apply the convention to the server directory string, Must ends with '/', and change it if it's not the case.
   INPUT :
   OUTPUT :
-	*/
+  */
 	if (SERVER_DIRECTORY == NULL) {
 		printf("SERVER DIRECTORY PATH == NULL");
 		return;
@@ -143,11 +143,11 @@ void force_server_directory_format(){
 
 
 void force_client_directory_format(){
-	/*  
+  /*  
     Apply the convention to the client directory string, Must ends with '/', and change it if it's not the case.
   INPUT :
   OUTPUT :
-	*/
+  */
 	if (CLIENT_DIRECTORY == NULL) {
 		printf("CLIENT DIRECTORY PATH == NULL");
 		return;
