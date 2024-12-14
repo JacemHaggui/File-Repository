@@ -56,9 +56,12 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
     pack0-> data_size = strlen(buffer);
     pack0-> data_ptr = buffer;
 
-    send_pkt(pack0, channel);
-    Packet* status = empty_packet();
-    recv_pkt(status, channel);
+    char pktbuff[MAX_PACKET_SIZE];
+    packet_to_string(pack0, pktbuff);
+    send_pkt(pktbuff, channel);
+    recv_pkt(pktbuff, channel);
+    Packet* status = empty_packet(); 
+    string_to_packet(pktbuff, status);
 
     if(status->code != 0){ // a.k.a if something went wrong...
         pack0->code = COMMAND_FAILS;
