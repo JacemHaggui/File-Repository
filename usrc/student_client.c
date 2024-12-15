@@ -10,22 +10,6 @@
 #include <stdlib.h>
 
 
-/* help message for commandline options */
-const char * const client_help_options = "\
- client options are:\n\
-\n\
- -interactive :\n\
-	interactive mode ('better' interface messages)\n\
-\n\
- -analyze filename :\n\
-	reads commands from filename.\n\
-\n\
- -directory string :\n\
-	   specifies the directory to be used to store files. If this\n\
-	   directory is non empty when the client starts, then existing\n\
-	   files are assumed to be part of the local drive.\n\
-\n\
-";
 
 #define INT_MAX 1978 // Maximum data_size for packet data. (2048 - 70)
 
@@ -57,7 +41,7 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
     strcpy(pack0->option2, itoa(datalen, 10));
     slice(data, buffer, 0, INT_MAX);
     pack0-> data_size = strlen(buffer);
-    pack0-> data_ptr = buffer;
+    strcpy(pack0->data_ptr, buffer);
 
     char pktbuff[MAX_PACKET_SIZE];
     packet_to_string(pack0, pktbuff);
@@ -92,7 +76,7 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
             strcpy(out->option2, itoa(datalen, 10));
             slice(data, buffer, i*INT_MAX, (i+1)*INT_MAX);
             out-> data_size = strlen(buffer);
-            out->data_ptr = buffer;
+            strcpy(out->data_ptr, buffer);
             list[i-1] = out;
         }
         return list; // SHOULD SEND ONLY THE ELEMENTS AFTER INDEX 0. (0 excluded)
@@ -353,7 +337,7 @@ void received_from_server(Packet** received, char* directory){
         for (int i = 0; i < packnum; i++){
             file = cats(file, received[i]->data_ptr);
         }
-        write_to_file(received[0]->option1, file, directory);
+        write_to_file(cats(directory, received[0]->option1), file);
     }
     else if(received[0]->code == CMD_LIST){ // LS
         packnum= atoi(received[0]->option1);

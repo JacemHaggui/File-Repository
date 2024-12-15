@@ -27,8 +27,7 @@ const char * const client_help_options = "\
 \n\
 ";
 
-int write_to_file(char filepath[], char data[],
-                   char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
+int write_to_file(char filepath[], char data[]) { // FILENAME IS NOT ENOUGH. FILEPATH
                                          // MUST CONTAIN THE PATH TO THE FILE!
     /*
       Open a file with its filename, and convert it into the text string given in parameter
@@ -40,6 +39,8 @@ int write_to_file(char filepath[], char data[],
       FILE_ALREADY_EXISTS
       SUCCESS
     */
+
+
   if (file_exists(filepath)) {
     printf("ERROR: File %s already exists on directory!\n", filepath);
     printf("No modifications will be made.\n");
