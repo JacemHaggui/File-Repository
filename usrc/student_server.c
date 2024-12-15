@@ -611,18 +611,18 @@ void student_server(int channel, int argc, char *argv[]) {
   for (int i = 1; i < argc; i++) {
 
     if (strcmp(argv[i], "-quotasize") == 0) {
-        if (1) { // TO DO
+        if ( i+1 > argc || atoi(argv[i+1]) <= 0) { // IF THERE IS NO QUOTA SIZE OR IT'S NOT A NUMBER (OR THE NUMBER IS 0).
             fprintf(stderr, "Error: Invalid or duplicate -quotasize option\n");  // In case the user is messing with us
             return ; // EXIT
         }
-        // TO DO 
+        set_quota_size(argv[i+1]);
     }
     else if (strcmp(argv[i], "-quotanumber") == 0) {
-        if (1) { // TO DO
-            fprintf(stderr, "Error: Duplicate -interactive option\n");
+        if (i+1 > argc || atoi(argv[i+1] <= 0)) { // TO DO
+            fprintf(stderr, "Error: Invalid or -interactive option\n");
             return ; // EXIT
         }
-        // TO DO 
+        set_quota_number(argv[i+1]); 
     }
 
     else if (strcmp(argv[i], "-directory") == 0) {

@@ -13,6 +13,9 @@
 // DIRECTORY  VARIABLES HANDLER
 extern char * SERVER_DIRECTORY; // SERVER WORKING DIRECTORY
 extern char * CLIENT_DIRECTORY; // CLIENT WORKING DIRECTORY
+extern int QUOTASIZE = -1;      // max number of bytes available in directory. 
+extern int QUOTANUMBER = -1;    // max number of files available in directory 
+
 
 // Define constants for packet
 #define HEADER_SIZE 70
@@ -56,7 +59,8 @@ int line_count(char string[]);
 
 bool file_exists(char *filename);
 
-
+void set_quota_size(int qs);
+void set_quota_number(int qn);
 
 void set_server_directory(const char *string);
 void set_client_directory(const char *string);

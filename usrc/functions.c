@@ -111,7 +111,16 @@ bool file_exists(char *filename) { // Checks for file existence.
 
 char * SERVER_DIRECTORY = NULL; // DEFINE NULL at the beginning (Will be updated in student_server function)
 char * CLIENT_DIRECTORY = NULL; // DEFINE NULL at the beginning (Will be updated in student_client function)
+int QUOTASIZE = -1;             // max number of bytes available in directory. INITIALISED at "no quota"
+int QUOTANUMBER = -1;           // max number of files available in directory INITIALISED at "no quota"
 
+void set_quota_size(int qs){
+  QUOTASIZE = qs;
+}
+
+void set_quota_number(int qn){
+  QUOTANUMBER = qn;
+}
 
 void set_server_directory(const char *string) {
   /*  
