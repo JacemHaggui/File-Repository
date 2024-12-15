@@ -153,7 +153,7 @@ void print_ls_format(const char *stri, int n) {
     }
 }
 
-void wait_for_response(int channel){
+int wait_for_response(int channel){
     // WIP: This one should create a list of the packets received by the server after request.
     // Something goes wrong. It seems to get into a while true and never gets out of it. 
     
@@ -225,7 +225,7 @@ void wait_for_response(int channel){
         else if(error_listener == SUCCESS){
             printf("BUG\n");
             // TO DO
-            return;
+            return SUCCESS;
         } 
         
         printf("FINI E ?\n");
@@ -235,7 +235,7 @@ void wait_for_response(int channel){
 
     printf("FINI C ?\n");
     
-    return ;
+    return SUCCESS;
 }
 
 int student_client(int channel, int argc, char *argv[]) {
