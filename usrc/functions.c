@@ -281,7 +281,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       else{
         packet->code = CMD_ADD;
         memcpy(packet->option1, parsed_cmd.param1, 32);
-        memcpy(packet->data_size, datasize, 2);
+        packet->data_size = datasize;
         memcpy(packet->data_ptr, file_data, datasize);
       }
 
