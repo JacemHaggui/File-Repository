@@ -665,14 +665,14 @@ void student_server(int channel, int argc, char *argv[]) {
             fprintf(stderr, "Error: Invalid or duplicate -quotasize option\n");  // In case the user is messing with us
             return ; // EXIT
         }
-        set_quota_size(atoi(argv[i+1]));
+        set_quota_size(atoi(argv[++i]));
     }
     else if (strcmp(argv[i], "-quotanumber") == 0) {
         if (i+1 > argc || atoi(argv[i+1]) <= 0) { // TO DO
             fprintf(stderr, "Error: Invalid or -interactive option\n");
             return ; // EXIT
         }
-        set_quota_number(atoi(argv[i+1])); 
+        set_quota_number(atoi(argv[++i])); 
     }
 
     else if (strcmp(argv[i], "-directory") == 0) {
