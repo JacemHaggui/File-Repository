@@ -120,7 +120,6 @@ int recv_pkt(char *pkt, int channel) {
 
 /* A function to send a packet pkt in a socket channel. 
  * The "packet" parameter must respect the specified format (see before).
- * Returns 1 for success and 0 for failure
  */
 int send_pkt(char *pkt, int channel) {
     // Header is 70 bytes: 3 for 'E', 'D', 'r' + 2 for data_size + 1 for command/error
