@@ -3,6 +3,7 @@
 #include "../uinclude/communication.h"
 #include "../uinclude/struct_packet.h"
 #include "../uinclude/functions.h"
+#include "../include/student_client.h"
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
@@ -13,7 +14,6 @@
 
 #define INT_MAX 1978 // Maximum data_size for packet data. (2048 - 70)
 
-void print_ls_format(const char *stri, int n); //declaring it here to avoid implicit declaration, fixes a warning
 
 Packet** add_file_request(char* data, char* filename, char* directory, int channel){
     /*
