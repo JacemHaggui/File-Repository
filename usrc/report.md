@@ -60,26 +60,15 @@ Then you can type all the functions that follow.
 We've implemented a packet structure that simplifies code accessibility. 
 
 ```c
-#ifndef STRUCT_PACKET_H
-#define STRUCT_PACKET_H
-
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <inttypes.h>
-#include <ctype.h>
-
-#include <stddef.h> // DEBUG ONLY
-
 // PACKET STRUCTURE
 typedef struct  {
-	char E;  // 1 byte
-	char D;  // 1 byte
-	char r;  // 1 byte
-	uint16_t data_size;  // 2 byte  <!> little-endian MODE ! (So we have to swap from little-endian to big-endian order)
-	int8_t code;  // 1 byte
-	char option1[32];  // 32 bytes
-	char option2[32];  // 32 bytes
+	char E;              // 1 byte
+	char D;              // 1 byte
+	char r;              // 1 byte
+	uint16_t data_size;  // 2 byte
+	int8_t code;         // 1 byte
+	char option1[32];    // 32 bytes
+	char option2[32];    // 32 bytes
 	char * data_ptr;
 } Packet ;
 ```
