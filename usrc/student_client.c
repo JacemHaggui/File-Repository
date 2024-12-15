@@ -29,6 +29,8 @@ const char * const client_help_options = "\
 
 #define INT_MAX 1978 // Maximum data_size for packet data. (2048 - 70)
 
+void print_ls_format(const char *stri, int n); //declaring it here to avoid implicit declaration, fixes a warning
+
 Packet** add_file_request(char* data, char* filename, char* directory, int channel){
     /*
         Creates a packet that requests the creation of a file, as per the "add remote file" function.
@@ -419,8 +421,12 @@ void wait_for_response(int channel){
             Packet* pkt = empty_packet();
             
             // CONVERT the string packet received to a struct packet
-            int error_code_conversion = string_to_packet(pktbuff, pkt); // TO DO HANDLE THE ERROR DUE TO THE CONVERSION IF THERE IS ONE
+            int error_code_conversion = string_to_packet(pktbuff, pkt); 
             //strcpy(pktbuff, ""); // ???
+
+            // HANDLING THE ERROR DUE TO THE CONVERSION IF THERE IS ONE
+            if(error_code_conversion == BAD_PACKET_FORMAT) return BAD_PACKET_FORMAT;
+            if(error_code_conversion == QUOTA_EXCEEDED) return QUOTA_EXCEEDED;
 
             // ADD the part here where we only receive an single packet error from the server
             // it should check the content of the packet received, then check if it's an error answer from the server
@@ -573,8 +579,17 @@ int student_client(int channel, int argc, char *argv[]) {
             char cmd_to_packet_string[MAX_PACKET_SIZE];
             int error_code = convert_cmd_string_to_packet_string(line, cmd_to_packet_string);
 
-            // TO DO MANAGE ERROR CODE
+            // MANAGING ERROR CODE
+            if( error_code == CMD_QUIT ){
+                printf("Quitting Client");
+                return CMD_QUIT;
+                //break;//quitting client
+            }
             
+            if( error_code == CMD_RESTART){
+                printf("Restarting Client");
+                return CMD_RESTART;
+            }
 
             // SEND the packet
             int res = send_pkt(cmd_to_packet_string, channel);
@@ -609,6 +624,7 @@ int student_client(int channel, int argc, char *argv[]) {
                 printf("Quitting Client");
                 return CMD_QUIT;
                 //break;//quitting client
+            }
             
             if( error_code == CMD_RESTART){
                 printf("Restarting Client");
@@ -625,8 +641,6 @@ int student_client(int channel, int argc, char *argv[]) {
             printf("C'est la qu'on sort ?\n");
         }
     }
-
     printf("FINI B ?\n");
     return SUCCESS; // USELESS
-    }
 }
