@@ -325,7 +325,7 @@ Packet * add_remote_file(Packet* in, char directory[]){
     return error_packet(QUOTA_EXCEEDED);
   }
 
-  int errcode = write_to_file(cats(directory, filename), in->data_ptr);
+  int errcode = write_to_file(filename, in->data_ptr);
 
   if(errcode != 0){
     return error_packet(errcode);

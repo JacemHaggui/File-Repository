@@ -196,7 +196,6 @@ int wait_for_response(int channel){
            
             // GENERATE the list of packets which will be received.
             Packet ** PacketList = calloc(packnum, sizeof(Packet));
-            printf("\n\nPRINT PAACKNUM %d \n\n", packnum);
             
             PacketList[0] = pkt;
             int i = 1;
@@ -210,11 +209,8 @@ int wait_for_response(int channel){
                     i++;
                 }
             }
-            printf("\n\nALL THE PACKETS HAVE BEEN RECEIVED\n\n");
 
             received_from_server(PacketList, CLIENT_DIRECTORY); // Calls the function that reads the list and executes the desired action (print lines, get file, etc).
-            
-            printf("ERROR F ?\n");
             
             break;
             
@@ -228,12 +224,12 @@ int wait_for_response(int channel){
             return SUCCESS;
         } 
         
-        printf("FINI E ?\n");
+        
         break;
     
     }
 
-    printf("FINI C ?\n");
+    
     
     return SUCCESS;
 }
@@ -345,10 +341,9 @@ int student_client(int channel, int argc, char *argv[]) {
             if( res != SUCCESS){
                 return res;
             }
-
-            printf("\n\n\nENTER WAIT FOR RESPONSE\n\n\n");
+            
             wait_for_response(channel);
-            printf("FINI A ?\n");
+            
 
         }
     }
@@ -394,7 +389,7 @@ int student_client(int channel, int argc, char *argv[]) {
 
             // WAIT for a response from the server! (the function doesn't work yet)
             wait_for_response(channel);
-            printf("C'est la qu'on sort ?\n");
+            
         }
     }
     printf("FINI B ?\n");
