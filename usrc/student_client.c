@@ -351,7 +351,7 @@ void received_from_server(Packet** received, char* directory){
         for (int i = 0; i < packnum; i++){
             file = cats(file, received[i]->data_ptr);
         }
-        write_to_file(received[0]->option1, file, directory);
+        write_to_file(cats(directory, received[0]->option1), file);
     }
     else if(received[0]->code == CMD_LIST){ // LS
         packnum= atoi(received[0]->option1);

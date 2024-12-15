@@ -53,7 +53,7 @@ char* itoa(int val, int base);
 
 void slice(const char* str, char* result, size_t start, size_t end);
 
-int write_to_file(char filepath[], char data[], char destination[]);
+int write_to_file(char filepath[], char data[]);
 
 int line_count(char string[]);
 
