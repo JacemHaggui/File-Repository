@@ -267,8 +267,13 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
           param2 : 32
       */
     if (strcmp(parsed_cmd.cmd,"put") == 0) {
-      char * file_data = read_file(parsed_cmd.param1);
-      uint16_t datasize = len(file_data);
+      char * filename = parsed_cmd.param1;
+      // Create a buffer large enough to hold both strings and the additional slash
+      char filepath[ strlen(filename) + strlen(CLIENT_DIRECTORY) + 2 ];
+
+      snprintf(filepath, sizeof(filepath), "%s%s/", CLIENT_DIRECTORY, filename);
+      char * file_data = read_file(filepath);
+      uint16_t datasize = strlen(file_data);
       if( datasize > MAX_DATA_SIZE ){
         return QUOTA_EXCEEDED;
         // TODO: Continuous sending
@@ -276,7 +281,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       else{
         packet->code = CMD_ADD;
         memcpy(packet->option1, parsed_cmd.param1, 32);
-        memcpy(packet->data_size, datasize, 16);
+        memcpy(packet->data_size, datasize, 2);
         memcpy(packet->data_ptr, file_data, datasize);
       }
 
