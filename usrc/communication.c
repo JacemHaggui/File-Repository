@@ -39,38 +39,22 @@
 #include "../uinclude/struct_packet.h"
 #include "../uinclude/functions.h"
 
-int connect_to_server(const char* server_ip, int port) {
-    // Create socket
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        perror("Socket creation failed");
-        return -1;
-    }
+// Defining error codes
+#define BAD_PACKET_FORMAT    -1
+#define FILE_NOT_FOUND       -2
+#define FILE_ALREADY_EXISTS  -3
+#define COMMAND_FAILS        -4
+#define QUOTA_EXCEEDED       -5
+#define SYNTAX_ERROR         -6
+#define BAD_SERVER_RESPONSE  -7
+#define CONNECTION_CLOSED    -8
+#define CANNOT_READ          -9
 
-    // Set up server address struct
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr = inet_addr(server_ip); // or use inet_pton
-
-    // Connect to the server
-    if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        perror("Connection failed");
-        close(sock);
-        return -1;
-    }
-
-    printf("Connected to server at %s:%d\n", server_ip, port);
-    return sock;
-}
-
-
-
+#define SUCCESS              0
 
 /* a function to receive a packet (in pkt) on a socket channel 
  * it assumes that the received packet respects the format.
  * (in a real program, this should be checked... )
- * Returns 1 in case of success, 0 in case of failure
  */
 int recv_pkt(char *pkt, int channel) {
     /*
@@ -98,11 +82,18 @@ int recv_pkt(char *pkt, int channel) {
         fprintf(stderr, "Connection closed\n");
         return CONNECTION_CLOSED;
     }
-    printf("\nString Received :\n\t");
-    print_string(buf,amount_received);
-    printf("\tAmout Received : %d\n", amount_received);
+
+    printf("\n--[ Packet Received ]-- \n");
+        printf("\tString Header Format :\n\t\t"); print_string(buf,amount_received);
+        printf("\tData Header Received (sould be 70): %d\n", amount_received);
+    
     // After the header, read the actual data (based on data_size field)
-    uint16_t data_size = *(uint16_t*)(pkt + 3); // Get data size(2 bytes) from the packet
+    //uint16_t data_size = *(uint16_t*)(pkt + 3); // WORK ~
+    //uint16_t data_size = *(uint16_t*)( buf + 3 ); // WORK ~
+    //uint16_t data_size = *(uint16_t *)(  (unsigned char)(  (unsigned char)(*(buf + 3)) ) | (unsigned char)(  (unsigned char)( *(buf + 4) ) << 8 ) ); // NOT WORKING
+    uint16_t data_size = ((uint8_t)buf[4] << 8) | (uint8_t)buf[3];
+        printf("\tData Received (should be below 1978): %u DATA\n", data_size);
+
     if (data_size > 0) { //If we actually have data (duuuuh)
         total_size = data_size; // Set total size to read the actual data
         buf += 70; // Move the buffer pointer past the header
@@ -123,9 +114,14 @@ int recv_pkt(char *pkt, int channel) {
             buf += amount_received; // Move the buffer pointer forward
         }
     }
+    printf("\tData Content : \n\t\t");
+    print_string((pkt + 70), data_size);
 
-    printf("\nString Encoded :\n\t");
-    print_string(pkt,70 + data_size);
+    printf("\n\tPacket Complete String Format :\n\t\t");
+    print_string(pkt, 70 + data_size);
+
+    printf("--[ END - Packet Received ]-- \n\n");
+    
 
     return SUCCESS; // Success
 }
@@ -136,7 +132,7 @@ int recv_pkt(char *pkt, int channel) {
  * The "packet" parameter must respect the specified format (see before).
  * Returns 1 for success and 0 for failure
  */
-void send_pkt(char *pkt, int channel) {
+int send_pkt(char *pkt, int channel) {
     // Header is 70 bytes: 3 for 'E', 'D', 'r' + 2 for data_size + 1 for command/error
     // + 32 for option1 + 32 for option2 = 70.
     uint16_t data_size = *(uint16_t*)(pkt + 3);
@@ -149,17 +145,59 @@ void send_pkt(char *pkt, int channel) {
         amount_sent = write(channel, buf, total_size);
         printf("Amount Send : %d\n", amount_sent);
         if (amount_sent == -1) { // Error case
-            if (errno == EPIPE)
+            if (errno == EPIPE) {
                 fprintf(stderr, "Connection closed\n");
-            else
+                return  CONNECTION_CLOSED; // TO DO verify this line
+            }
+            else {
                 perror("Cannot write");
+                return COMMAND_FAILS; // TO DO verify this line
+            }
         }
         if (amount_sent == 0) { // Connection issue
             fprintf(stderr, "Write problem\n");
+            return COMMAND_FAILS; // TO DO verify this line
+
         }
 
         total_size -= amount_sent; // Update remaining size to send
         buf += amount_sent; // Move buffer pointer forward
     }
     printf("Succesfully sent packet\n");
+    return SUCCESS;
+}
+
+
+void treat_response_code(int code){
+    switch (code) {
+        case BAD_PACKET_FORMAT:
+            printf("\nBad packet format\n");
+            break;
+        case FILE_NOT_FOUND:
+            printf("\nFile not found\n");
+            break;
+        case FILE_ALREADY_EXISTS:
+            printf("\nFile already exists\n");
+            break;
+        case COMMAND_FAILS:
+            printf("\nCommand fails (for other server-side failures)\n");
+            break;
+        case QUOTA_EXCEEDED:
+            printf("\nQuota exceeded\n");
+            break;
+        case SYNTAX_ERROR:
+            printf("\nSyntax error in command line\n");
+            break;
+        case BAD_SERVER_RESPONSE:
+            printf("\nBad response from server\n");
+            break;
+        case CONNECTION_CLOSED:
+            printf("\nConnection closed\n");
+            break;
+        case SUCCESS:
+            printf("\nSuccessfully received the server's response\n");
+            break;
+        default:
+            printf("\nUNKNOWN ERROR\n");
+        }
 }

@@ -148,34 +148,6 @@ int * file_to_string(char *filename, char ** text){
   return result;
 }
 
-
-int write_to_file(char filepath[], char data[],
-                   char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
-                                         // MUST CONTAIN THE PATH TO THE FILE!
-    /*
-      Open a file with its filename, and convert it into the text string given in parameter
-      Output an array : [number of caracters, number of lines] based on the file stats.
-    INPUT :
-        filepath : The path to the file to process and to open
-        data : data that will be written inside the file
-    OUTPUT : ERROR CODES
-      FILE_ALREADY_EXISTS
-      SUCCESS
-    */
-  if (file_exists(filepath)) {
-    printf("ERROR: File %s already exists on directory!\n", filepath);
-    printf("No modifications will be made.\n");
-    return FILE_ALREADY_EXISTS; // FILE ALREADY EXISTS.
-  }
-
-
-  FILE *new;
-  new = fopen(filepath, "w");
-  fputs(data, new);
-  fclose(new);
-  return SUCCESS; // Success !
-}
-
 /* Returns -1 if trying to rename to existing file, returns -2 if trying to rename a non-existing file. Returns 0 if done correctly.*/
 int rename_file(char newfile[], char oldfile[]) { // full paths need to be given in parameter.
     /*
@@ -248,8 +220,11 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
   char * filename = cats(directory, input->option1);
 
   char * file_string = "";
-  int * result = file_to_string(filename, &file_string); // HERE WE DON'T THE CONTENT OF RESULT EXCEPT FOR ERRORS.
+  int * result = file_to_string(filename, &file_string); // HERE WE DON'T CHECK THE CONTENT OF RESULT EXCEPT FOR ERRORS.
   
+  printf("\nThe string to split : \n");
+  print_string(file_string, result[0] + 1); // +1 <=> WILL PRINT '\0' at the end
+
   if(result[0] < 0){
     Packet ** single_slot = calloc(1, sizeof(Packet));
     single_slot[0] = error_packet(result[0]);
@@ -259,22 +234,29 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
   int number_lines = atoi(input->option2);
   int number_caracters_to_print = count_caracter_inside_n_first_lines(file_string, number_lines);
 
-  char * datastring = malloc(sizeof(char) * number_caracters_to_print);
+  //char * datastring = malloc(sizeof(char) * number_caracters_to_print);
+  //int packnum = print_lines(file_string, atoi(input->option2), datastring, 0);
 
-  int packnum = print_lines(file_string, atoi(input->option2), datastring, 0);
+  int packnum = 1;
+  if (number_caracters_to_print > INT_MAX) packnum = number_caracters_to_print / INT_MAX + 1;
+
 
   Packet ** list = calloc(packnum, sizeof(Packet));
   Packet * out;
 
   for(int i = 0; i < packnum; i++){
     out = empty_packet();
-    char buffer[INT_MAX];
+    char buffer[INT_MAX + 1]; // We have to include the null terminator (1978 of data and 1 octet for the '\0' given that it's a string)
     out->code = 1;
     strcpy(out->option1, itoa(packnum,10));
     out->E = 'E'; out->D = 'D'; out->r = 'r';
-    slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
-    out-> data_size = strlen(buffer);
-    out->data_ptr = buffer;
+    slice(file_string, buffer, i*INT_MAX, (i+1)*INT_MAX);
+
+    
+    out-> data_size = (int)strlen(buffer);
+    out->data_ptr = calloc(out-> data_size + 1, sizeof(char));
+    strcpy(out->data_ptr, buffer);
+    //printf("\n\n\n\nLength of Buffer : %d\nThe Content of Buffer : \n%s \n\n\n\n",out-> data_size, out->data_ptr);
     list[i] = out;
   }
   return list;
@@ -382,16 +364,16 @@ Packet **fetch(Packet* in, char directory[]){
   
   for (int i = 0; i < packnum; i++){
     Packet * out = empty_packet();
-    char buffer[INT_MAX];
+    char buffer[INT_MAX + 1];
     out->code = 5;
     strcpy(out->option1, itoa(packnum,10)); // FOR NOW BUT WILL CHANGE WHEN WE SEND THE PACKET
     strcpy(out->option2, itoa(number_caracter,10)); // STAY LIKE THAT
     out->E = 'E'; out->D = 'D'; out->r = 'r';
     slice(contents, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
-    out->data_ptr = buffer;
+    out->data_ptr = calloc(out-> data_size + 1, sizeof(char));
+    strcpy(out->data_ptr, buffer);
     list[i] = out;
-    print_packet(out);
   }
   return list;
 }
@@ -490,11 +472,16 @@ int process_packet(Packet * packet, int channel) {
     printf("\n\n--- SENDING PACKETS: ---\n\n");
     for (int i = 0; i < number_packet_to_send; i ++) {
         char packet_string_to_send[MAX_PACKET_SIZE];
+
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
-        printf("Packet %d Send: \n\t\tError Code : %d\n\t\tSend Code: %d\n\t\t", i+1, error_code, res);
-        print_string(packet_string_to_send, 70 + list_packet_to_send[i]->data_size);
+
+        printf("--[THE FOLLOWING PACKET IS SENT :]--\n\n");
+        printf("\tPacket %d Send: \n\t\tError Code : %d\n\t\tSend Code: %d\n\n\t", i+1, error_code, res);
         print_packet(list_packet_to_send[i]);
+        printf("\nNumber of Data to Print : (70 + data_size) %d\n", list_packet_to_send[i]->data_size + 70);
+        print_string(packet_string_to_send, list_packet_to_send[i]->data_size + 70);
+        printf("\n--[END OF THE PACKET SENT :]--\n");
     }
     printf("\n\n--- END SENDING PACKETS: ---\n\n");
   }
@@ -560,7 +547,11 @@ int process_packet(Packet * packet, int channel) {
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
         printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
+
+        printf("THE FOLLOWING PACKET IS SENT :\n");
         print_packet(list_packet_to_send[i]);
+        print_string(packet_string_to_send, list_packet_to_send[i]->data_size + 70);
+        printf("END OF THE PACKET SENT :\n");
     }
   }
 
@@ -614,10 +605,42 @@ void student_server(int channel, int argc, char *argv[]) {
   // with "EPIPE" in send_pkt in usrc/communication.c).
   signal(SIGPIPE, SIG_IGN);
 
+  char directory[256] = {0};  // Directory MUST ENDS WITH '/'
 
-  set_server_directory("./"); // DIRECTORY DEFAULT SERVER IS "./"
-  printf("\nCURRENT DIRECTORY : %s\n", SERVER_DIRECTORY);
-  force_server_directory_format();
+      // Step 1: Parse command-line arguments, figuring out which mode to activate
+  for (int i = 1; i < argc; i++) {
+
+    if (strcmp(argv[i], "-quotasize") == 0) {
+        if (1) { // TO DO
+            fprintf(stderr, "Error: Invalid or duplicate -quotasize option\n");  // In case the user is messing with us
+            return ; // EXIT
+        }
+        // TO DO 
+    }
+    else if (strcmp(argv[i], "-quotanumber") == 0) {
+        if (1) { // TO DO
+            fprintf(stderr, "Error: Duplicate -interactive option\n");
+            return ; // EXIT
+        }
+        // TO DO 
+    }
+
+    else if (strcmp(argv[i], "-directory") == 0) {
+        if (directory[0] || i + 1 >= argc) { // BY DEFAULT directory is './'
+            fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
+            return ; // EXIT
+        }
+        
+        set_server_directory(argv[++i]); // DEFINE the new directory to work with
+        force_server_directory_format(); // ADD '/' at the end of directory given.
+        printf("\nCURRENT DIRECTORY : %s\n", SERVER_DIRECTORY);
+    }
+    else {
+        fprintf(stderr, "Error: Unknown option %s\n", argv[i]);  // User isn't making any sense
+        return ; // EXIT
+    }
+  }
+
 
   // buffer to receive packets (max size: 81)
   char string_packet_received[2048];
@@ -663,9 +686,7 @@ void student_server(int channel, int argc, char *argv[]) {
           break;
         }
         default : {
-          printf("-----DEBUG LA ?\n");
           int error_code_process = process_packet(packet_received, channel);
-          printf("-----DEBUG LA ?\n");
         }
       }
 

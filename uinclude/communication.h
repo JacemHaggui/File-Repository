@@ -37,7 +37,5 @@ int send_pkt(char *pkt, int channel);
  */
 int recv_pkt(char *pkt, int channel);
 
-
-int connect_to_server(const char* server_ip, int port);
-
+void treat_response_code(int code);
 #endif
