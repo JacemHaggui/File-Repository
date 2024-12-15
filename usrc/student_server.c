@@ -36,7 +36,6 @@
 #include <stdbool.h> // bool type
 #include <string.h>
 #include <sys/stat.h> // stat
-#define _DEFAULT_SOURCE // necessary for usage of DT_REG
 #include <dirent.h> // For directory handling.
 #include <stdlib.h>
 
@@ -264,6 +263,45 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
   return list;
 }
 
+int files_in_folder(char* directory){
+  /*
+    Returns number of files present in directory.
+  */
+
+  int file_count = 0;
+  DIR * dr =opendir(directory);
+  struct dirent * de;
+
+  while ((de = readdir(dr)) != NULL) {
+    if (strcmp(de->d_name , ".") == 0 || strcmp(de->d_name , "..") == 0) continue;
+    file_count++;
+  }
+  closedir(dr);
+
+  return file_count;
+}
+
+int folder_size(char* directory){  
+  /*
+    Returns sum of size of files in directory
+  */
+
+  int size_count = 0;
+  DIR * dr =opendir(directory);
+  struct dirent * de;
+
+  while ((de = readdir(dr)) != NULL) {
+    if (strcmp(de->d_name , ".") == 0 || strcmp(de->d_name , "..") == 0) continue;
+    struct stat buf;
+    stat(de->d_name, &buf);
+    size_count += buf.st_size;
+  }
+  closedir(dr);
+
+  return size_count;
+}
+
+
 Packet * add_remote_file(Packet* in, char directory[]){ 
   /*
     Generate a file with data content of the packet data field
@@ -343,40 +381,6 @@ Packet * removefile(Packet* in, char directory[]){
   int errcode = remove_file(cats(directory, in->option1));
   
   return error_packet(errcode);
-}
-
-int files_in_folder(char* directory){
-  /*
-    Returns number of files present in directory.
-  */
-
-  int file_count = 0;
-  DIR * dr =opendir(directory);
-  struct dirent * de;
-
-  while ((de = readdir(dr)) != NULL) {
-    if (strcmp(de->d_name , ".") == 0 || strcmp(de->d_name , "..") == 0) continue;
-    file_count++;
-  }
-  closedir(dr);
-}
-
-int folder_size(char* directory){  
-  /*
-    Returns sum of size of files in directory
-  */
-
-  int size_count = 0;
-  DIR * dr =opendir(directory);
-  struct dirent * de;
-
-  while ((de = readdir(dr)) != NULL) {
-    if (strcmp(de->d_name , ".") == 0 || strcmp(de->d_name , "..") == 0) continue;
-    struct stat buf;
-    stat(de->d_name, &buf);
-    size_count += buf.st_size;
-  }
-  closedir(dr);
 }
 
 Packet **fetch(Packet* in, char directory[]){
@@ -659,14 +663,14 @@ void student_server(int channel, int argc, char *argv[]) {
             fprintf(stderr, "Error: Invalid or duplicate -quotasize option\n");  // In case the user is messing with us
             return ; // EXIT
         }
-        set_quota_size(argv[i+1]);
+        set_quota_size(atoi(argv[i+1]));
     }
     else if (strcmp(argv[i], "-quotanumber") == 0) {
-        if (i+1 > argc || atoi(argv[i+1] <= 0)) { // TO DO
+        if (i+1 > argc || atoi(argv[i+1]) <= 0) { // TO DO
             fprintf(stderr, "Error: Invalid or -interactive option\n");
             return ; // EXIT
         }
-        set_quota_number(argv[i+1]); 
+        set_quota_number(atoi(argv[i+1])); 
     }
 
     else if (strcmp(argv[i], "-directory") == 0) {
