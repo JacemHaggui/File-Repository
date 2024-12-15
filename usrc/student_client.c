@@ -354,22 +354,11 @@ void received_from_server(Packet** received, char* directory){
     }
     else if(received[0]->code == CMD_LIST){ // LS
         packnum= atoi(received[0]->option1);
-        for (int i =0; i < packnum; i++){
-            for(int j = 0; j < received[i]->data_size; j++){
-                bool tab = true; // ATTENTION Doesn't change at all after ! Bug ?  // TO DO
-                if( (received[i]->data_ptr)[j] == ',' ){
-                    if (tab) {
-                        printf("\t");
-                        } else {
-                        printf("\n");
-                    }
-                }
-                else{
-                    printf("\n");
-                    printf("%c", (received[i]->data_ptr)[j]);
-                }
-            }
+        char lstring = malloc(sizeof(char) * packnum * INT_MAX); // Reconstructing the string sent on each packet.
+        for (int i = 0; i < packnum; i++){
+            lstring = cats(lstring, received[i]->data_ptr); // Create the string by concatenating
         }
+        print_ls_format(lstring, strlen(lstring));
     }
     else{
         print_response(received[0]);
@@ -437,6 +426,41 @@ void wait_for_response(int channel){
     }
 }
 
+void print_ls_format(const char *stri, int n) {
+        /*
+        Prints the received string in the desired ls format.
+    INPUT :
+        stri: the string to print
+        n: the string's length.
+    */
+    
+    int i = 0;
+
+    while (i < n) {
+        // Afficher le nom jusqu'à la virgule
+        while (i < n && stri[i] != ',') {
+            putchar(stri[i]);
+            i++;
+        }
+
+        // Afficher une tabulation après le nom
+        putchar('\t');
+        i++; // Passer la virgule
+
+        // Afficher la taille jusqu'à la prochaine virgule ou fin de chaîne
+        while (i < n && stri[i] != ',') {
+            putchar(stri[i]);
+            i++;
+        }
+
+        // Passer la virgule (ou fin de chaîne)
+        i++;
+
+        // Afficher un saut de ligne après chaque couple
+        putchar('\n');
+    }
+}
+
 int student_client(int channel, int argc, char *argv[]) {
     /*
         Implements a client-side program that interacts with a servernthrough a socket channel.
@@ -449,7 +473,7 @@ int student_client(int channel, int argc, char *argv[]) {
         
     */
 
-    // Writing to a closed socket causes a SIGPIPE signal, which makes the program exits. 
+    // Writing to a closed socket causes a SIfGPIPE signal, which makes the program exits. 
     // The following line inhibits this default behaviour.
     // Thus, writing to a cloned socket will simply return -1 with the EPIPE
     // error in errno and will therefore not cause an exit. 
@@ -533,7 +557,6 @@ int student_client(int channel, int argc, char *argv[]) {
 
             wait_for_response(channel);
         }
-
     }
 
     // Step 3: Handle -interactive option
