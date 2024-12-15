@@ -267,10 +267,8 @@ int student_client(int channel, int argc, char *argv[]) {
 
     // Step 1: Parse command-line arguments, figuring out which mode to activate
 
-    // Buffer to receive the command line
-    char cmdline[128];
     // Buffer to build the packet to send (max size: 81)
-    char sendbuf[MAX_PACKET_SIZE];
+    //char sendbuf[MAX_PACKET_SIZE]; //Unused variable
 
     for (int i = 3; i < argc; i++) {
 
@@ -343,6 +341,10 @@ int student_client(int channel, int argc, char *argv[]) {
 
             // SEND the packet
             int res = send_pkt(cmd_to_packet_string, channel);
+            // Treating potential error codes
+            if( res != SUCCESS){
+                return res;
+            }
 
             printf("\n\n\nENTER WAIT FOR RESPONSE\n\n\n");
             wait_for_response(channel);
@@ -355,6 +357,7 @@ int student_client(int channel, int argc, char *argv[]) {
     // Step 3: Handle -interactive option
     if (interactive_flag) {
         while (1) { // INFINITE TIMES
+            // Buffer to receive the command line
             char cmdline[256];
 
             // Get the command from user, exit if it fails
@@ -384,7 +387,10 @@ int student_client(int channel, int argc, char *argv[]) {
             // SEND the packet
             if(error_code == SUCCESS ){
                 int res = send_pkt(cmd_to_packet_string, channel);
+                // Treating potential error codes
+                if( res != SUCCESS) return res;
             }
+
 
             // WAIT for a response from the server! (the function doesn't work yet)
             wait_for_response(channel);
