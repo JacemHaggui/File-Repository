@@ -378,13 +378,15 @@ void received_from_server(Packet** received, char* directory){
 void wait_for_response(int channel){
     // WIP: This one should create a list of the packets received by the server after request.
     // Something goes wrong. It seems to get into a while true and never gets out of it. 
-    while (1){
+    
+    char pktbuff[2048];
 
+    while (1){
+        
         // CHECK IF THE FIRST PACKET IS RECEIVED
         if(recv_pkt(pktbuff, channel) == SUCCESS){ // Waits until it receives a packet.
 
             // DECLARE this variable only if needed. (Inside the "if packet is received")
-            char pktbuff[2048];
             Packet* pkt = empty_packet();
 
             // CONVERT the string packet received to a struct packet
