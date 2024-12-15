@@ -55,7 +55,7 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
     strcpy(pack0->option2, itoa(datalen, 10));
     slice(data, buffer, 0, INT_MAX);
     pack0-> data_size = strlen(buffer);
-    pack0-> data_ptr = buffer;
+    strcpy(pack0->data_ptr, buffer);
 
     char pktbuff[MAX_PACKET_SIZE];
     packet_to_string(pack0, pktbuff);
@@ -90,7 +90,7 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
             strcpy(out->option2, itoa(datalen, 10));
             slice(data, buffer, i*INT_MAX, (i+1)*INT_MAX);
             out-> data_size = strlen(buffer);
-            out->data_ptr = buffer;
+            strcpy(out->data_ptr, buffer);
             list[i-1] = out;
         }
         return list; // SHOULD SEND ONLY THE ELEMENTS AFTER INDEX 0. (0 excluded)
