@@ -223,7 +223,7 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
   int * result = file_to_string(filename, &file_string); // HERE WE DON'T CHECK THE CONTENT OF RESULT EXCEPT FOR ERRORS.
   
   printf("\nThe string to split : \n");
-  print_string(file_string, result[0] + 1);
+  print_string(file_string, result[0] + 1); // +1 <=> WILL PRINT '\0' at the end
 
   if(result[0] < 0){
     Packet ** single_slot = calloc(1, sizeof(Packet));
@@ -246,13 +246,17 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
 
   for(int i = 0; i < packnum; i++){
     out = empty_packet();
-    char buffer[INT_MAX];
+    char buffer[INT_MAX + 1]; // We have to include the null terminator (1978 of data and 1 octet for the '\0' given that it's a string)
     out->code = 1;
     strcpy(out->option1, itoa(packnum,10));
     out->E = 'E'; out->D = 'D'; out->r = 'r';
     slice(file_string, buffer, i*INT_MAX, (i+1)*INT_MAX);
-    out-> data_size = strlen(buffer);
-    out->data_ptr = buffer;
+
+    
+    out-> data_size = (int)strlen(buffer);
+    out->data_ptr = calloc(out-> data_size + 1, sizeof(char));
+    strcpy(out->data_ptr, buffer);
+    //printf("\n\n\n\nLength of Buffer : %d\nThe Content of Buffer : \n%s \n\n\n\n",out-> data_size, out->data_ptr);
     list[i] = out;
   }
   return list;
@@ -360,14 +364,15 @@ Packet **fetch(Packet* in, char directory[]){
   
   for (int i = 0; i < packnum; i++){
     Packet * out = empty_packet();
-    char buffer[INT_MAX];
+    char buffer[INT_MAX + 1];
     out->code = 5;
     strcpy(out->option1, itoa(packnum,10)); // FOR NOW BUT WILL CHANGE WHEN WE SEND THE PACKET
     strcpy(out->option2, itoa(number_caracter,10)); // STAY LIKE THAT
     out->E = 'E'; out->D = 'D'; out->r = 'r';
     slice(contents, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
-    out->data_ptr = buffer;
+    out->data_ptr = calloc(out-> data_size + 1, sizeof(char));
+    strcpy(out->data_ptr, buffer);
     list[i] = out;
   }
   return list;
@@ -467,6 +472,7 @@ int process_packet(Packet * packet, int channel) {
     printf("\n\n--- SENDING PACKETS: ---\n\n");
     for (int i = 0; i < number_packet_to_send; i ++) {
         char packet_string_to_send[MAX_PACKET_SIZE];
+
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
 

@@ -92,7 +92,7 @@ int recv_pkt(char *pkt, int channel) {
     //uint16_t data_size = *(uint16_t*)( buf + 3 ); // WORK ~
     //uint16_t data_size = *(uint16_t *)(  (unsigned char)(  (unsigned char)(*(buf + 3)) ) | (unsigned char)(  (unsigned char)( *(buf + 4) ) << 8 ) ); // NOT WORKING
     uint16_t data_size = ((uint8_t)buf[4] << 8) | (uint8_t)buf[3];
-        printf("\tData Received : %u DATA\n", data_size);
+        printf("\tData Received (should be below 1978): %u DATA\n", data_size);
 
     if (data_size > 0) { //If we actually have data (duuuuh)
         total_size = data_size; // Set total size to read the actual data
@@ -132,7 +132,7 @@ int recv_pkt(char *pkt, int channel) {
  * The "packet" parameter must respect the specified format (see before).
  * Returns 1 for success and 0 for failure
  */
-void send_pkt(char *pkt, int channel) {
+int send_pkt(char *pkt, int channel) {
     // Header is 70 bytes: 3 for 'E', 'D', 'r' + 2 for data_size + 1 for command/error
     // + 32 for option1 + 32 for option2 = 70.
     uint16_t data_size = *(uint16_t*)(pkt + 3);
@@ -145,19 +145,26 @@ void send_pkt(char *pkt, int channel) {
         amount_sent = write(channel, buf, total_size);
         printf("Amount Send : %d\n", amount_sent);
         if (amount_sent == -1) { // Error case
-            if (errno == EPIPE)
+            if (errno == EPIPE) {
                 fprintf(stderr, "Connection closed\n");
-            else
+                return  CONNECTION_CLOSED; // TO DO verify this line
+            }
+            else {
                 perror("Cannot write");
+                return COMMAND_FAILS; // TO DO verify this line
+            }
         }
         if (amount_sent == 0) { // Connection issue
             fprintf(stderr, "Write problem\n");
+            return COMMAND_FAILS; // TO DO verify this line
+
         }
 
         total_size -= amount_sent; // Update remaining size to send
         buf += amount_sent; // Move buffer pointer forward
     }
     printf("Succesfully sent packet\n");
+    return SUCCESS;
 }
 
 

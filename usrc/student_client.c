@@ -504,10 +504,16 @@ int student_client(int channel, int argc, char *argv[]) {
         }
     }
 
+
     // Step 2: Handle -analyze option
     if (analyze_flag) {
 
-        FILE *file = fopen(analyze_file, "r");
+        if (CLIENT_DIRECTORY == NULL) { // DEFAULT VALUE FOR CLIENT_DIRECTORY
+            set_client_directory("./");
+        }
+
+        FILE *file = fopen(cats(CLIENT_DIRECTORY, analyze_file), "r");
+        // CHECK IF THE FILE EXIST OR NO ! TO DO
 
 
         char line[256];  // maximum length of the line

@@ -204,7 +204,10 @@ int packet_to_string(Packet * packet, char * string) {
 		*(++string) = '.';
 	}
 	
+
 	char * ptr = packet->data_ptr;
+	//printf("\n\nTEST : PRINT STRING : \n");
+	//print_string(ptr, packet->data_size);
 	for (int i = 0; i < packet->data_size; i ++) {
 		*(++string)	= *(ptr++);
 	}
