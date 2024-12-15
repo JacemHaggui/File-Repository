@@ -209,6 +209,7 @@ int count_caracter_inside_n_first_lines(char * file, int n) {
     }
   }
 
+
   return count;
 }
 

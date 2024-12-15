@@ -151,7 +151,8 @@ int student_client_old(int channel, int argc, char *argv[]) {
                 fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
                 return -1;
             }
-            strncpy(directory, argv[++i], sizeof(directory) - 1);
+            set_client_directory(argv[++i]); // DEFINE the new directory to work with
+            force_client_directory_format(); // ADD '/' at the end of directory given.
         }
         else {
             fprintf(stderr, "Error: Unknown option %s\n", argv[i]);  // User isn't making any sense
@@ -378,13 +379,14 @@ void received_from_server(Packet** received, char* directory){
 void wait_for_response(int channel){
     // WIP: This one should create a list of the packets received by the server after request.
     // Something goes wrong. It seems to get into a while true and never gets out of it. 
-    
+
     char pktbuff[2048];
 
     while (1){
         
+        int error_listener = recv_pkt(pktbuff, channel);
         // CHECK IF THE FIRST PACKET IS RECEIVED
-        if(recv_pkt(pktbuff, channel) == SUCCESS){ // Waits until it receives a packet.
+        if(error_listener == SUCCESS){ // Waits until it receives a packet.
 
             // DECLARE this variable only if needed. (Inside the "if packet is received")
             Packet* pkt = empty_packet();
@@ -427,6 +429,10 @@ void wait_for_response(int channel){
             received_from_server(PacketList, CLIENT_DIRECTORY); // Calls the function that reads the list and executes the desired action (print lines, get file, etc).
             break;
 
+        }
+        else if(error_listener == SUCCESS){
+            // TO DO
+            return;
         }
     }
 }
@@ -489,7 +495,8 @@ int student_client(int channel, int argc, char *argv[]) {
                 fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
                 return SYNTAX_ERROR;
             }
-            strncpy(directory, argv[++i], sizeof(directory) - 1);
+            set_client_directory(argv[++i]); // DEFINE the new directory to work with
+            force_client_directory_format(); // ADD '/' at the end of directory given.
         }
         else {
             fprintf(stderr, "Error: Unknown option %s\n", argv[i]);  // User isn't making any sense

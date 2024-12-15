@@ -176,8 +176,10 @@ int packet_to_string(Packet * packet, char * string) {
 	*(string) 	= packet->E;
 	*(++string) 	= packet->D;
 	*(++string) 	= packet->r;
-	*(++string)	= ((packet->data_size & 0xF0) >> 8) ; // First get the 8 upper bit with the mask then shift right 8 times to remove the lower part
-	*(++string)	= (packet->data_size & 0x0F) ; // Then get the 8 lower bits with an another mask 
+	//*(++string)	= ((packet->data_size & 0xF0) >> 8) ; // First get the 8 upper bit with the mask then shift right 8 times to remove the lower part
+	//*(++string)	= (packet->data_size & 0x0F) ; // Then get the 8 lower bits with an another mask 
+	*(++string) 	= (uint8_t)(packet->data_size & 0xFF);
+	*(++string)		= (uint8_t)((packet->data_size >> 8) & 0xFF);
 	*(++string)	= packet->code;
 
 	int n_opt1 = strlen(packet->option1);
