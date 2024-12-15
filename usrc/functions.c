@@ -273,19 +273,33 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
 
       snprintf(filepath, sizeof(filepath), "%s%s/", CLIENT_DIRECTORY, filename);
       char * file_data = read_file(filepath);
-      uint16_t datasize = strlen(file_data);
-      if( datasize > MAX_DATA_SIZE ){
+    
+      if (file_data == NULL) {
+          // Handle error, e.g., file not found
+          return FILE_NOT_FOUND;
+      }
+      
+      uint16_t datasize = strlen(file_data) + 1; // Include null terminator
+      if (datasize > MAX_DATA_SIZE) {
         return QUOTA_EXCEEDED;
         // TODO: Continuous sending
       }
-      else{
+      else {
         packet->code = CMD_ADD;
         memcpy(packet->option1, parsed_cmd.param1, 32);
-        packet->data_size = datasize;
-        memcpy(packet->data_ptr, file_data, datasize);
-      }
 
+        // Allocate memory for data_ptr 
+        packet->data_ptr = malloc(datasize);
+        if (packet->data_ptr == NULL) {
+          printf("Memory Allocation Failed");
+          return 1;
+        }
+        // Copy file_data
+        memcpy(packet->data_ptr, file_data, datasize);
+        packet->data_size = datasize; // Use direct assignment
+      }
     }
+    
     else if (strcmp(parsed_cmd.cmd,"rm") == 0) {
       packet->code = CMD_REMOVE;
       memcpy(packet->option1, parsed_cmd.param1, 32);
