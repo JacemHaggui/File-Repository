@@ -10,6 +10,23 @@
 #include "../include/utilities.h"
 #include "../uinclude/functions.h"
 
+/* help message for commandline options */
+const char * const client_help_options = "\
+ client options are:\n\
+\n\
+ -interactive :\n\
+	interactive mode ('better' interface messages)\n\
+\n\
+ -analyze filename :\n\
+	reads commands from filename.\n\
+\n\
+ -directory string :\n\
+	   specifies the directory to be used to store files. If this\n\
+	   directory is non empty when the client starts, then existing\n\
+	   files are assumed to be part of the local drive.\n\
+\n\
+";
+
 int write_to_file(char filepath[], char data[],
                    char destination[]) { // FILENAME IS NOT ENOUGH. FILEPATH
                                          // MUST CONTAIN THE PATH TO THE FILE!
@@ -278,13 +295,15 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       memcpy(packet->option2, parsed_cmd.param2, 32);
     }
     else if (strcmp(parsed_cmd.cmd,"quit") == 0 || strcmp(parsed_cmd.cmd,"exit") == 0) {
-      // TO DO
+      //we quit and don't send the packet, check with the group
+      return CMD_QUIT;
     }
     else if (strcmp(parsed_cmd.cmd,"restart") == 0 ) {
-      // TO DO
+      //we restart and don't send the packet, check with the group
+      return CMD_RESTART;
     }
     else if (strcmp(parsed_cmd.cmd,"help") == 0) {
-      // DO HELP CMD
+      printf("%s\n",client_help_options);
     }
 
     print_packet(packet);

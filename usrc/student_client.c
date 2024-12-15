@@ -558,20 +558,23 @@ int student_client(int channel, int argc, char *argv[]) {
         }
 
         FILE *file = fopen(cats(CLIENT_DIRECTORY, analyze_file), "r");
-        // CHECK IF THE FILE EXIST OR NO ! TO DO
-
+        if (file == NULL) {
+            printf("Error opening file");
+            return FILE_NOT_FOUND;
+        }
 
         char line[256];  // maximum length of the line
         // Print info to terminal
 
         // Infinite loop -> use ^C to exit the program
         while (fgets(line, 255, file)) { // FINITE TIMES (256 - 1 for '\0')
-
+            
             // GENERATE Packet Command Line using a string format
             char cmd_to_packet_string[MAX_PACKET_SIZE];
             int error_code = convert_cmd_string_to_packet_string(line, cmd_to_packet_string);
 
             // TO DO MANAGE ERROR CODE
+            
 
             // SEND the packet
             int res = send_pkt(cmd_to_packet_string, channel);
@@ -602,9 +605,20 @@ int student_client(int channel, int argc, char *argv[]) {
             int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string);
 
             // TO DO MANAGE ERROR CODE (HELP, QUIT, LEAVE etc...)
+            if( error_code == CMD_QUIT ){
+                printf("Quitting Client");
+                return CMD_QUIT;
+                //break;//quitting client
+            
+            if( error_code == CMD_RESTART){
+                printf("Restarting Client");
+                return CMD_RESTART;
+            }
 
             // SEND the packet
-            int res = send_pkt(cmd_to_packet_string, channel);
+            if(error_code == SUCCESS ){
+                int res = send_pkt(cmd_to_packet_string, channel);
+            }
 
             // WAIT for a response from the server! (the function doesn't work yet)
             wait_for_response(channel);
