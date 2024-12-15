@@ -175,6 +175,8 @@ int string_to_packet (char * string, Packet * packet) {
 
 	//packet->data_ptr = calloc(packet->data_size + 1, sizeof(char));
     //strcpy(packet->data_ptr, ptr);
+
+
 	packet->data_ptr = malloc(packet->data_size + 1);
 	strncpy(packet->data_ptr, ptr, packet->data_size);
 	packet->data_ptr[packet->data_size] = '\0';

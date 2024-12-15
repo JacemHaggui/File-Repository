@@ -234,6 +234,7 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
   int number_lines = atoi(input->option2);
   int number_caracters_to_print = count_caracter_inside_n_first_lines(file_string, number_lines);
   printf("\n\nNumbers of caracter to print : %d\n\n", number_caracters_to_print);
+  file_string[number_caracters_to_print] = '\0';
 
   //char * datastring = malloc(sizeof(char) * number_caracters_to_print);
   //int packnum = print_lines(file_string, atoi(input->option2), datastring, 0);
@@ -247,15 +248,16 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
 
   for(int i = 0; i < packnum; i++){
     out = empty_packet();
-    char buffer[INT_MAX + 1]; // We have to include the null terminator (1978 of data and 1 octet for the '\0' given that it's a string)
+    char buffer[INT_MAX]; // We have to include the null terminator (1978 of data and 1 octet for the '\0' given that it's a string)
     out->code = 1;
     strcpy(out->option1, itoa(packnum,10));
     out->E = 'E'; out->D = 'D'; out->r = 'r';
     slice(file_string, buffer, i*INT_MAX, (i+1)*INT_MAX);
 
+
     
     out-> data_size = (int)strlen(buffer);
-    out->data_ptr = calloc(out-> data_size + 1, sizeof(char));
+    out->data_ptr = calloc(out-> data_size , sizeof(char));
     strcpy(out->data_ptr, buffer);
     //printf("\n\n\n\nLength of Buffer : %d\nThe Content of Buffer : \n%s \n\n\n\n",out-> data_size, out->data_ptr);
     list[i] = out;

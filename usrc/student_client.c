@@ -334,7 +334,7 @@ int student_client_old(int channel, int argc, char *argv[]) {
 
 
 void received_from_server(Packet** received, char* directory){
-    int packnum;
+    int packnum = 1;
 
     if(received[0]->code == CMD_PRINT){ // PRINT_N_LINES
         packnum= atoi(received[0]->option1);
@@ -404,18 +404,20 @@ void print_ls_format(const char *stri, int n) {
 void wait_for_response(int channel){
     // WIP: This one should create a list of the packets received by the server after request.
     // Something goes wrong. It seems to get into a while true and never gets out of it. 
-
-    char pktbuff[INT_MAX + 1]; // 2048 + 1 to store '\0'
+    
+    char pktbuff[INT_MAX]; // 2048 + 1 to store '\0'
+    //pktbuff[INT_MAX] = '\0';
 
     while (1){
         
         int error_listener = recv_pkt(pktbuff, channel);
         // CHECK IF THE FIRST PACKET IS RECEIVED
+        
         if(error_listener == SUCCESS){ // Waits until it receives a packet.
 
             // DECLARE this variable only if needed. (Inside the "if packet is received")
             Packet* pkt = empty_packet();
-
+            
             // CONVERT the string packet received to a struct packet
             int error_code_conversion = string_to_packet(pktbuff, pkt); // TO DO HANDLE THE ERROR DUE TO THE CONVERSION IF THERE IS ONE
             //strcpy(pktbuff, ""); // ???
@@ -423,7 +425,8 @@ void wait_for_response(int channel){
             // ADD the part here where we only receive an single packet error from the server
             // it should check the content of the packet received, then check if it's an error answer from the server
             // and then return from this function, given that we don't need to create a whole list of packet to read.
-
+             
+             
             // DETERMINE the number of packets to still receive
             int packnum = 1; // Initialize
             if(pkt->code == CMD_PRINT || pkt->code == CMD_LIST){ // Retrieves the number of packets that it should receive.
@@ -434,8 +437,11 @@ void wait_for_response(int channel){
                 if (fetchfilesize > INT_MAX) {packnum = (fetchfilesize  / INT_MAX ) + 1;}
             }
 
+           
             // GENERATE the list of packets which will be received.
             Packet ** PacketList = calloc(packnum, sizeof(Packet));
+            printf("\n\nPRINT PAACKNUM %d \n\n", packnum);
+            
             PacketList[0] = pkt;
             int i = 1;
             while(i < packnum){ // Waits until it receives all desired packets. This might be where things go wrong.
@@ -451,20 +457,28 @@ void wait_for_response(int channel){
             printf("\n\nALL THE PACKETS HAVE BEEN RECEIVED\n\n");
 
             received_from_server(PacketList, CLIENT_DIRECTORY); // Calls the function that reads the list and executes the desired action (print lines, get file, etc).
+            
             printf("ERROR F ?\n");
+            
             break;
-
+            
         }
+        
+        
         
         else if(error_listener == SUCCESS){
             printf("BUG\n");
             // TO DO
             return;
-        }
+        } 
+        
         printf("FINI E ?\n");
+        break;
+    
     }
 
     printf("FINI C ?\n");
+    
     return ;
 }
 
@@ -500,7 +514,7 @@ int student_client(int channel, int argc, char *argv[]) {
     // Buffer to receive the command line
     char cmdline[128];
     // Buffer to build the packet to send (max size: 81)
-    char sendbuf[2048];
+    char sendbuf[MAX_PACKET_SIZE];
 
     for (int i = 3; i < argc; i++) {
 
@@ -608,6 +622,7 @@ int student_client(int channel, int argc, char *argv[]) {
 
             // WAIT for a response from the server! (the function doesn't work yet)
             wait_for_response(channel);
+            printf("C'est la qu'on sort ?\n");
         }
     }
 

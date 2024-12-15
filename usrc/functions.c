@@ -223,16 +223,18 @@ void force_client_directory_format(){
 } 
 
 int count_caracter_inside_n_first_lines(char * file, int n) {
-  int l = 0;
-  int i = 0;
-  int length_file = strlen(file);
-  int count = 0;
+  int l = 0;  // Compteur de lignes
+  int count = 0;  // Compteur de caractères
 
-  for (i = 0; i < length_file && l < n; i++) {
-    count++;
-    if (file[i] == '\n') {
-      l++;
-    }
+  // Parcourir le fichier caractère par caractère
+  for (int i = 0; file[i] != '\0'; i++) {
+      count++; // Compter chaque caractère
+      if (file[i] == '\n') {
+          l++; // Compter les sauts de ligne
+          if (l == n) {
+              break; // Si on atteint n lignes, on arrête
+          }
+      }
   }
 
 
