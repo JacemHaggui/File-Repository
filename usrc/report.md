@@ -101,7 +101,7 @@ The client wants to print 3 lines of the file :
 ```bash
 $ git clone git@gitlab.eurecom.fr:della1/basicos2024-team07.git
 $ cd usrc && make
-$ ./bin/EDclient/client 192.168.123.132 443 -directory directory -interactive -analyse
+$ ./bin/EDclient/client 192.168.123.132 443 -directory directory -interactive -analyse file.txt
 $ cat MyFile.txt 3
 ```
 
