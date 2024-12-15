@@ -10,6 +10,22 @@
 #include "../include/utilities.h"
 #include "../uinclude/functions.h"
 
+/* help message for commandline options */
+const char * const client_help_options = "\
+ client options are:\n\
+\n\
+ -interactive :\n\
+	interactive mode ('better' interface messages)\n\
+\n\
+ -analyze filename :\n\
+	reads commands from filename.\n\
+\n\
+ -directory string :\n\
+	   specifies the directory to be used to store files. If this\n\
+	   directory is non empty when the client starts, then existing\n\
+	   files are assumed to be part of the local drive.\n\
+\n\
+";
 
 int write_to_file(char filepath[], char data[]) { // FILENAME IS NOT ENOUGH. FILEPATH
                                          // MUST CONTAIN THE PATH TO THE FILE!
