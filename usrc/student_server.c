@@ -316,12 +316,12 @@ Packet * add_remote_file(Packet* in, char directory[]){
   char * filename = cats(directory, in->option1);
   
   if(files_in_folder(directory) + 1 > QUOTANUMBER){
-    printf("Error: QUOTA NUMBER (%d) WOULD BE EXCEEDED BY TRANSFER!\n", QUOTANUMBER);
+    printf("Error: QUOTA NUMBER (%d) WOULD BE EXCEEDED BY TRANSFER! (%d + 1)\n", QUOTANUMBER, files_in_folder(directory));
     return error_packet(QUOTA_EXCEEDED);
   }
 
   if(folder_size(directory) + in->data_size > QUOTASIZE){
-    printf("Error: QUOTA SIZE (%d) WOULD BE EXCEEDED BY TRANSFER!\n", QUOTASIZE);
+    printf("Error: QUOTA SIZE (%d) WOULD BE EXCEEDED BY TRANSFER! (%d + %d)\n", QUOTASIZE, folder_size(directory), in->data_size);
     return error_packet(QUOTA_EXCEEDED);
   }
 
@@ -517,7 +517,6 @@ int process_packet(Packet * packet, int channel) {
     } else {
       number_packet_to_send = atoi(first_packet->option1); //OPTION 1 contains the number of packets
     }
-
     // SEND THE PACKETS
     printf("\n\n--- SENDING PACKETS: ---\n\n");
     for (int i = 0; i < number_packet_to_send; i ++) {
