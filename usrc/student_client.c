@@ -330,6 +330,8 @@ int student_client_old(int channel, int argc, char *argv[]) {
     return 0; // Success
 }
 
+
+
 void received_from_server(Packet** received, char* directory){
     int packnum;
 
@@ -375,34 +377,54 @@ void received_from_server(Packet** received, char* directory){
 void wait_for_response(int channel){
     // WIP: This one should create a list of the packets received by the server after request.
     // Something goes wrong. It seems to get into a while true and never gets out of it. 
-
-    char pktbuff[2049];
-    Packet* pkt = empty_packet();
-    int packnum = 1;
     while (1){
-    if(recv_pkt(pktbuff, channel) == SUCCESS){ // Waits until it receives a packet.
-        string_to_packet(pktbuff, pkt);
-        strcpy(pktbuff, ""); 
-        if(pkt->code == CMD_PRINT || pkt->code == CMD_LIST){ // Retrieves the number of packets that it should receive.
-            packnum = atoi(pkt->option1);
-        }
-        else if(pkt-> code == CMD_GET){ // Retrieves the number of packets that it should receive.
-            int fetchfilesize = atoi(pkt->option2);
-            if (fetchfilesize > INT_MAX) {packnum = (fetchfilesize  / INT_MAX ) + 1;}
-        }
-        Packet ** PacketList = malloc(packnum * sizeof(Packet));
-        PacketList[0] = pkt;
-        int i = 1;
-        while(i < packnum){ // Waits until it receives all desired packets. This might be where things go wrong.
-            if(recv_pkt(pktbuff, channel) == SUCCESS){
-                string_to_packet(pktbuff, PacketList[i]);
-                strcpy(pktbuff, ""); 
-                i++;
+
+        // CHECK IF THE FIRST PACKET IS RECEIVED
+        if(recv_pkt(pktbuff, channel) == SUCCESS){ // Waits until it receives a packet.
+
+            // DECLARE this variable only if needed. (Inside the "if packet is received")
+            char pktbuff[2048];
+            Packet* pkt = empty_packet();
+
+            // CONVERT the string packet received to a struct packet
+            int error_code_conversion = string_to_packet(pktbuff, pkt); // TO DO HANDLE THE ERROR DUE TO THE CONVERSION IF THERE IS ONE
+            strcpy(pktbuff, ""); // ???
+
+            // ADD the part here where we only receive an single packet error from the server
+            // it should check the content of the packet received, then check if it's an error answer from the server
+            // and then return from this function, given that we don't need to create a whole list of packet to read.
+
+
+            // DETERMINE the number of packets to still receive
+            int packnum = 1; // Initialize
+            if(pkt->code == CMD_PRINT || pkt->code == CMD_LIST){ // Retrieves the number of packets that it should receive.
+                packnum = atoi(pkt->option1);
+            }
+            else if(pkt-> code == CMD_GET){ // Retrieves the number of packets that it should receive.
+                int fetchfilesize = atoi(pkt->option2);
+                if (fetchfilesize > INT_MAX) {packnum = (fetchfilesize  / INT_MAX ) + 1;}
+            }
+
+
+            // GENERATE the list of packets which will be received.
+            Packet ** PacketList = malloc(packnum * sizeof(Packet));
+            PacketList[0] = pkt;
+            int i = 1;
+            while(i < packnum){ // Waits until it receives all desired packets. This might be where things go wrong.
+                if(recv_pkt(pktbuff, channel) == SUCCESS){
+
+                    // NOT sure about filling the packetList directly like that "string_to_packet(pktbuff, PacketList[i]);"
+                    // maybe try to malloc an empty packet and then fill it with the content of the string, and finally put it inside the list.
+                    string_to_packet(pktbuff, PacketList[i]); 
+                    strcpy(pktbuff, ""); // ???
+                    i++;
                 }
-            } 
-        received_from_server(PacketList, CLIENT_DIRECTORY); // Calls the function that reads the list and executes the desired action (print lines, get file, etc).
-        break;
-    }
+            }
+
+            received_from_server(PacketList, CLIENT_DIRECTORY); // Calls the function that reads the list and executes the desired action (print lines, get file, etc).
+            break;
+            
+        }
     }
 }
 
@@ -412,7 +434,7 @@ int student_client(int channel, int argc, char *argv[]) {
     INPUT :
         channel : A socket file descriptor used to communicate with the server
         argc : The number of command-line arguments
-        *argv[] : An array of strings containing the command-line arguments
+        argv : An array of strings containing the command-line arguments
     OUTPUT :
         CANNOT_READ : to exit
         
@@ -477,9 +499,10 @@ int student_client(int channel, int argc, char *argv[]) {
 
         FILE *file = fopen(analyze_file, "r");
 
+
         char line[256];  // maximum length of the line
         // Print info to terminal
-        printf("(^C to exit)\n\n");
+
         // Infinite loop -> use ^C to exit the program
         while (fgets(line, 256, file)) { // FINITE TIMES
 
