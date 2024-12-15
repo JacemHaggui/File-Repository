@@ -24,6 +24,8 @@ Packet **fetch(Packet* in, char directory[]);
 
 Packet **list_files(Packet* in, char destination[]);
 
+int files_in_folder(char* directory);
+int folder_size(char* directory);
 
 #endif
 

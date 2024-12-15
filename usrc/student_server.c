@@ -36,6 +36,7 @@
 #include <stdbool.h> // bool type
 #include <string.h>
 #include <sys/stat.h> // stat
+#define _DEFAULT_SOURCE // necessary for usage of DT_REG
 #include <dirent.h> // For directory handling.
 #include <stdlib.h>
 
@@ -273,8 +274,17 @@ Packet * add_remote_file(Packet* in, char directory[]){
   */
   char * filename = cats(directory, in->option1);
   
-  int errcode = write_to_file(filename, in->data_ptr, directory);
+  if(files_in_folder(directory) + 1 > QUOTANUMBER){
+    printf("Error: QUOTA NUMBER (%d) WOULD BE EXCEEDED BY TRANSFER!\n", QUOTANUMBER);
+    return error_packet(QUOTA_EXCEEDED);
+  }
 
+  if(folder_size(directory) + in->data_size > QUOTASIZE){
+    printf("Error: QUOTA SIZE (%d) WOULD BE EXCEEDED BY TRANSFER!\n", QUOTASIZE);
+    return error_packet(QUOTA_EXCEEDED);
+  }
+
+  int errcode = write_to_file(filename, in->data_ptr, directory);
 
   if(errcode != 0){
     return error_packet(errcode);
@@ -334,6 +344,39 @@ Packet * removefile(Packet* in, char directory[]){
   return error_packet(errcode);
 }
 
+int files_in_folder(char* directory){
+  /*
+    Returns number of files present in directory.
+  */
+
+  int file_count = 0;
+  DIR * dr =opendir(directory);
+  struct dirent * de;
+
+  while ((de = readdir(dr)) != NULL) {
+    if (strcmp(de->d_name , ".") == 0 || strcmp(de->d_name , "..") == 0) continue;
+    file_count++;
+  }
+  closedir(dr);
+}
+
+int folder_size(char* directory){  
+  /*
+    Returns sum of size of files in directory
+  */
+
+  int size_count = 0;
+  DIR * dr =opendir(directory);
+  struct dirent * de;
+
+  while ((de = readdir(dr)) != NULL) {
+    if (strcmp(de->d_name , ".") == 0 || strcmp(de->d_name , "..") == 0) continue;
+    struct stat buf;
+    stat(de->d_name, &buf);
+    size_count += buf.st_size;
+  }
+  closedir(dr);
+}
 
 Packet **fetch(Packet* in, char directory[]){
   /*
@@ -410,7 +453,6 @@ Packet **list_files(Packet* in, char destination[]){
     stat(de->d_name, &buf);
     string = cats(string, itoa(buf.st_size, 10));
     string = cats(string, ",");
-
   }
   closedir(dr);
 
@@ -438,7 +480,8 @@ Packet **list_files(Packet* in, char destination[]){
     //slice(datastring, buffer, i*INT_MAX, (i+1)*INT_MAX);
     slice(string, buffer, i*INT_MAX, (i+1)*INT_MAX);
     out-> data_size = strlen(buffer);
-    out->data_ptr = buffer;
+    out->data_ptr = calloc(out-> data_size + 1, sizeof(char));
+    strcpy(out->data_ptr, buffer);
     list[i] = out;
     }
     return list;
