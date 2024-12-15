@@ -341,7 +341,8 @@ void received_from_server(Packet** received, char* directory){
         for (int i = 0; i < packnum; i++){
             printf("%s", received[i]->data_ptr);
         }
-        // TO DO maybe here put a printf("\n"); to visually close the file ?
+        printf("\n"); // TO DO maybe here put a printf("\n"); to visually close the file ?
+        
     }
     else if(received[0]->code == CMD_GET){ // FETCH
         int fetchfilesize = atoi(received[0]->option2);
@@ -404,7 +405,7 @@ void wait_for_response(int channel){
     // WIP: This one should create a list of the packets received by the server after request.
     // Something goes wrong. It seems to get into a while true and never gets out of it. 
 
-    char pktbuff[2048];
+    char pktbuff[INT_MAX + 1]; // 2048 + 1 to store '\0'
 
     while (1){
         
@@ -417,12 +418,11 @@ void wait_for_response(int channel){
 
             // CONVERT the string packet received to a struct packet
             int error_code_conversion = string_to_packet(pktbuff, pkt); // TO DO HANDLE THE ERROR DUE TO THE CONVERSION IF THERE IS ONE
-            strcpy(pktbuff, ""); // ???
+            //strcpy(pktbuff, ""); // ???
 
             // ADD the part here where we only receive an single packet error from the server
             // it should check the content of the packet received, then check if it's an error answer from the server
             // and then return from this function, given that we don't need to create a whole list of packet to read.
-
 
             // DETERMINE the number of packets to still receive
             int packnum = 1; // Initialize
@@ -434,31 +434,38 @@ void wait_for_response(int channel){
                 if (fetchfilesize > INT_MAX) {packnum = (fetchfilesize  / INT_MAX ) + 1;}
             }
 
-
             // GENERATE the list of packets which will be received.
-            Packet ** PacketList = malloc(packnum * sizeof(Packet));
+            Packet ** PacketList = calloc(packnum, sizeof(Packet));
             PacketList[0] = pkt;
             int i = 1;
             while(i < packnum){ // Waits until it receives all desired packets. This might be where things go wrong.
                 if(recv_pkt(pktbuff, channel) == SUCCESS){
-
-                    // NOT sure about filling the packetList directly like that "string_to_packet(pktbuff, PacketList[i]);"
-                    // maybe try to malloc an empty packet and then fill it with the content of the string, and finally put it inside the list.
-                    string_to_packet(pktbuff, PacketList[i]); 
-                    strcpy(pktbuff, ""); // ???
+                    Packet * empty_packet_received = empty_packet();
+                    string_to_packet(pktbuff, empty_packet_received);
+                    PacketList[i] = empty_packet_received;
+                    //strcpy(pktbuff, ""); // ???
+                    print_string(PacketList[i]->data_ptr, PacketList[i]->data_size);
                     i++;
                 }
             }
+            printf("\n\nALL THE PACKETS HAVE BEEN RECEIVED\n\n");
 
             received_from_server(PacketList, CLIENT_DIRECTORY); // Calls the function that reads the list and executes the desired action (print lines, get file, etc).
+            printf("ERROR F ?\n");
             break;
 
         }
+        
         else if(error_listener == SUCCESS){
+            printf("BUG\n");
             // TO DO
             return;
         }
+        printf("FINI E ?\n");
     }
+
+    printf("FINI C ?\n");
+    return ;
 }
 
 int student_client(int channel, int argc, char *argv[]) {
@@ -544,7 +551,7 @@ int student_client(int channel, int argc, char *argv[]) {
         // Print info to terminal
 
         // Infinite loop -> use ^C to exit the program
-        while (fgets(line, 256, file)) { // FINITE TIMES
+        while (fgets(line, 255, file)) { // FINITE TIMES (256 - 1 for '\0')
 
             // GENERATE Packet Command Line using a string format
             char cmd_to_packet_string[MAX_PACKET_SIZE];
@@ -555,10 +562,14 @@ int student_client(int channel, int argc, char *argv[]) {
             // SEND the packet
             int res = send_pkt(cmd_to_packet_string, channel);
 
+            printf("\n\n\nENTER WAIT FOR RESPONSE\n\n\n");
             wait_for_response(channel);
+            printf("FINI A ?\n");
+
         }
     }
 
+    printf("FINI D ?\n");
     // Step 3: Handle -interactive option
     if (interactive_flag) {
         while (1) { // INFINITE TIMES
@@ -586,5 +597,6 @@ int student_client(int channel, int argc, char *argv[]) {
         }
     }
 
+    printf("FINI B ?\n");
     return SUCCESS; // USELESS
 }

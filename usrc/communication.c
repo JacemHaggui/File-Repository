@@ -124,6 +124,7 @@ int send_pkt(char *pkt, int channel) {
     // Header is 70 bytes: 3 for 'E', 'D', 'r' + 2 for data_size + 1 for command/error
     // + 32 for option1 + 32 for option2 = 70.
     uint16_t data_size = *(uint16_t*)(pkt + 3);
+
     int total_size = 70 + data_size; // 70 bytes header + data_size
     int amount_sent;
     char *buf = pkt; // pointer to data to send
@@ -131,7 +132,7 @@ int send_pkt(char *pkt, int channel) {
     // Send the entire packet, including the header and data
     while (total_size > 0) {//while there is stuff to send, keep sending
         amount_sent = write(channel, buf, total_size);
-        printf("Amount Send : %d\n", amount_sent);
+        printf("Amount Send : %d\nData to Send : %d\n", amount_sent,data_size);
         if (amount_sent == -1) { // Error case
             if (errno == EPIPE) {
                 fprintf(stderr, "Connection closed\n");

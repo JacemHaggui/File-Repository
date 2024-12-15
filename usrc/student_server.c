@@ -234,6 +234,7 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
 
   int number_lines = atoi(input->option2);
   int number_caracters_to_print = count_caracter_inside_n_first_lines(file_string, number_lines);
+  printf("\n\nNumbers of caracter to print : %d\n\n", number_caracters_to_print);
 
   //char * datastring = malloc(sizeof(char) * number_caracters_to_print);
   //int packnum = print_lines(file_string, atoi(input->option2), datastring, 0);

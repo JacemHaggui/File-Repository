@@ -110,8 +110,23 @@ int string_to_packet (char * string, Packet * packet) {
 	if (*(++ptr))	packet->r = *(ptr);	else return BAD_PACKET_FORMAT ;  // Constant Value r not here
 
 	// DATA SIZE PART
-	uint16_t data_size = (uint16_t)(  (unsigned char)(  (unsigned char)(*(++ptr)) ) | (unsigned char)(  (unsigned char)( *(++ptr) ) << 8 ) );
+	//uint16_t data_size = (uint16_t)(  (unsigned char)(  (unsigned char)(*(++ptr)) ) | (unsigned char)(  (unsigned char)( *(++ptr) ) << 8 ) );
+
+	    // Extraction des valeurs
+    uint8_t msb = (uint8_t)*(++ptr);       // MSB
+    uint8_t lsb = (uint8_t)*(++ptr); 		// LSB
+
+	//printf("Octet ptr (MSB) : 0x%02X\n", msb);
+    //printf("Octet ptr (LSB) : 0x%02X\n", lsb);
+
+    // Combinaison pour obtenir la valeur 16 bits
+    uint16_t data_size = ((uint16_t)lsb << 8) | (uint16_t)msb;
+
+	//uint16_t data_size = ((uint8_t)(*(++ptr)) << 8) | (uint8_t)(*(++ptr));
+
+	//uint16_t data_size = (uint16_t)(*(++ptr)) | ((uint16_t)(*(++ptr)) << 8);
 	packet->data_size = data_size;
+	//printf("\n\n\nDATA TO LINK %d\n\n\n\n", packet->data_size);
 
 	// CODE PART
 	uint8_t code = *(uint8_t *)(++ptr);
@@ -157,11 +172,18 @@ int string_to_packet (char * string, Packet * packet) {
 	}
 
 	// DATA PART
-	packet->data_ptr = ptr;
+
+	//packet->data_ptr = calloc(packet->data_size + 1, sizeof(char));
+    //strcpy(packet->data_ptr, ptr);
+	packet->data_ptr = malloc(packet->data_size + 1);
+	strncpy(packet->data_ptr, ptr, packet->data_size);
+	packet->data_ptr[packet->data_size] = '\0';
+
+	//packet->data_ptr = ptr;
 
 	return SUCCESS;
 
-} 
+}
 
 
 int packet_to_string(Packet * packet, char * string) {
