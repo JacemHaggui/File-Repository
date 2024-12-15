@@ -369,13 +369,13 @@ int student_client(int channel, int argc, char *argv[]) {
 
             // TO DO MANAGE ERROR CODE (HELP, QUIT, LEAVE etc...)
             if( error_code == CMD_QUIT ){
-                printf("Quitting Client");
+                printf("Quitting Client\n");
                 return CMD_QUIT;
                 //break;//quitting client
             }
             
             if( error_code == CMD_RESTART){
-                printf("Restarting Client");
+                printf("Restarting Client\n");
                 return CMD_RESTART;
             }
 

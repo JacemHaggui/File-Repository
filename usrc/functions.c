@@ -267,11 +267,19 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
           param2 : 32
       */
     if (strcmp(parsed_cmd.cmd,"put") == 0) {
-      
-      packet->code = CMD_ADD;
-      memcpy(packet->option1, parsed_cmd.param1, 32);
-      //packet->option1 = parsed_cmd.param1;
-      // WHERE ARE THE DATA TO TRANSMIT ? In my cucu ?
+      char * file_data = read_file(parsed_cmd.param1);
+      uint16_t datasize = len(file_data);
+      if( datasize > MAX_DATA_SIZE ){
+        return QUOTA_EXCEEDED;
+        // TODO: Continuous sending
+      }
+      else{
+        packet->code = CMD_ADD;
+        memcpy(packet->option1, parsed_cmd.param1, 32);
+        memcpy(packet->data_size, datasize, 16);
+        memcpy(packet->data_ptr, file_data, datasize);
+      }
+
     }
     else if (strcmp(parsed_cmd.cmd,"rm") == 0) {
       packet->code = CMD_REMOVE;
@@ -319,3 +327,31 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
 
 }
 
+char* read_file(const char *filename) {
+    FILE *file = fopen(filename, "r");  // Open the file in read mode
+
+    if (file == NULL) {
+        printf("Could not open file\n");
+        return NULL;
+    }
+
+    // Move the file pointer to the end to get the file size
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);  // Move back to the beginning of the file
+
+    // Allocate memory for the file content
+    char *content = (char *)malloc(file_size + 1);
+    if (content == NULL) {
+        printf("Memory allocation failed\n");
+        fclose(file);
+        return NULL;
+    }
+
+    // Read the entire file into the buffer
+    fread(content, 1, file_size, file);
+    content[file_size] = '\0';  // Null-terminate the string
+
+    fclose(file);  // Close the file
+    return content;
+}
