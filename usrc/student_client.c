@@ -340,6 +340,7 @@ void received_from_server(Packet** received, char* directory){
         for (int i = 0; i < packnum; i++){
             printf("%s", received[i]->data_ptr);
         }
+        // TO DO maybe here put a printf("\n"); to visually close the file ?
     }
     else if(received[0]->code == CMD_GET){ // FETCH
         int fetchfilesize = atoi(received[0]->option2);
@@ -354,14 +355,14 @@ void received_from_server(Packet** received, char* directory){
         packnum= atoi(received[0]->option1);
         for (int i =0; i < packnum; i++){
             for(int j = 0; j < received[i]->data_size; j++){
-                bool tab = true;
+                bool tab = true; // ATTENTION Doesn't change at all after ! Bug ?  // TO DO
                 if( (received[i]->data_ptr)[j] == ',' ){
                     if (tab) {
                         printf("\t");
                         } else {
                         printf("\n");
                     }
-                } 
+                }
                 else{
                     printf("\n");
                     printf("%c", (received[i]->data_ptr)[j]);
@@ -423,7 +424,7 @@ void wait_for_response(int channel){
 
             received_from_server(PacketList, CLIENT_DIRECTORY); // Calls the function that reads the list and executes the desired action (print lines, get file, etc).
             break;
-            
+
         }
     }
 }
