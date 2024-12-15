@@ -58,9 +58,9 @@ int recv_pkt(char *pkt, int channel) {
 
     int amount_received;
     int total_size = 70; // First, we expect the 70-byte header
-    char * buf = calloc(MAX_PACKET_SIZE + 1, sizeof(char));
-    strcpy(buf, pkt);
-    //pkt; // pointer to data buffer
+    //char * buf = calloc(MAX_PACKET_SIZE + 1, sizeof(char));
+    //strcpy(buf, pkt);
+    char * buf = pkt; // pointer to data buffer
 
     // Read the header first
     amount_received = read(channel, buf, total_size);

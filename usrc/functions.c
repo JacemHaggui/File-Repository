@@ -278,10 +278,10 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       memcpy(packet->option2, parsed_cmd.param2, 32);
     }
     else if (strcmp(parsed_cmd.cmd,"quit") == 0 || strcmp(parsed_cmd.cmd,"exit") == 0) {
-      packet->code = CMD_QUIT;
+      // TO DO
     }
     else if (strcmp(parsed_cmd.cmd,"restart") == 0 ) {
-      packet->code = CMD_RESTART;
+      // TO DO
     }
     else if (strcmp(parsed_cmd.cmd,"help") == 0) {
       // DO HELP CMD
