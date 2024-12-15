@@ -13,8 +13,8 @@
 // DIRECTORY  VARIABLES HANDLER
 extern char * SERVER_DIRECTORY; // SERVER WORKING DIRECTORY
 extern char * CLIENT_DIRECTORY; // CLIENT WORKING DIRECTORY
-extern int QUOTASIZE = -1;      // max number of bytes available in directory. 
-extern int QUOTANUMBER = -1;    // max number of files available in directory 
+extern int QUOTASIZE;      // max number of bytes available in directory. 
+extern int QUOTANUMBER;    // max number of files available in directory 
 
 
 // Define constants for packet
