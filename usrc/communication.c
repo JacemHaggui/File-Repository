@@ -39,18 +39,6 @@
 #include "../uinclude/struct_packet.h"
 #include "../uinclude/functions.h"
 
-// Defining error codes
-#define BAD_PACKET_FORMAT    -1
-#define FILE_NOT_FOUND       -2
-#define FILE_ALREADY_EXISTS  -3
-#define COMMAND_FAILS        -4
-#define QUOTA_EXCEEDED       -5
-#define SYNTAX_ERROR         -6
-#define BAD_SERVER_RESPONSE  -7
-#define CONNECTION_CLOSED    -8
-#define CANNOT_READ          -9
-
-#define SUCCESS              0
 
 /* a function to receive a packet (in pkt) on a socket channel 
  * it assumes that the received packet respects the format.
