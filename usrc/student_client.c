@@ -354,7 +354,7 @@ void received_from_server(Packet** received, char* directory){
     }
     else if(received[0]->code == CMD_LIST){ // LS
         packnum= atoi(received[0]->option1);
-        char lstring = malloc(sizeof(char) * packnum * INT_MAX); // Reconstructing the string sent on each packet.
+        char *lstring = malloc(sizeof(char) * packnum * INT_MAX); // Reconstructing the string sent on each packet.
         for (int i = 0; i < packnum; i++){
             lstring = cats(lstring, received[i]->data_ptr); // Create the string by concatenating
         }
@@ -362,6 +362,41 @@ void received_from_server(Packet** received, char* directory){
     }
     else{
         print_response(received[0]);
+    }
+}
+
+void print_ls_format(const char *stri, int n) {
+        /*
+        Prints the received string in the desired ls format.
+    INPUT :
+        stri: the string to print
+        n: the string's length.
+    */
+    
+    int i = 0;
+
+    while (i < n) {
+        // Afficher le nom jusqu'à la virgule
+        while (i < n && stri[i] != ',') {
+            putchar(stri[i]);
+            i++;
+        }
+
+        // Afficher une tabulation après le nom
+        putchar('\t');
+        i++; // Passer la virgule
+
+        // Afficher la taille jusqu'à la prochaine virgule ou fin de chaîne
+        while (i < n && stri[i] != ',') {
+            putchar(stri[i]);
+            i++;
+        }
+
+        // Passer la virgule (ou fin de chaîne)
+        i++;
+
+        // Afficher un saut de ligne après chaque couple
+        putchar('\n');
     }
 }
 
@@ -423,41 +458,6 @@ void wait_for_response(int channel){
             // TO DO
             return;
         }
-    }
-}
-
-void print_ls_format(const char *stri, int n) {
-        /*
-        Prints the received string in the desired ls format.
-    INPUT :
-        stri: the string to print
-        n: the string's length.
-    */
-    
-    int i = 0;
-
-    while (i < n) {
-        // Afficher le nom jusqu'à la virgule
-        while (i < n && stri[i] != ',') {
-            putchar(stri[i]);
-            i++;
-        }
-
-        // Afficher une tabulation après le nom
-        putchar('\t');
-        i++; // Passer la virgule
-
-        // Afficher la taille jusqu'à la prochaine virgule ou fin de chaîne
-        while (i < n && stri[i] != ',') {
-            putchar(stri[i]);
-            i++;
-        }
-
-        // Passer la virgule (ou fin de chaîne)
-        i++;
-
-        // Afficher un saut de ligne après chaque couple
-        putchar('\n');
     }
 }
 
