@@ -345,6 +345,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
     print_packet(packet);
 
     int error_code = packet_to_string(packet, string);
+    free_packet(packet);
 
     return error_code;
 
