@@ -268,10 +268,16 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       */
     if (strcmp(parsed_cmd.cmd,"put") == 0) {
       char * filename = parsed_cmd.param1;
-      // Create a buffer large enough to hold both strings and the additional slash
-      char filepath[ strlen(filename) + strlen(CLIENT_DIRECTORY) + 2 ];
 
-      snprintf(filepath, sizeof(filepath), "%s%s/", CLIENT_DIRECTORY, filename);// tested and works
+      // Create a buffer large enough to hold both strings and the additional slash
+      //char filepath[ strlen(filename) + strlen(CLIENT_DIRECTORY) + 2 ];
+      // concatenates the directory and filename adding a slash at the end to respect the format
+      //snprintf(filepath, sizeof(filepath), "%s%s/", CLIENT_DIRECTORY, filename);// tested and works
+
+
+      char * filepathtmp = cats(CLIENT_DIRECTORY, filename);
+      char* filepath = cats(filepathtmp, "/");
+
       char * file_data = read_file(filepath);
     
       if (file_data == NULL) {
