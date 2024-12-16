@@ -331,13 +331,45 @@ if (interactive_flag) {
 
 ### <a name="server-approach"></a> **Server Side**
 
+Here we defined the functions linked to the student_server function.
 
+Some of them will return a lsit of Packet, in which we store each packet needed to transmit the whole data.
+
+```c
+Packet **f_print_n_lines(Packet* in, char directory[]);
+
+Packet *add_remote_file(Packet* in, char directory[]);
+
+Packet * renamefile(Packet* in, char directory[]);
+
+Packet * removefile(Packet* in, char directory[]);
+
+Packet **fetch(Packet* in, char directory[]);
+
+Packet **list_files(Packet* in, char destination[]);
+```
+
+Here a summary of the student_server packet manager :
+
+```c
+void student_server() {
+
+     // Step 1 : Parse command-line arguments, figuring out which mode to activate (analyze, interactive) and the parameters
+
+     // Step 2 : infinite loop -> to receive packets
+     while (true) {
+        // GET USER COMMAND
+        // GET THE PACKET
+        // PROCESS THE STRING PACKET RECEIVED CONTENT
+
+}
+```
 
 <br />
 
 ## <a name="individual"></a> **Individual Work**
 
-### <a name="launch"></a> **Server Side** 
+### <a name="launch"></a> **Server Side Members :** 
 #### **Romain Della Rocca** 
 - Made the structure packet and the functions related to it, such as functions to convert from a string to a packet format and a packet to a string format
 - Updated Makefile in order to compile new files included and to link them with the other files of the repository
@@ -348,7 +380,7 @@ if (interactive_flag) {
 #### **Clemente Paredes Vigneaux**
 To Do
 
-### <a name="launch"></a> **Client Side** 
+### <a name="launch"></a> **Client Side Members :** 
 #### **Jacem Haggui** 
 - Implemented Command-line Analysis and Mode Activation
 - Implemented the interactive mode
