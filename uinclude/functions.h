@@ -73,6 +73,6 @@ int count_caracter_inside_n_first_lines(char * file, int n);
 
 int convert_cmd_string_to_packet_string(char * cmd, char * string);
 
-char* read_file(const char *filename);
+char* read_file(char *filename);
 
 #endif // STRUCT_FUNCTIONS_H

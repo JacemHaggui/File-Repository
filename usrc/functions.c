@@ -278,6 +278,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       char * filepathtmp = cats(CLIENT_DIRECTORY, filename);
       char* filepath = cats(filepathtmp, "/");
 
+      printf("Attempting to read file contents of: %s\n", filepath);
       char * file_data = read_file(filepath);
     
       if (file_data == NULL) {
