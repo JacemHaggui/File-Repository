@@ -1,0 +1,10 @@
+cat serversmall 5
+get serversmall svsmall
+rm serversmall
+ls
+put svsmall
+cat serversmall 5
+mv svsmall serversmol
+mv serversmol serversmall
+rm servsmall
+rm serversmol

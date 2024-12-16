@@ -1,0 +1,10 @@
+get pin pom
+cat serversmall 5000
+cat serversmall 300
+cat serversmall 2
+put clientsmall
+cat clientsmall 200
+rm clientsmall
+cat serverbig 10
+cat serverbig 100
+ls

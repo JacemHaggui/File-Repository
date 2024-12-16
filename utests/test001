@@ -1,0 +1,11 @@
+cat serverbig 10
+put clientsmall
+put clientsmall
+cat clientsmall 5
+mv clientsmall servsmall
+cat servsmall 5
+get servsmall downloaded
+cat nonexistent_file 5
+rm downloaded
+rm clientsmall
+rm servsmall

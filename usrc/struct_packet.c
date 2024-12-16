@@ -327,7 +327,6 @@ int CmdlinetoPacket(const char *input, Packet *pkt) {
         fprintf(stderr, "Error: Unknown command '%s'\n", command);
         return -6;
     }
-
     return 0;  // Success
 }
 
@@ -374,8 +373,38 @@ void print_response(const Packet *packet) {
             printf("Printing n lines of file\n");
             printf("File Name: %s\n", packet->option1);
             break;
-        default:
-            printf("Unknown command (Code: %d)\n", packet->code);
+        case SUCCESS:
+			printf("Success! (%d)\n", SUCCESS);
+			break;
+		case BAD_PACKET_FORMAT:
+			printf("Error %d: Bad Packet Format\n", BAD_PACKET_FORMAT);
+			break;
+		case FILE_NOT_FOUND:
+			printf("Error %d: File not Found\n", FILE_NOT_FOUND);
+			break;
+		case FILE_ALREADY_EXISTS:
+			printf("Error %d: File already exists.\n", FILE_ALREADY_EXISTS);
+			break;
+		case COMMAND_FAILS:
+			printf("Error %d: Command Failed\n", COMMAND_FAILS);
+			break;
+		case QUOTA_EXCEEDED:
+			printf("Error %d: Adding file would exceed quota.\n", QUOTA_EXCEEDED);
+			break;
+		case SYNTAX_ERROR:
+			printf("Error %d: Syntax error.\n", SYNTAX_ERROR);
+			break;
+		case BAD_SERVER_RESPONSE:
+			printf("Error %d: Bad Response From Server\n", BAD_SERVER_RESPONSE);
+			break;
+		case CONNECTION_CLOSED:
+			printf("Error %d: Connection closed.\n", CONNECTION_CLOSED);
+			break;
+		case CANNOT_READ:
+			printf("Error %d: Can't read file.\n", CANNOT_READ);
+			break;
+		default:
+            printf("Unknown (Code: %d)\n", packet->code);
             break;
     }
 

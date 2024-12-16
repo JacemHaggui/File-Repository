@@ -247,8 +247,8 @@ int student_client(int channel, int argc, char *argv[]) {
         // Print info to terminal
 
         // Infinite loop -> use ^C to exit the program
-        while (fgets(line, 255, file)) { // FINITE TIMES (256 - 1 for '\0')
-            
+        while (fgets(line, 254, file)) { // FINITE TIMES (256 - 2 for '\0')
+            printf("COMMAND: %s", line);
             // GENERATE Packet Command Line using a string format
             char cmd_to_packet_string[MAX_PACKET_SIZE];
             int error_code = convert_cmd_string_to_packet_string(line, cmd_to_packet_string, channel);
@@ -274,6 +274,7 @@ int student_client(int channel, int argc, char *argv[]) {
             
             // Wait for response!
             wait_for_response(channel);
+            printf("\n");
         }
     }
 
@@ -283,6 +284,10 @@ int student_client(int channel, int argc, char *argv[]) {
             // Buffer to receive the command line
             char cmdline[256];
 
+        if (CLIENT_DIRECTORY == NULL) { // DEFAULT VALUE FOR CLIENT_DIRECTORY
+            set_client_directory("./");
+        }
+
             // Get the command from user, exit if it fails
             printf("> ");  // Command prompt simulator XD
             if(! fgets(cmdline, 128, stdin)){
@@ -290,6 +295,8 @@ int student_client(int channel, int argc, char *argv[]) {
                 // Return CANNOT_READ to exit
                 return CANNOT_READ;
             }
+
+            printf("COMMAND: %s", cmdline);
 
             // GENERATE Packet Command Line using a string format
             char cmd_to_packet_string[MAX_PACKET_SIZE];
@@ -317,6 +324,7 @@ int student_client(int channel, int argc, char *argv[]) {
 
             // WAIT for a response from the server! (the function doesn't work yet)
             wait_for_response(channel);
+            printf("\n");
             
         }
     }

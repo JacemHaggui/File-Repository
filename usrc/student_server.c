@@ -592,7 +592,7 @@ int process_packet(Packet * packet, int channel) {
     // SEND THE PACKETS
     for (int i = 0; i < number_packet_to_send; i ++) {
         char packet_string_to_send[MAX_PACKET_SIZE];
-        if (error_code >= 0){ printf(":P\n");strcpy(list_packet_to_send[i]->option1, packet->option2);}
+        if (error_code >= 0){strcpy(list_packet_to_send[i]->option1, packet->option2);}
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
         /* printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
@@ -655,7 +655,7 @@ void student_server(int channel, int argc, char *argv[]) {
   signal(SIGPIPE, SIG_IGN);
 
   char directory[256] = {0};  // Directory MUST ENDS WITH '/'
-
+  set_server_directory("./"); // default directory
       // Step 1: Parse command-line arguments, figuring out which mode to activate
   for (int i = 1; i < argc; i++) {
 
@@ -704,8 +704,8 @@ void student_server(int channel, int argc, char *argv[]) {
     if (res == CONNECTION_CLOSED) {
       printf("--[Connection Closed]--\n\n");
       return ;
-
     }
+
     else if (res == CANNOT_READ) {
       // CREATE ERROR PACKET
       Packet * packet_error_code = error_packet(CANNOT_READ);
