@@ -7,12 +7,15 @@
 2. [Implementation choices](#implementation)
     1. [Functions](#functions)
     2. [Packet Structure](#packet-structure)
-    3. [Server & Client Directory](#server-&-client-directory)
-    4. [Example of communication between client and server](#example)  
+    3. [Packet String Structure](#packet-string-structure)
+    4. [Command and Error Codes](#command-error-codes)
+    5. [Server & Client Directory](#server-&-client-directory)
+    6. [Example of communication between client and server](#example)  
 3. [Global approch](#global-approach)
     1. [Client Side](#client-approach)
     2. [Server Side](#server-approach)
-
+4. [Individual Work](#individual)
+5. [Tests](#tests)
 
 <br />
 
@@ -102,7 +105,7 @@ The function `packet_to_string(Packet * packet, char * string)` converts a packe
 
 <br />
 
-### <a name="packet-String-structure"></a> **Packet String Structure** 
+### <a name="packet-string-structure"></a> **Packet String Structure** 
 
  Packet Format (Header + Data) as defined for the project:
 
@@ -121,7 +124,36 @@ The function `packet_to_string(Packet * packet, char * string)` converts a packe
 **Total packet size must not exceed 2048 bytes, including the header.**
 
 
+### <a name="command-error-codes"></a> **Command and Error Codes** 
 
+#### Command Function Codes
+
+| **Origin** | **Code** | **Value**                     |
+|------------|----------|-------------------------------|
+| **GROUP**  | 8        | Command byte for "restart"    |
+| **GROUP**  | 7        | Command byte for "quit" or "exit" |
+| **PROF**   | 6        | Listing remote files          |
+| **PROF**   | 5        | Getting a remote file         |
+| **PROF**   | 4        | Removing a remote file        |
+| **PROF**   | 3        | Renaming a remote file        |
+| **PROF**   | 2        | Adding a remote file          |
+| **PROF**   | 1        | Printing n lines of a file    |
+| **GROUP**  | 0        | Success                       |
+
+
+#### Error Handling
+
+| **Origin** | **Code** | **Value**                          |
+|------------|----------|------------------------------------|
+| **PROF**   | -1       | Bad packet format                  |
+| **PROF**   | -2       | File not found                     |
+| **PROF**   | -3       | File already exists                |
+| **PROF**   | -4       | Command fails (for other server-side failures) |
+| **PROF**   | -5       | Quota exceeded                     |
+| **PROF**   | -6       | Syntax error in command line       |
+| **PROF**   | -7       | Bad response form server           |
+| **PROF**   | -8       | Connection closed                  |
+| **GROUP**  | -9       | Can't read file                    |
 
 
 <br />
@@ -165,7 +197,7 @@ Third line
 ## <a name="global-approach"></a> **Global Approach** 
 
 ### <a name="client-approach"></a> **Client Side**
-#### <a name="analyze"></a> **1. Parameter Analysis and Mode Activation**
+#### **1. Parameter Analysis and Mode Activation**
 
 The program analyzes the command-line parameters by iterating through the arguments and checking for specific options:
 
@@ -209,7 +241,7 @@ for (int i = 3; i < argc; i++) {
 	}
 }
 ```
-#### <a name="Analyze Mode"></a> **2. Handling Analyze Mode**
+#### **2. Handling Analyze Mode**
 	1.	Open the file specified by -analyze.
 	2.	Read its contents line by line.
 	3.	Convert each line into a packet string.
@@ -253,7 +285,7 @@ if (analyze_flag) {
 
 <br />
 
-#### <a name="Interactive Mode"></a> **3. Handling Interactive Mode**
+#### **3. Handling Interactive Mode**
 	1.	Continuously prompt the user for commands.
 	2.	Read each command from the user.
 	3.	Convert the command into a packet.
@@ -298,8 +330,74 @@ if (interactive_flag) {
 <br />
 
 ### <a name="server-approach"></a> **Server Side**
-#To Do
 
+Here we defined the functions linked to the student_server function.
 
+Some of them will return a list of Packets, in which we store each packet needed to transmit the whole data.
+
+```c
+Packet **f_print_n_lines(Packet* in, char directory[]);
+
+Packet *add_remote_file(Packet* in, char directory[]);
+
+Packet * renamefile(Packet* in, char directory[]);
+
+Packet * removefile(Packet* in, char directory[]);
+
+Packet **fetch(Packet* in, char directory[]);
+
+Packet **list_files(Packet* in, char destination[]);
+```
+
+Here is a summary of the student_server packet Handling :
+
+```c
+void student_server() {
+
+     // Step 1 : Parse command-line arguments, figuring out which mode to activate (analyze, interactive) and the parameters
+
+     // Step 2 : infinite loop -> to receive packets
+     while (true) {
+        // GET USER COMMAND
+        // GET THE PACKET
+        // PROCESS THE STRING PACKET RECEIVED CONTENT
+
+}
+```
 
 <br />
+
+## <a name="individual"></a> **Individual Work**
+
+### <a name="launch"></a> **Server Side Members :** 
+#### **Romain Della Rocca** 
+- Made the structure packet and the functions related to it, such as functions to convert from a string to a packet format and a packet to a string format
+- Updated Makefile in order to compile new files included and to link them with the other files of the repository
+- Worked mainly on the server side and client side functions
+- Handled the connections between server and client side
+- Overall files management
+
+#### **Clemente Paredes Vigneaux**
+To Do
+
+### <a name="launch"></a> **Client Side Members :** 
+#### **Jacem Haggui** 
+- Implemented Command-line Analysis and Mode Activation
+- Implemented the interactive mode
+- Adapted the recv_pkt and send_pkt functions
+- Explained Client approach on report along with some additions and corrections
+- General debugging on client Side
+
+#### **Clara Mougeot** 
+- Implemented functions to transform the instructions of the user into packet format
+- Worked on the analyse mode until it was fixed
+- Managed and documented the error and command codes
+- Added docstrings to functions
+- Wrote the report
+
+<br />
+
+## <a name="tests"></a> **Tests**
+
+Our test files are in /utest
+
