@@ -18,12 +18,24 @@ To launch the program, you have to :
 
 1. Clone the git repository by typing this command `git clone https://gitlab.eurecom.fr/della1/basicos2024-team07.git`. If you want to clone it in shh, use this command `git@gitlab.eurecom.fr:della1/basicos2024-team07.git`.
 
-2. Go to usrc directory using `cd usrc && make` in the command prompt.  
+2. Go to the main directory and type `make` in the command prompt to compile the code.
 
-3. The server launches the program using `./bin/EDserver/server` and returns a port and an IP adress.
+	**(Type `make clean` before `make` if `make` was previously used.)**
 
-4. Th client launches the program using  `./bin/EDclient/client` with the IP adress and the port given by the server. 
+3. Launch the server using `./bin/EDserver/server` 
+The server should print information on:
 
+		A port: Let's call it p.
+
+		An IP address: Let's call it a.
+(Don't forget to provide arguments)
+
+4. Launch the client using  `./bin/EDclient/client` a p [options]
+
+		Options:
+		-analyze: Execute commands from a file
+		-interactive: Wait for input from the keyboard.
+		-directory: Specify a directory for client-side files.
 
 Then you can type all the functions that follow.
 
