@@ -7,8 +7,9 @@
 2. [Implementation choices](#implementation)
     1. [Functions](#functions)
     2. [Packet Structure](#packet-structure)
-    3. [Server & Client Directory](#server-&-client-directory)
-    4. [Example of communication between client and server](#example)  
+    3. [Command and Error Codes](#tests)
+    4. [Server & Client Directory](#server-&-client-directory)
+    5. [Example of communication between client and server](#example)  
 3. [Global approch](#global-approach)
     1. [Client Side](#client-approach)
     2. [Server Side](#server-approach)
@@ -121,7 +122,36 @@ The function `packet_to_string(Packet * packet, char * string)` converts a packe
 **Total packet size must not exceed 2048 bytes, including the header.**
 
 
+## <a name="command-error-codes"></a> **Command and Error Codes** 
 
+### Command Function Codes
+
+| **Origin** | **Code** | **Value**                     |
+|------------|----------|-------------------------------|
+| **GROUP**  | 8        | Command byte for "restart"    |
+| **GROUP**  | 7        | Command byte for "quit" or "exit" |
+| **PROF**   | 6        | Listing remote files          |
+| **PROF**   | 5        | Getting a remote file         |
+| **PROF**   | 4        | Removing a remote file        |
+| **PROF**   | 3        | Renaming a remote file        |
+| **PROF**   | 2        | Adding a remote file          |
+| **PROF**   | 1        | Printing n lines of a file    |
+| **GROUP**  | 0        | Success                       |
+
+
+### Error Handling
+
+| **Origin** | **Code** | **Value**                          |
+|------------|----------|------------------------------------|
+| **PROF**   | -1       | Bad packet format                  |
+| **PROF**   | -2       | File not found                     |
+| **PROF**   | -3       | File already exists                |
+| **PROF**   | -4       | Command fails (for other server-side failures) |
+| **PROF**   | -5       | Quota exceeded                     |
+| **PROF**   | -6       | Syntax error in command line       |
+| **PROF**   | -7       | Bad response form server           |
+| **PROF**   | -8       | Connection closed                  |
+| **GROUP**  | -9       | Can't read file                    |
 
 
 <br />
@@ -305,3 +335,6 @@ if (interactive_flag) {
 <br />
 
 ## <a name="individual"></a> **Individual**
+
+## <a name="tests"></a> **Tests**
+Our test files are in /utest
