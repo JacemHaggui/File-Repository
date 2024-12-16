@@ -271,7 +271,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       // Create a buffer large enough to hold both strings and the additional slash
       char filepath[ strlen(filename) + strlen(CLIENT_DIRECTORY) + 2 ];
 
-      snprintf(filepath, sizeof(filepath), "%s%s/", CLIENT_DIRECTORY, filename);
+      snprintf(filepath, sizeof(filepath), "%s%s/", CLIENT_DIRECTORY, filename);// tested and works
       char * file_data = read_file(filepath);
     
       if (file_data == NULL) {
@@ -289,17 +289,19 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
         memcpy(packet->option1, parsed_cmd.param1, 32);
 
         // Allocate memory for data_ptr 
-        packet->data_ptr = malloc(datasize);
+        packet->data_ptr = (char *) malloc(datasize);
         if (packet->data_ptr == NULL) {
           printf("Memory Allocation Failed");
+          free(packet->data_ptr);
           return 1;
         }
         // Copy file_data
         memcpy(packet->data_ptr, file_data, datasize);
-        packet->data_size = datasize; // Use direct assignment
+
+        packet->data_size = datasize;
       }
     }
-    
+
     else if (strcmp(parsed_cmd.cmd,"rm") == 0) {
       packet->code = CMD_REMOVE;
       memcpy(packet->option1, parsed_cmd.param1, 32);
