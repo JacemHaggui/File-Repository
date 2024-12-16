@@ -39,7 +39,53 @@ The server should print information on:
 
 <br />
 
-## <a name="implementation"></a> **Global Approach** 
+### <a name="packet-structure"></a> **Packet Structure** 
+
+We've implemented a packet structure that simplifies code accessibility. 
+
+```c
+// PACKET STRUCTURE
+typedef struct  {
+	char E;              // 1 byte
+	char D;              // 1 byte
+	char r;              // 1 byte
+	uint16_t data_size;  // 2 byte
+	int8_t code;         // 1 byte
+	char option1[32];    // 32 bytes
+	char option2[32];    // 32 bytes
+	char * data_ptr;
+} Packet ;
+```
+Each packet begins with E, D and r so we can recognise the packet.  
+
+Then we implemented methods that use the packet structure.  
+
+The function `string_to_packet(char * string, Packet * packet)` converts a string argument to a struct packet given.
+
+The function `packet_to_string(Packet * packet, char * string)` converts a packet given in a string format.
+
+<br />
+
+### <a name="packet-String-structure"></a> **Packet String Structure** 
+
+ Packet Format (Header + Data) as defined for the project:
+
+	| 'E' | 'D' | 'r' | data size (2 bytes)
+	| command/error (1 byte)|
+	| option1 (32 bytes) | option2 (32 bytes)
+	| data (0 to 1978 bytes)|
+ Where:
+ - The first three bytes are fixed: 'E', 'D', and 'r'.
+ - Data size (2 bytes): Represents the size of the data field in the packet.
+ - Command/Error (1 byte): Stores the command type or error code.
+ - Option1 (32 bytes): Stores a string (e.g., filename or other metadata).
+ - Option2 (32 bytes): Stores a second string (or additional metadata).
+ - Data (0 to 1978 bytes): Contains raw data if the command requires it (e.g., file contents). This field is optional.
+
+**Total packet size must not exceed 2048 bytes, including the header.**
+
+
+## <a name="Global Aproach"></a> **Global Approach** 
 
 ### <a name="Client Approach"></a> **Client Side**
 #### <a name="CmdLine Analysis"></a> **1.Parameter Analysis and Mode Activation**
@@ -87,14 +133,97 @@ for (int i = 3; i < argc; i++) {
 }
 ```
 #### <a name="Analyze Mode"></a> **2.Handling Analyze Mode**
+	1.	Open the file specified by -analyze.
+	2.	Read its contents line by line.
+	3.	Convert each line into a packet string.
+	4.	Send the command, wait for the response, and repeat.
+
+```c
+if (analyze_flag) {
+	// Default directory
+    if (CLIENT_DIRECTORY == NULL) {
+        set_client_directory("./");
+    }
+
+    FILE *file = fopen(cats(CLIENT_DIRECTORY, analyze_file), "r");
+    if (file == NULL) {
+        printf("Error opening file");
+        return FILE_NOT_FOUND;
+    }
+
+    char line[256];
+    while (fgets(line, 255, file)) {
+        char cmd_to_packet_string[MAX_PACKET_SIZE];
+        int error_code = convert_cmd_string_to_packet_string(line, cmd_to_packet_string, channel);
+
+        if (error_code == CMD_QUIT) {
+            printf("Quitting Client");
+            return CMD_QUIT;
+        }
+        
+        if (error_code == CMD_RESTART) {
+            printf("Restarting Client");
+            return CMD_RESTART;
+        }
+
+        int res = send_pkt(cmd_to_packet_string, channel);
+        if (res != SUCCESS) {
+            return res;
+        }
+    }
+}
+```
 
 <br />
 
 #### <a name="Interactive Mode"></a> **3.Handling Interactive Mode**
+	1.	Continuously prompt the user for commands.
+	2.	Read each command from the user.
+	3.	Convert the command into a packet.
+	4.	Send the packet and wait for a response.
+	5.	Handle special commands like quit,exit or restart.
+```c
+if (interactive_flag) {
+    while (1) {
+        char cmdline[256];
+
+        // Get the command from user
+        printf("> ");
+        if (!fgets(cmdline, 128, stdin)) {
+            printf("Cannot read command line\n");
+            return CANNOT_READ;
+        }
+
+        char cmd_to_packet_string[MAX_PACKET_SIZE];
+        int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string, channel);
+
+        if (error_code == CMD_QUIT) {
+            printf("Quitting Client\n");
+            return CMD_QUIT;
+        }
+
+        if (error_code == CMD_RESTART) {
+            printf("Restarting Client\n");
+            return CMD_RESTART;
+        }
+
+        if (error_code == SUCCESS) {
+            int res = send_pkt(cmd_to_packet_string, channel);
+            if (res != SUCCESS) return res;
+        }
+
+        // Wait for a response
+        wait_for_response(channel);
+    }
+}
+```
 
 <br />
 
-#### <a name="Conversion and Sending"></a> **4.Converting the command and sending**
+### <a name="Server Approach"></a> **Server Side**
+#To Do
+
+
 
 <br />
 
@@ -126,50 +255,6 @@ for (int i = 3; i < argc; i++) {
 
 <br />
 
-### <a name="packet-structure"></a> **Packet Structure** 
-
-We've implemented a packet structure that simplifies code accessibility. 
-
-```c
-// PACKET STRUCTURE
-typedef struct  {
-	char E;              // 1 byte
-	char D;              // 1 byte
-	char r;              // 1 byte
-	uint16_t data_size;  // 2 byte
-	int8_t code;         // 1 byte
-	char option1[32];    // 32 bytes
-	char option2[32];    // 32 bytes
-	char * data_ptr;
-} Packet ;
-```
-Each packet begins with E, D and r so we can recognise the packet.  
-
-Then we implemented methods that use the packet structure.  
-
-The function `string_to_packet(char * string, Packet * packet)` converts a string argument to a struct packet given.
-
-The function `packet_to_string(Packet * packet, char * string)` converts a packet given in a string format.
-
-<br />
-
-### <a name="packet-String-structure"></a> **Packet String Structure** 
-
- Packet Format (Header + Data) as defined for the project:
-
-	| 'E' | 'D' | 'r' | data size (2 bytes)
-	| command/error (1 byte)|
-	| option1 (32 bytes) | option2 (32 bytes)
-	| data (0 to 1978 bytes)|
- Where:
- - The first three bytes are fixed: 'E', 'D', and 'r'.
- - Data size (2 bytes): Represents the size of the data field in the packet.
- - Command/Error (1 byte): Stores the command type or error code.
- - Option1 (32 bytes): Stores a string (e.g., filename or other metadata).
- - Option2 (32 bytes): Stores a second string (or additional metadata).
- - Data (0 to 1978 bytes): Contains raw data if the command requires it (e.g., file contents). This field is optional.
-
-**Total packet size must not exceed 2048 bytes, including the header.**
 
 <br />
 
