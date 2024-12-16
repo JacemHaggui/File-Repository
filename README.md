@@ -403,5 +403,5 @@ void student_server() {
 
 ## <a name="tests"></a> **Tests**
 
-Our test files are in /utest
+Our test files are in ./utests
 
