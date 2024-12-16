@@ -275,8 +275,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       //snprintf(filepath, sizeof(filepath), "%s%s/", CLIENT_DIRECTORY, filename);// tested and works
 
 
-      char * filepathtmp = cats(CLIENT_DIRECTORY, filename);
-      char* filepath = cats(filepathtmp, "/");
+      char * filepath = cats(CLIENT_DIRECTORY, filename);
 
       printf("Attempting to read file contents of: %s\n", filepath);
       char * file_data = read_file(filepath);
