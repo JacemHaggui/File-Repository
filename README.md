@@ -333,7 +333,7 @@ if (interactive_flag) {
 
 Here we defined the functions linked to the student_server function.
 
-Some of them will return a lsit of Packet, in which we store each packet needed to transmit the whole data.
+Some of them will return a list of Packets, in which we store each packet needed to transmit the whole data.
 
 ```c
 Packet **f_print_n_lines(Packet* in, char directory[]);
@@ -349,7 +349,7 @@ Packet **fetch(Packet* in, char directory[]);
 Packet **list_files(Packet* in, char destination[]);
 ```
 
-Here a summary of the student_server packet manager :
+Here is a summary of the student_server packet Handling :
 
 ```c
 void student_server() {
