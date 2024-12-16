@@ -37,14 +37,73 @@ The server should print information on:
 		-interactive: Wait for input from the keyboard.
 		-directory: Specify a directory for client-side files.
 
-Then you can type all the functions that follow.
+<br />
 
+## <a name="implementation"></a> **Global Approach** 
+
+### <a name="Client Approach"></a> **Client Side**
+#### <a name="CmdLine Analysis"></a> **1.Parameter Analysis and Mode Activation**
+
+The program analyzes the command-line parameters by iterating through the arguments and checking for specific options:
+
+
+If both -analyze and -interactive are provided, the program first processes the file specified by -analyze, then switches to interactive mode.
+
+The program also ensures options are not repeated, and required arguments are provided.
+
+Here’s the relevant block of the code:
+
+
+
+```c
+for (int i = 3; i < argc; i++) {
+	// argv[1] and argv[2] are the ip adress and port number respectvely
+	if (strcmp(argv[i], "-analyze") == 0) {
+		if (analyze_flag || i + 1 >= argc) {
+			// Invalid or missing file
+			fprintf(stderr, "Error: Invalid or duplicate -analyze option\n");
+			return SYNTAX_ERROR;
+		}
+		analyze_flag = 1;
+		strncpy(analyze_file, argv[++i], sizeof(analyze_file) - 1);
+	}
+	else if (strcmp(argv[i], "-interactive") == 0) {
+		if (interactive_flag) {
+			// Duplicate -interactive
+			fprintf(stderr, "Error: Duplicate -interactive option\n");
+			return SYNTAX_ERROR;
+		}
+		interactive_flag = 1;
+	}
+	else if (strcmp(argv[i], "-directory") == 0) {
+		// Invalid or duplicate directory
+		if (directory[0] || i + 1 >= argc) {
+			fprintf(stderr, "Error: Invalid or duplicate -directory option\n");
+			return SYNTAX_ERROR;
+		}
+		set_client_directory(argv[++i]);
+		force_client_directory_format(); // Ensure directory ends with '/'
+	}
+}
+```
+#### <a name="Analyze Mode"></a> **2.Handling Analyze Mode**
+
+<br />
+
+#### <a name="Interactive Mode"></a> **3.Handling Interactive Mode**
+
+<br />
+
+#### <a name="Conversion and Sending"></a> **4.Converting the command and sending**
 
 <br />
 
 ## <a name="implementation"></a> **Implementation choices** 
 
 ### <a name="functions"></a> **Functions** 
+**Total packet size must not exceed 2048 bytes, including the header.**
+
+**The Limit for the data size is 1978 bytes**
 
 * Use `put filename` to **copy a local file** to the Eurecom Drive. This function takes the name of the file as input and returns either 0 (success) or an error code.
 
