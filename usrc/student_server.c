@@ -736,6 +736,9 @@ void student_server(int channel, int argc, char *argv[]) {
         }
         default : {
           int error_code_process = process_packet(packet_received, channel);
+          if(error_code_process == SUCCESS){
+            continue;
+          }
         }
       }
 

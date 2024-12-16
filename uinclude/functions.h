@@ -46,6 +46,7 @@ extern int QUOTANUMBER;    // max number of files available in directory
 #define CMD_ADD       2   // Add a remote file
 #define CMD_PRINT     1   // Print n lines of a file
 
+Packet* add_file_request(char* data, char* filename, char* directory, int channel);
 
 char *  cats(char* dest, char* source);
 
