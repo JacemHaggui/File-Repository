@@ -7,13 +7,15 @@
 2. [Implementation choices](#implementation)
     1. [Functions](#functions)
     2. [Packet Structure](#packet-structure)
-    3. [Command and Error Codes](#tests)
-    4. [Server & Client Directory](#server-&-client-directory)
-    5. [Example of communication between client and server](#example)  
+    3. [Packet String Structure](#packet-string-structure)
+    4. [Command and Error Codes](#command-error-codes)
+    5. [Server & Client Directory](#server-&-client-directory)
+    6. [Example of communication between client and server](#example)  
 3. [Global approch](#global-approach)
     1. [Client Side](#client-approach)
     2. [Server Side](#server-approach)
 4. [Individual Work](#individual)
+5. [Tests](#tests)
 
 <br />
 
@@ -103,7 +105,7 @@ The function `packet_to_string(Packet * packet, char * string)` converts a packe
 
 <br />
 
-### <a name="packet-String-structure"></a> **Packet String Structure** 
+### <a name="packet-string-structure"></a> **Packet String Structure** 
 
  Packet Format (Header + Data) as defined for the project:
 
@@ -122,9 +124,9 @@ The function `packet_to_string(Packet * packet, char * string)` converts a packe
 **Total packet size must not exceed 2048 bytes, including the header.**
 
 
-## <a name="command-error-codes"></a> **Command and Error Codes** 
+### <a name="command-error-codes"></a> **Command and Error Codes** 
 
-### Command Function Codes
+#### Command Function Codes
 
 | **Origin** | **Code** | **Value**                     |
 |------------|----------|-------------------------------|
@@ -139,7 +141,7 @@ The function `packet_to_string(Packet * packet, char * string)` converts a packe
 | **GROUP**  | 0        | Success                       |
 
 
-### Error Handling
+#### Error Handling
 
 | **Origin** | **Code** | **Value**                          |
 |------------|----------|------------------------------------|
@@ -195,7 +197,7 @@ Third line
 ## <a name="global-approach"></a> **Global Approach** 
 
 ### <a name="client-approach"></a> **Client Side**
-#### <a name="analyze"></a> **1. Parameter Analysis and Mode Activation**
+#### **1. Parameter Analysis and Mode Activation**
 
 The program analyzes the command-line parameters by iterating through the arguments and checking for specific options:
 
@@ -239,7 +241,7 @@ for (int i = 3; i < argc; i++) {
 	}
 }
 ```
-#### <a name="Analyze Mode"></a> **2. Handling Analyze Mode**
+#### **2. Handling Analyze Mode**
 	1.	Open the file specified by -analyze.
 	2.	Read its contents line by line.
 	3.	Convert each line into a packet string.
@@ -283,7 +285,7 @@ if (analyze_flag) {
 
 <br />
 
-#### <a name="Interactive Mode"></a> **3. Handling Interactive Mode**
+#### **3. Handling Interactive Mode**
 	1.	Continuously prompt the user for commands.
 	2.	Read each command from the user.
 	3.	Convert the command into a packet.
@@ -328,7 +330,6 @@ if (interactive_flag) {
 <br />
 
 ### <a name="server-approach"></a> **Server Side**
-#To Do
 
 
 
@@ -336,5 +337,9 @@ if (interactive_flag) {
 
 ## <a name="individual"></a> **Individual**
 
+<br />
+
 ## <a name="tests"></a> **Tests**
+
 Our test files are in /utest
+
