@@ -92,6 +92,25 @@ The function `string_to_packet(char * string, Packet * packet)` converts a strin
 
 The function `packet_to_string(Packet * packet, char * string)` converts a packet given in a string format.
 
+<br />
+
+### <a name="packet-String-structure"></a> **Packet String Structure** 
+
+ Packet Format (Header + Data) as defined for the project:
+
+	| 'E' | 'D' | 'r' | data size (2 bytes)
+	| command/error (1 byte)|
+	| option1 (32 bytes) | option2 (32 bytes)
+	| data (0 to 1978 bytes)|
+ Where:
+ - The first three bytes are fixed: 'E', 'D', and 'r'.
+ - Data size (2 bytes): Represents the size of the data field in the packet.
+ - Command/Error (1 byte): Stores the command type or error code.
+ - Option1 (32 bytes): Stores a string (e.g., filename or other metadata).
+ - Option2 (32 bytes): Stores a second string (or additional metadata).
+ - Data (0 to 1978 bytes): Contains raw data if the command requires it (e.g., file contents). This field is optional.
+
+**Total packet size must not exceed 2048 bytes, including the header.**
 
 <br />
 
@@ -112,12 +131,15 @@ The client wants to print 3 lines of the file :
 
 ```bash
 $ git clone git@gitlab.eurecom.fr:della1/basicos2024-team07.git
-$ cd usrc && make
+$ cd basicos2024-team07.git && make
+$ ./bin/EDserver/server [options] #gives us ip adress and port
 $ ./bin/EDclient/client 192.168.123.132 443 -directory directory -interactive -analyse file.txt
 $ cat MyFile.txt 3
 ```
 
-The string of the first 3 lines of MyFile.txt is converted into a packet format. The packet is then converted into a 32-bit “packet string” starting with E, D, r, then converted into 0's and 1's and sent to the server.
+The string of the first 3 lines of MyFile.txt is converted into a packet format.
+
+The packet is then converted into a 2048 byte **packet string** starting with E, D, r, then converted into 0's and 1's and sent to the server.
 
 The server converts the 0s and 1s into a “packet string”, then into a packet and analyzes it. It then sends the first 3 lines with the same process back to the client, who will see :  
 
