@@ -222,8 +222,8 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
   char * file_string = "";
   int * result = file_to_string(filename, &file_string); // HERE WE DON'T CHECK THE CONTENT OF RESULT EXCEPT FOR ERRORS.
   
-  printf("\nThe string to split : \n");
-  print_string(file_string, result[0] + 1); // +1 <=> WILL PRINT '\0' at the end
+  // printf("\nThe string to split : \n");
+  // print_string(file_string, result[0] + 1); // +1 <=> WILL PRINT '\0' at the end
 
   if(result[0] < 0){
     Packet ** single_slot = calloc(1, sizeof(Packet));
@@ -233,7 +233,7 @@ Packet ** f_print_n_lines(Packet* input, char *directory){
 
   int number_lines = atoi(input->option2);
   int number_caracters_to_print = count_caracter_inside_n_first_lines(file_string, number_lines);
-  printf("\n\nNumbers of caracter to print : %d\n\n", number_caracters_to_print);
+  // printf("\n\nNumbers of caracter to print : %d\n\n", number_caracters_to_print);
   file_string[number_caracters_to_print] = '\0';
 
   //char * datastring = malloc(sizeof(char) * number_caracters_to_print);
@@ -416,7 +416,7 @@ Packet **fetch(Packet* in, char directory[]){
     Packet * out = empty_packet();
     char buffer[INT_MAX + 1];
     out->code = 5;
-    strcpy(out->option1, itoa(packnum,10)); // FOR NOW BUT WILL CHANGE WHEN WE SEND THE PACKET
+    strcpy(out->option1, itoa(packnum,10)); 
     strcpy(out->option2, itoa(number_caracter,10)); // STAY LIKE THAT
     out->E = 'E'; out->D = 'D'; out->r = 'r';
     slice(contents, buffer, i*INT_MAX, (i+1)*INT_MAX);
@@ -518,21 +518,21 @@ int process_packet(Packet * packet, int channel) {
       number_packet_to_send = atoi(first_packet->option1); //OPTION 1 contains the number of packets
     }
     // SEND THE PACKETS
-    printf("\n\n--- SENDING PACKETS: ---\n\n");
+    // printf("\n\n--- SENDING PACKETS: ---\n\n");
     for (int i = 0; i < number_packet_to_send; i ++) {
         char packet_string_to_send[MAX_PACKET_SIZE];
 
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
 
-        printf("--[THE FOLLOWING PACKET IS SENT :]--\n\n");
+        /* printf("--[THE FOLLOWING PACKET IS SENT :]--\n\n");
         printf("\tPacket %d Send: \n\t\tError Code : %d\n\t\tSend Code: %d\n\n\t", i+1, error_code, res);
         print_packet(list_packet_to_send[i]);
         printf("\nNumber of Data to Print : (70 + data_size) %d\n", list_packet_to_send[i]->data_size + 70);
         print_string(packet_string_to_send, list_packet_to_send[i]->data_size + 70);
-        printf("\n--[END OF THE PACKET SENT :]--\n");
+        printf("\n--[END OF THE PACKET SENT :]--\n"); */ 
     }
-    printf("\n\n--- END SENDING PACKETS: ---\n\n");
+    // printf("\n\n--- END SENDING PACKETS: ---\n\n");
   }
 
   // ADDING A REMOTE FILE
@@ -544,7 +544,7 @@ int process_packet(Packet * packet, int channel) {
     char packet_string_to_send[MAX_PACKET_SIZE];
     int error_code = packet_to_string(packet_error_code, packet_string_to_send);
     int res = send_pkt(packet_string_to_send, channel);
-    printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+    // printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
   }
 
 
@@ -557,7 +557,7 @@ int process_packet(Packet * packet, int channel) {
     char packet_string_to_send[MAX_PACKET_SIZE];
     int error_code = packet_to_string(packet_error_code, packet_string_to_send);
     int res = send_pkt(packet_string_to_send, channel);
-    printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+    // printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
   }
 
 
@@ -570,7 +570,7 @@ int process_packet(Packet * packet, int channel) {
     char packet_string_to_send[MAX_PACKET_SIZE];
     int error_code = packet_to_string(packet_error_code, packet_string_to_send);
     int res = send_pkt(packet_string_to_send, channel);
-    printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+    // printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
   }
 
 
@@ -592,15 +592,15 @@ int process_packet(Packet * packet, int channel) {
     // SEND THE PACKETS
     for (int i = 0; i < number_packet_to_send; i ++) {
         char packet_string_to_send[MAX_PACKET_SIZE];
-        if (error_code >= 0) strcpy(list_packet_to_send[i]->option1, packet->option1);
+        if (error_code >= 0){ printf(":P\n");strcpy(list_packet_to_send[i]->option1, packet->option2);}
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
-        printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
+        /* printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
 
         printf("THE FOLLOWING PACKET IS SENT :\n");
         print_packet(list_packet_to_send[i]);
         print_string(packet_string_to_send, list_packet_to_send[i]->data_size + 70);
-        printf("END OF THE PACKET SENT :\n");
+        printf("END OF THE PACKET SENT :\n"); */
     }
   }
 
@@ -625,9 +625,9 @@ int process_packet(Packet * packet, int channel) {
         char packet_string_to_send[MAX_PACKET_SIZE];
         int error_code = packet_to_string(list_packet_to_send[i], packet_string_to_send);
         int res = send_pkt(packet_string_to_send, channel);
-        printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
+        /* printf("Packet %d : \tError Code : %d\tSend Code: %d\n", i, error_code, res);
         print_packet(list_packet_to_send[i]);
-        print_string(list_packet_to_send[i]->data_ptr , list_packet_to_send[i]->data_size);
+        print_string(list_packet_to_send[i]->data_ptr , list_packet_to_send[i]->data_size); */
     }
 
   }
@@ -638,7 +638,7 @@ int process_packet(Packet * packet, int channel) {
     char packet_string_to_send[MAX_PACKET_SIZE];
     int error_code = packet_to_string(packet_error_code, packet_string_to_send);
     int res = send_pkt(packet_string_to_send, channel);
-    printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
+    // printf("Packet Send : \tError Code : %d\tSend Code: %d\n",  error_code, res);
   }
 
   return SUCCESS;
@@ -720,7 +720,7 @@ void student_server(int channel, int argc, char *argv[]) {
       // PROCESS THE STRING PACKET RECEIVED CONTENT
       Packet * packet_received = empty_packet();
       int error_code_conversion = string_to_packet(string_packet_received, packet_received);
-      print_packet(packet_received);
+      // print_packet(packet_received);
 
       switch (error_code_conversion) {
         case BAD_PACKET_FORMAT:

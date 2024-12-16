@@ -73,16 +73,16 @@ int recv_pkt(char *pkt, int channel) {
         return CONNECTION_CLOSED;
     }
 
-    printf("\n--[ Packet Received ]-- \n");
+    /* printf("\n--[ Packet Received ]-- \n");
         printf("\tString Header Format :\n\t\t"); print_string(buf,amount_received);
-        printf("\tData Header Received (sould be 70): %d\n", amount_received);
+        printf("\tData Header Received (sould be 70): %d\n", amount_received); */
     
     // After the header, read the actual data (based on data_size field)
     //uint16_t data_size = *(uint16_t*)(pkt + 3); // WORK ~
     //uint16_t data_size = *(uint16_t*)( buf + 3 ); // WORK ~
     //uint16_t data_size = *(uint16_t *)(  (unsigned char)(  (unsigned char)(*(buf + 3)) ) | (unsigned char)(  (unsigned char)( *(buf + 4) ) << 8 ) ); // NOT WORKING
     uint16_t data_size = ((uint8_t)buf[4] << 8) | (uint8_t)buf[3];
-        printf("\tData Received (should be below 1978): %u DATA\n", data_size);
+    //printf("\tData Received (should be below 1978): %u DATA\n", data_size);
 
     if (data_size > 0) { //If we actually have data (duuuuh)
         total_size = data_size; // Set total size to read the actual data
@@ -104,13 +104,13 @@ int recv_pkt(char *pkt, int channel) {
             buf += amount_received; // Move the buffer pointer forward
         }
     }
-    printf("\tData Content : \n\t\t");
+    /* printf("\tData Content : \n\t\t");
     print_string((pkt + 70), data_size);
 
     printf("\n\tPacket Complete String Format :\n\t\t");
     print_string(pkt, 70 + data_size);
 
-    printf("--[ END - Packet Received ]-- \n\n");
+    printf("--[ END - Packet Received ]-- \n\n"); */
     
 
     return SUCCESS; // Success
@@ -133,7 +133,7 @@ int send_pkt(char *pkt, int channel) {
     // Send the entire packet, including the header and data
     while (total_size > 0) {//while there is stuff to send, keep sending
         amount_sent = write(channel, buf, total_size);
-        printf("Amount Send : %d\nData to Send : %d\n", amount_sent,data_size);
+        // printf("Amount Send : %d\nData to Send : %d\n", amount_sent,data_size);
         if (amount_sent == -1) { // Error case
             if (errno == EPIPE) {
                 fprintf(stderr, "Connection closed\n");
@@ -153,7 +153,7 @@ int send_pkt(char *pkt, int channel) {
         total_size -= amount_sent; // Update remaining size to send
         buf += amount_sent; // Move buffer pointer forward
     }
-    printf("Succesfully sent packet\n");
+    // printf("Succesfully sent packet\n");
     return SUCCESS;
 }
 

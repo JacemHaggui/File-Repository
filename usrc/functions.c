@@ -434,7 +434,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string, int channel) 
       printf("%s\n",client_help_options);
     }
 
-    print_packet(packet);
+    // print_packet(packet);
 
     int error_code = packet_to_string(packet, string);
     free_packet(packet);

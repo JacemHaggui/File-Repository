@@ -23,7 +23,7 @@ void received_from_server(Packet** received, char* directory){
         for (int i = 0; i < packnum; i++){
             printf("%s", received[i]->data_ptr);
         }
-        printf("\n"); // TO DO maybe here put a printf("\n"); to visually close the file ?
+        printf("\n");
         
     }
     else if(received[0]->code == CMD_GET){ // FETCH
@@ -135,7 +135,7 @@ int wait_for_response(int channel){
                     string_to_packet(pktbuff, empty_packet_received);
                     PacketList[i] = empty_packet_received;
                     //strcpy(pktbuff, ""); // ???
-                    print_string(PacketList[i]->data_ptr, PacketList[i]->data_size);
+                    // print_string(PacketList[i]->data_ptr, PacketList[i]->data_size);
                     i++;
                 }
             }
@@ -272,7 +272,8 @@ int student_client(int channel, int argc, char *argv[]) {
                 return res;
             }    
             
-
+            // Wait for response!
+            wait_for_response(channel);
         }
     }
 
