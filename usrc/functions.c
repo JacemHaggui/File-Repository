@@ -244,7 +244,7 @@ int count_caracter_inside_n_first_lines(char * file, int n) {
 
 
 
-int convert_cmd_string_to_packet_string(char * cmd, char * string) {
+int convert_cmd_string_to_packet_string(char * cmd, char * string, int channel) {
   /*
     Convert a string to a packet format.
     The function uses a defined packet structure to transform a command-line string into a structured packet, then converts the packet into a string format.
@@ -270,7 +270,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       char * filename = parsed_cmd.param1;
 
       // Create a buffer large enough to hold both strings and the additional slash
-      //char filepath[ strlen(filename) + strlen(CLIENT_DIRECTORY) + 2 ];
+      // char filepath[ strlen(filename) + strlen(CLIENT_DIRECTORY) + 2 ];
       // concatenates the directory and filename adding a slash at the end to respect the format
       //snprintf(filepath, sizeof(filepath), "%s%s/", CLIENT_DIRECTORY, filename);// tested and works
 
@@ -287,8 +287,10 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
       
       uint16_t datasize = strlen(file_data) + 1; // Include null terminator
       if (datasize > MAX_DATA_SIZE) {
-        return QUOTA_EXCEEDED;
+        //return QUOTA_EXCEEDED;
         // TODO: Continuous sending
+        Packet* packet = add_file_request(file_data, filename, CLIENT_DIRECTORY, channel);
+
       }
       else {
         packet->code = CMD_ADD;
@@ -305,6 +307,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
         memcpy(packet->data_ptr, file_data, datasize);
 
         packet->data_size = datasize;
+        strcpy(packet->option2, itoa(datasize, 10));
       }
     }
 

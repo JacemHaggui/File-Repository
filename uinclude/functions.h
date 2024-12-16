@@ -71,7 +71,7 @@ void force_client_directory_format();
 
 int count_caracter_inside_n_first_lines(char * file, int n);
 
-int convert_cmd_string_to_packet_string(char * cmd, char * string);
+int convert_cmd_string_to_packet_string(char * cmd, char * string, int channel);
 
 char* read_file(char *filename);
 

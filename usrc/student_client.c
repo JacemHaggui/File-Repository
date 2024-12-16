@@ -15,7 +15,7 @@
 #define INT_MAX 1978 // Maximum data_size for packet data. (2048 - 70)
 
 
-Packet** add_file_request(char* data, char* filename, char* directory, int channel){
+Packet* add_file_request(char* data, char* filename, char* directory, int channel){
     /*
         Creates a packet that requests the creation of a file, as per the "add remote file" function.
     INPUT :
@@ -24,7 +24,7 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
         directory: the directory in which to store the file.
         channel: A socket file descriptor used to communicate with the server
     OUTPUT :
-        A list of the packets required to send the data split into sections of less than INT_MAX size.
+        The function sends all the packets except for the last one which it returns
         If the server failed to receive the file (e.g because the filename already exists), the list contains only an ABORT error packet.
     */
     int datalen = strlen(data);
@@ -79,7 +79,25 @@ Packet** add_file_request(char* data, char* filename, char* directory, int chann
             strcpy(out->data_ptr, buffer);
             list[i-1] = out;
         }
-        return list; // SHOULD SEND ONLY THE ELEMENTS AFTER INDEX 0. (0 excluded)
+        // Sending packets except for the last one
+        for(int j = 1; j < reqpacknum - 2; j++ ){// -2 to exclude the last one
+            Packet* current_packet = list[j];
+            // Creating a string to send
+            char current_packet_string[MAX_PACKET_SIZE];
+            packet_to_string(current_packet, current_packet_string);
+
+            // SEND the packet
+            int res = send_pkt(current_packet_string, channel);
+            // Treating potential error codes
+            if( res != SUCCESS){
+                return res;
+            }
+        }
+
+        Packet* last_packet = list[reqpacknum - 1];// getting the last packet
+
+
+        return last_packet; // returning the last packet to send
     }
 
 }
@@ -321,7 +339,7 @@ int student_client(int channel, int argc, char *argv[]) {
             
             // GENERATE Packet Command Line using a string format
             char cmd_to_packet_string[MAX_PACKET_SIZE];
-            int error_code = convert_cmd_string_to_packet_string(line, cmd_to_packet_string);
+            int error_code = convert_cmd_string_to_packet_string(line, cmd_to_packet_string, channel);
 
             // MANAGING ERROR CODE
             if( error_code == CMD_QUIT ){
@@ -340,9 +358,7 @@ int student_client(int channel, int argc, char *argv[]) {
             // Treating potential error codes
             if( res != SUCCESS){
                 return res;
-            }
-            
-            wait_for_response(channel);
+            }    
             
 
         }
@@ -364,7 +380,7 @@ int student_client(int channel, int argc, char *argv[]) {
 
             // GENERATE Packet Command Line using a string format
             char cmd_to_packet_string[MAX_PACKET_SIZE];
-            int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string);
+            int error_code = convert_cmd_string_to_packet_string(cmdline, cmd_to_packet_string, channel);
 
             // TO DO MANAGE ERROR CODE (HELP, QUIT, LEAVE etc...)
             if( error_code == CMD_QUIT ){
