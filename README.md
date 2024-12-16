@@ -10,6 +10,10 @@
     3. [Server & Client Directory](#server-&-client-directory)
     4. [Example of communication between client and server](#example)  
 3. [Global approch](#global-approach)
+    1. [Client Side](#client-approach)
+    2. [Server Side](#server-approach)
+
+
 <br />
 
 ## <a name="launch"></a> **How to launch the program** 
@@ -293,7 +297,7 @@ if (interactive_flag) {
 
 <br />
 
-### <a name="Server Approach"></a> **Server Side**
+### <a name="server-approach"></a> **Server Side**
 #To Do
 
 
