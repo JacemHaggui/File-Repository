@@ -345,6 +345,7 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
     print_packet(packet);
 
     int error_code = packet_to_string(packet, string);
+    free_packet(packet);
 
     return error_code;
 
@@ -354,11 +355,12 @@ int convert_cmd_string_to_packet_string(char * cmd, char * string) {
 
 }
 
-char* read_file(const char *filename) {
+char* read_file(char *filename) {
     FILE *file = fopen(filename, "r");  // Open the file in read mode
 
     if (file == NULL) {
         printf("Could not open file\n");
+        printf("The filepath is: %s\n", filename);
         return NULL;
     }
 
