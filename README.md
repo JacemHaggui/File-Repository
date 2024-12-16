@@ -12,7 +12,7 @@
 3. [Global approch](#global-approach)
     1. [Client Side](#client-approach)
     2. [Server Side](#server-approach)
-
+4. [Individual Work](#individual)
 
 <br />
 
@@ -303,3 +303,5 @@ if (interactive_flag) {
 
 
 <br />
+
+## <a name="individual"></a> **Individual**
