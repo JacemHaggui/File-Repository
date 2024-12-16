@@ -378,7 +378,11 @@ void student_server() {
 - Overall files management
 
 #### **Clemente Paredes Vigneaux**
-To Do
+- Created most of the initial functions server-side.
+- Created the test files.
+- Fixed the last bugs remaining on the last few hours of work.
+- Improved the interactive UI.
+- Created the client-side functions that receive answers from the server.
 
 ### <a name="launch"></a> **Client Side Members :** 
 #### **Jacem Haggui** 
