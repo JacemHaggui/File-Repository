@@ -348,7 +348,6 @@ int student_client(int channel, int argc, char *argv[]) {
         }
     }
 
-    printf("FINI D ?\n");
     // Step 3: Handle -interactive option
     if (interactive_flag) {
         while (1) { // INFINITE TIMES
@@ -392,6 +391,5 @@ int student_client(int channel, int argc, char *argv[]) {
             
         }
     }
-    printf("FINI B ?\n");
     return SUCCESS; // USELESS
 }
