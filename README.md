@@ -1,6 +1,12 @@
-# **Report**
+# **General overview**
+The objective of this project was to complete the C code of a file management system.
+This system is built upon two components:
 
-<br />
+- A server, handling commands sent by clients. This commands are related to file manipulation (e.g., adding a file, removing a file). The server stores files in a configurable directory (given as argument) of the disk.
+
+- A client, sending commands to the server. The client reads commands from an input file, or from the keyboard, and accordingly sends requests to the server.
+
+Typical requests from a client to the server are: adding a file to the remote repository, removing a remote file, getting a remote file, listing available remote files, printing the first n lines of a remote file, and renaming a remote file.
 
 ## **Table of Contents**
 1. [How to launch the program](#launch)
